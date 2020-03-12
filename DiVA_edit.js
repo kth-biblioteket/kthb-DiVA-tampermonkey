@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA_edit
-// @version      1.0.4
+// @version      1.0.5
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_edit.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_edit.js
@@ -36,7 +36,7 @@ function processJSON_Response (response) {
     }
 
     var rooms = response.response;
-    console.log(rooms);
+
     var roomName  = rooms[0].room_name;
 
     var resultsDiv  = `
