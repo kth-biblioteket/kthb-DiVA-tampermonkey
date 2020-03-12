@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA_edit
-// @version      1.0.5
+// @version      1.0.6
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_edit.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_edit.js
@@ -83,7 +83,7 @@ function actionFunction() {
     $iframe.ready(function() {
         $iframe.contents().find("body").html(QC);
     });
-    callapi();
+    //callapi();
 }
 
 //Skapa QC + dagens datum
