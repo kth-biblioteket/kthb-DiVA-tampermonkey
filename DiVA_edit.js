@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name     DiVA_edit
 // @version      1.0.4
+// @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_edit.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_edit.js
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf
@@ -27,7 +28,7 @@ function callapi() {
     } );
 }
 
-//Hantera API-svar och utför eventuella åtgärder
+//Hantera API-svar och utför eventuella åtgärder.
 function processJSON_Response (response) {
     if (response.status != 200  &&  response.status != 304) {
         reportAJAX_Error (response);
