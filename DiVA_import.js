@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name     DiVA_import
-// @version      1.0.2
+// @version      1.0.4
+// @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_import.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_import.js
 // @match    https://kth.diva-portal.org/dream/import/importForm.jsf
@@ -35,7 +36,7 @@ function processJSON_Response (response) {
     }
 
     var rooms = response.response;
-    console.log(rooms);
+
     var roomName  = rooms[0].room_name;
 
     var resultsDiv  = `
