@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA_edit
-// @version      1.0.2
+// @version      1.0.3
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_edit.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_edit.js
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf
