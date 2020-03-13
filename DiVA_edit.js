@@ -189,6 +189,7 @@ button {
    max-width: 600px;
    width: 80%;
    max-height: 1000px;
+   overflow: scroll;
    height: 80%;
    padding: 20px;
    position: relative;
