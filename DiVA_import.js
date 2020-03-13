@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA_import
-// @version      1.1.2
+// @version      1.1.3
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_import.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_import.js
@@ -125,11 +125,11 @@ $(authors).find('.diva2addtextarea').each(function () {
     //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
     authButtonjq.on("click",function() {
         var url = "https://lib.kth.se/ldap/api/v1/users/"
-                + $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
-                + " "
-                + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
-                + "*"
-                + "?token=" + ldapapikey;
+            + $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
+            + "* "
+            + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
+            + " *"
+            + "?token=" + ldapapikey;
         callapi(url, processJSON_Response_LDAP);
     })
     $(this).before (authButtonjq)
@@ -188,7 +188,7 @@ button {
 #popup {
    max-width: 600px;
    width: 80%;
-   max-height: 300px;
+   max-height: 1000px;
    height: 80%;
    padding: 20px;
    position: relative;
