@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA_edit
-// @version      1.1.1
+// @version      1.1.2
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_edit.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_edit.js
@@ -52,36 +52,37 @@ function processJSON_Response_MRBS (response) {
 
 //Hantera API-svar och utför eventuella åtgärder.
 function processJSON_Response_LDAP (response) {
-    if (response.status != 200  &&  response.status != 304) {
+    if (response.status != 200  && response.status != 201) {
         reportAJAX_Error (response);
         return;
     }
-    //Skapa en overlay
-    var html = '<div id="overlay"><div id="popup"><div id="close">X</div><h2>Information från KTH UG(LDAP)</h2>';
+
+    var html = '<div id="popup"><div id="close">X</div><h2>Information från KTH UG(LDAP)</h2>';
 
     if(response.response) {
         var json = response.response
-        //gå igenom alla users och lägg till i html
-        $.each(json.ugusers, function(key , value) {
-            html += "<p>" + json.ugusers[key].displayName + ", "
-                + json.ugusers[key].ugKthid + ", "
-                + json.ugusers[key].title + ", "
-                + json.ugusers[key].kthPAGroupMembership + ", "
-                +"</p>"
-        });
+        if (response.status == 201) {
+            html += "<p>Inga användare hittades</p>";
+        } else {
+            //gå igenom alla users och lägg till i html
+            $.each(json.ugusers, function(key , value) {
+                html += "<p>" + json.ugusers[key].displayName + ", "
+                    + json.ugusers[key].ugKthid + ", "
+                    + json.ugusers[key].title + ", "
+                    + json.ugusers[key].kthPAGroupMembership + ", "
+                    +"</p>"
+            });
+        }
     }
 
-
     html += '</div></div>'
-    //Lägg in overlay på sidan så den kan visas
-    $(html, {
-        id: 'ugusers'
-    }).appendTo('body');
-    $('#overlay').fadeIn(300);
+    $('#ldapoverlay').html(html);
+    $('#ldapoverlay').fadeIn(300);
     //Stängknapp till overlay
     var closeButton = $('#close');
     closeButton.click(function(){
-        $('#overlay').fadeOut(300)
+        $('#ldapoverlay').fadeOut(300)
+        $('#ldapoverlay').html('');
     });
 }
 
@@ -111,21 +112,26 @@ document.getElementById ("myButton").addEventListener (
     "click", ButtonClickAction, false
 );
 
+//Lägg in overlay för LDAP-resultat på sidan så den kan visas
+$('<div/>', {
+    id: 'ldapoverlay'
+}).appendTo('body');
+
 //Skapa en knapp vid "Författar-avsnittet"(jquery)
 var authors = $('#' + diva_id + '\\:authorSerie');
 $(authors).find('.diva2addtextarea').each(function () {
     var thiz = this;
     var authButtonjq = $('<button id="myButton" type="button">LDAP-info</button>');
     //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
-    authButtonjq.click(function(){
-        callapi("https://lib.kth.se/ldap/api/v1/users/"
-                + $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val() 
-                + " " 
-                + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val() 
+    authButtonjq.on("click",function() {
+        var url = "https://lib.kth.se/ldap/api/v1/users/"
+                + $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
+                + " "
+                + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
                 + "*"
-                + "?token=" + ldapapikey
-                , processJSON_Response_LDAP);
-    });
+                + "?token=" + ldapapikey;
+        callapi(url, processJSON_Response_LDAP);
+    })
     $(this).before (authButtonjq)
 });
 
@@ -167,7 +173,7 @@ button {
     line-height: 1.5;
     border-radius: .25rem;
  }
-#overlay {
+#ldapoverlay {
    position: fixed;
    height: 100%;
    width: 100%;
