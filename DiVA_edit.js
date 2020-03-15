@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA_edit
-// @version      1.1.3
+// @version      1.1.4
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_edit.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_edit.js
@@ -11,17 +11,22 @@
 // @grant    GM_addStyle
 // @connect  apps.lib.kth.se
 // @connect  lib.kth.se
+// @connect  pub.orcid.org
 // ==/UserScript==
 /* global $ */
 /* eslint-disable no-multi-spaces, curly */
 
 var ldapapikey = "[LÄGG TILL APIKEY HÄR]";
+var letaanstalldaapikey = "[LÄGG TILL APIKEY HÄR]"
 
 function callapi(apiURL, callback) {
     GM_xmlhttpRequest ( {
         method:         "GET",
         url:            apiURL,
         responseType:   "json",
+        headers: {
+            "Accept": "application/json"
+        },
         onload:         callback,
         onabort:        reportAJAX_Error,
         onerror:        reportAJAX_Error,
@@ -69,7 +74,78 @@ function processJSON_Response_LDAP (response) {
                 html += "<p>" + json.ugusers[key].displayName + ", "
                     + json.ugusers[key].ugKthid + ", "
                     + json.ugusers[key].title + ", "
-                    + json.ugusers[key].kthPAGroupMembership + ", "
+                    + json.ugusers[key].kthPAGroupMembership
+                    +"</p>"
+            });
+        }
+    }
+
+    html += '</div></div>'
+    $('#ldapoverlay').html(html);
+    $('#ldapoverlay').fadeIn(300);
+    //Stängknapp till overlay
+    var closeButton = $('#close');
+    closeButton.click(function(){
+        $('#ldapoverlay').fadeOut(300)
+        $('#ldapoverlay').html('');
+    });
+}
+
+//Hantera API-svar och utför eventuella åtgärder.
+function processJSON_Response_LETA (response) {
+    if (response.status != 200  && response.status != 201) {
+        reportAJAX_Error (response);
+        return;
+    }
+
+    var html = '<div id="popup"><div id="close">X</div><h2>Information från Leta anställda</h2>';
+
+    if(response.response) {
+
+        var json = response.response
+        if (response.status == 201) {
+            html += "<p>Inga användare hittades</p>";
+        } else {
+            //gå igenom alla users och lägg till i html
+            $.each(json, function(key , value) {
+                html += "<p>" + json[key].Fnamn + " " + json[key].Enamn + ", "
+                    + json[key].KTH_id + ", "
+                    + json[key].ORCIDid + ", "
+                    + json[key].Orgnamn
+                    +"</p>"
+            });
+        }
+    }
+
+    html += '</div></div>'
+    $('#ldapoverlay').html(html);
+    $('#ldapoverlay').fadeIn(300);
+    //Stängknapp till overlay
+    var closeButton = $('#close');
+    closeButton.click(function(){
+        $('#ldapoverlay').fadeOut(300)
+        $('#ldapoverlay').html('');
+    });
+}
+
+//Hantera API-svar och utför eventuella åtgärder.
+function processJSON_Response_ORCID (response) {
+    if (response.status != 200  && response.status != 201) {
+        reportAJAX_Error (response);
+        return;
+    }
+
+    var html = '<div id="popup"><div id="close">X</div><h2>Information från ORCiD</h2>';
+    console.log(response)
+    if(response.response) {
+
+        var json = response.response.result
+        if (response.response.result == null) {
+            html += "<p>Inga användare hittades</p>";
+        } else {
+            //gå igenom alla users och lägg till i html
+            $.each(json, function(key , value) {
+                html += "<p>" + json[key]['orcid-identifier'].uri
                     +"</p>"
             });
         }
@@ -117,13 +193,15 @@ $('<div/>', {
     id: 'ldapoverlay'
 }).appendTo('body');
 
-//Skapa en knapp vid "Författar-avsnittet"(jquery)
+//Skapa knappar vid "Författar-avsnittet"(jquery)
 var authors = $('#' + diva_id + '\\:authorSerie');
 $(authors).find('.diva2addtextarea').each(function () {
     var thiz = this;
-    var authButtonjq = $('<button id="myButton" type="button">LDAP-info</button>');
+
+    //LDAP/UG
+    var ldapButtonjq = $('<button id="myButton" type="button">LDAP-info</button>');
     //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
-    authButtonjq.on("click",function() {
+    ldapButtonjq.on("click",function() {
         var url = "https://lib.kth.se/ldap/api/v1/users/"
             + $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
             + "* "
@@ -132,7 +210,37 @@ $(authors).find('.diva2addtextarea').each(function () {
             + "?token=" + ldapapikey;
         callapi(url, processJSON_Response_LDAP);
     })
-    $(this).before (authButtonjq)
+    $(this).before (ldapButtonjq)
+
+    //Leta KTH-anställda
+    var letaButtonjq = $('<button id="myButton" type="button">Leta anställda</button>');
+    //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
+    letaButtonjq.on("click",function() {
+        var url = "https://apps-ref.lib.kth.se/webservices/letaanstallda/api/v1/users?fname="
+            + $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
+            + "%&ename="
+            + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
+            + "%"
+            + "&api_key=" + letaanstalldaapikey;
+        callapi(url, processJSON_Response_LETA);
+    })
+
+    $(this).before (letaButtonjq)
+
+    //Sök i ORCiD
+    var orcidButtonjq = $('<button id="myButton" type="button">Sök ORCiD</button>');
+    //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
+    orcidButtonjq.on("click",function() {
+        var url = "https://pub.orcid.org/v3.0/search/?q=family-name:"
+            + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
+            + "+AND+given-names:"
+            + $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
+            //+ "affiliation-org-name:KTH"
+        console.log(url)
+        callapi(url, processJSON_Response_ORCID);
+    })
+
+    $(this).before (orcidButtonjq)
 });
 
 //Vänta tills fältet för anmärkning skapats (iframe)
@@ -141,7 +249,7 @@ waitForKeyElements('#' + diva_id + '\\:notes_ifr', actionFunction);
 function actionFunction() {
     var $iframe = $('#' + diva_id + '\\:notes_ifr');
     $iframe.ready(function() {
-        $iframe.contents().find("body").html(QC);
+        $iframe.contents().find("body").append(QC);
     });
     //callapi("https://apps.lib.kth.se/webservices/mrbs/api/v1/noauth/rooms", processJSON_Response_MRBS);
 }
@@ -186,7 +294,7 @@ button {
 }
 
 #popup {
-   max-width: 600px;
+   max-width: 1000px;
    width: 80%;
    max-height: 1000px;
    overflow: scroll;
