@@ -145,9 +145,9 @@ function processJSON_Response_ORCID (response) {
         } else {
             //gå igenom alla users och lägg till i html
             $.each(json, function(key , value) {
-                html += '<a target="_new" href="' + json[key]['orcid-identifier'].uri + '">'
-                + json[key]['orcid-identifier'].uri
-                + '</a>'
+                html += '<p><a target="_new" href="' + json[key]['orcid-identifier'].uri + '">'
+                    + json[key]['orcid-identifier'].uri
+                    + '</a></p>'
             });
         }
     }
