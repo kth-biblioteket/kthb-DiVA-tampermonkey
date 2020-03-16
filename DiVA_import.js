@@ -111,7 +111,9 @@ function processJSON_Response_LETA (response) {
                 html += "<p>" + json[key].Fnamn + " " + json[key].Enamn + ", "
                     + json[key].KTH_id + ", "
                     + json[key].ORCIDid + ", "
-                    + json[key].Orgnamn
+                    + json[key].Orgnamn + ", "
+                    + json[key].skola + ", "
+                    + json[key].datum
                     +"</p>"
             });
         }

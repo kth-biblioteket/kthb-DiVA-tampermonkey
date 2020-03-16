@@ -71,10 +71,12 @@ function processJSON_Response_LDAP (response) {
         } else {
             //gå igenom alla users och lägg till i html
             $.each(json.ugusers, function(key , value) {
-                html += "<p>" + json.ugusers[key].displayName + ", "
-                    + json.ugusers[key].ugKthid + ", "
-                    + json.ugusers[key].title + ", "
-                    + json.ugusers[key].kthPAGroupMembership
+                html += "<p>" + json[key].Fnamn + " " + json[key].Enamn + ", "
+                    + json[key].KTH_id + ", "
+                    + json[key].ORCIDid + ", "
+                    + json[key].Orgnamn + ", "
+                    + json[key].skola + ", "
+                    + json[key].datum
                     +"</p>"
             });
         }
