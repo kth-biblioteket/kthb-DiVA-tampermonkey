@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA_edit
-// @version      1.1.4
+// @version      1.1.5
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_edit.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_edit.js
@@ -145,8 +145,9 @@ function processJSON_Response_ORCID (response) {
         } else {
             //gå igenom alla users och lägg till i html
             $.each(json, function(key , value) {
-                html += "<p>" + json[key]['orcid-identifier'].uri
-                    +"</p>"
+                html += '<a target="_new" href="' + json[key]['orcid-identifier'].uri + '">'
+                + json[key]['orcid-identifier'].uri
+                + '</a>'
             });
         }
     }
@@ -271,6 +272,10 @@ function addZero(i) {
 
 //--CSS:
 GM_addStyle ( `
+a {
+    font-size: 1rem !important;
+}
+
 button {
     background-color: #d85497;
     color: #fff;
