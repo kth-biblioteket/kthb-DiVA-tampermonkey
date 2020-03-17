@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name     DiVA_edit
+// @name     DiVA
 // @version      1.0.1
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
