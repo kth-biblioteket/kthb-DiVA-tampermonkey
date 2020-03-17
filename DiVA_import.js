@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA_import
-// @version      1.1.5
+// @version      1.1.6
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_import.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA_import.js
