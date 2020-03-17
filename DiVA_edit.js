@@ -35,24 +35,14 @@ function callapi(apiURL, callback) {
 }
 
 //Hantera API-svar och utför eventuella åtgärder.
-function processJSON_Response_MRBS (response) {
+function processJSON_Response_default (response) {
     if (response.status != 200  &&  response.status != 304) {
         reportAJAX_Error (response);
         return;
     }
 
-    var rooms = response.response;
+   console.log(response.response);
 
-    var roomName  = rooms[0].room_name;
-
-    var resultsDiv  = `
-        <p>${roomName}</p>
-    `;
-
-    var $iframe = $('#' + diva_id + '\\:notes_ifr');
-    $iframe.ready(function() {
-        $iframe.contents().find("body").html(resultsDiv);
-    });
 }
 
 //Hantera API-svar och utför eventuella åtgärder.
@@ -141,15 +131,32 @@ function processJSON_Response_ORCID (response) {
     console.log(response)
     if(response.response) {
 
-        var json = response.response.result
-        if (response.response.result == null) {
+        var json = response.response
+        if (response.status == 201) {
             html += "<p>Inga användare hittades</p>";
         } else {
             //gå igenom alla users och lägg till i html
             $.each(json, function(key , value) {
                 html += '<p><a target="_new" href="' + json[key]['orcid-identifier'].uri + '">'
-                    + json[key]['orcid-identifier'].uri
-                    + '</a></p>'
+                    + json[key]['orcid-identifier'].uri + ", " + json[key].person.name['family-name'].value + " " + json[key].person.name['given-names'].value
+                if (json[key]["activities-summary"].employments["affiliation-group"].length > 0) {
+                    console.log(json[key]["activities-summary"].employments["affiliation-group"])
+                    $.each(json[key]["activities-summary"].employments["affiliation-group"], function(empkey , empvalue) {
+                        html += ", " + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"].organization.name
+                        if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"]) {
+                            if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year) {
+                                html += ", " + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year.value
+                            }
+                            if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month) {
+                                html += "-" + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month.value
+                            }
+                            if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day) {
+                                html += "-" + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day.value
+                            }
+                        }
+                    })
+                }
+                html += '</a></p>'
             });
         }
     }
@@ -254,7 +261,6 @@ function actionFunction() {
     $iframe.ready(function() {
         $iframe.contents().find("body").append(QC);
     });
-    //callapi("https://apps.lib.kth.se/webservices/mrbs/api/v1/noauth/rooms", processJSON_Response_MRBS);
 }
 
 //Skapa QC + dagens datum
@@ -274,7 +280,7 @@ function addZero(i) {
 
 //--CSS:
 GM_addStyle ( `
-a {
+#ldapoverlay a {
     font-size: 1rem !important;
 }
 
