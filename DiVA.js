@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.0.1
+// @version      1.0.2
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -188,78 +188,87 @@ function ButtonClickAction (event) {
 
 //Hämta aktuellt id beroende på DiVA-läge (edit eller import)
 var diva_id
-if ( window.location.href.indexOf("editForm.jsf") ==! -1 ) {
-    diva_id = "importForm";
+if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
+     waitForKeyElements('#diva2editcontainer', function() {
+        diva_id = $('#diva2editcontainer').closest('form').attr('id')
+    });
 } else {
-    diva_id = $('#diva2editcontainer').closest('form').attr('id');
+    diva_id = "importForm";
 }
-
-//Skapa en knapp vid "Anmärknings-fältet"(vanilla javascript)
-var qcButton       = document.createElement ('div');
-qcButton.innerHTML = '<button id="myButton" type="button">'
-                + 'Infoga QC datum</button>'
-                ;
-document.getElementById(diva_id + ":notes").parentNode.appendChild (qcButton)
-
-//Koppla action till klick på knappen
-document.getElementById ("myButton").addEventListener (
-    "click", ButtonClickAction, false
-);
 
 //Lägg in overlay för LDAP-resultat på sidan så den kan visas
 $('<div/>', {
     id: 'ldapoverlay'
 }).appendTo('body');
 
-//Skapa knappar vid "Författar-avsnittet"(jquery)
-var authors = $('#' + diva_id + '\\:authorSerie');
-$(authors).find('.diva2addtextarea').each(function () {
-    var thiz = this;
+function init() {
 
-    //LDAP/UG
-    var ldapButtonjq = $('<button id="myButton" type="button">LDAP-info</button>');
-    //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
-    ldapButtonjq.on("click",function() {
-        var url = "https://lib.kth.se/ldap/api/v1/users/"
+    //Skapa en knapp vid "Anmärknings-fältet"(vanilla javascript)
+    var qcButton       = document.createElement ('div');
+    qcButton.innerHTML = '<button id="myButton" type="button">'
+        + 'Infoga QC datum</button>'
+    ;
+    document.getElementById(diva_id + ":notes").parentNode.appendChild (qcButton)
+
+    //Koppla action till klick på knappen
+    document.getElementById ("myButton").addEventListener (
+        "click", ButtonClickAction, false
+    );
+
+    //Skapa knappar vid "Författar-avsnittet"(jquery)
+    var authors = $('#' + diva_id + '\\:authorSerie');
+    $(authors).find('.diva2addtextarea').each(function () {
+        var thiz = this;
+
+        //LDAP/UG
+        var ldapButtonjq = $('<button id="myButton" type="button">LDAP-info</button>');
+        //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
+        ldapButtonjq.on("click",function() {
+            var url = "https://lib.kth.se/ldap/api/v1/users/"
             + $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
             + "* "
             + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
             + " *"
             + "?token=" + ldapapikey;
-        callapi(url, processJSON_Response_LDAP);
-    })
-    $(this).before (ldapButtonjq)
+            callapi(url, processJSON_Response_LDAP);
+        })
+        $(this).before (ldapButtonjq)
 
-    //Leta KTH-anställda
-    var letaButtonjq = $('<button id="myButton" type="button">Leta anställda</button>');
-    //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
-    letaButtonjq.on("click",function() {
-        var url = "https://apps-ref.lib.kth.se/webservices/letaanstallda/api/v1/users?fname="
+        //Leta KTH-anställda
+        var letaButtonjq = $('<button id="myButton" type="button">Leta anställda</button>');
+        //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
+        letaButtonjq.on("click",function() {
+            var url = "https://apps-ref.lib.kth.se/webservices/letaanstallda/api/v1/users?fname="
             + $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
             + "%&ename="
             + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
             + "%"
             + "&api_key=" + letaanstalldaapikey;
-        callapi(url, processJSON_Response_LETA);
-    })
+            callapi(url, processJSON_Response_LETA);
+        })
 
-    $(this).before (letaButtonjq)
+        $(this).before (letaButtonjq)
 
-    //Sök i ORCiD
-    var orcidButtonjq = $('<button id="myButton" type="button">Sök ORCiD</button>');
-    //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
-    orcidButtonjq.on("click",function() {
-        var url = "https://pub.orcid.org/v3.0/search/?q=family-name:"
+        //Sök i ORCiD
+        var orcidButtonjq = $('<button id="myButton" type="button">Sök ORCiD</button>');
+        //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
+        orcidButtonjq.on("click",function() {
+            //var url = "https://pub.orcid.org/v3.0/search/?q=family-name:"
+            var url = "http://ref.lib.kth.se/orcid/api/v1/orcid/"
             + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
-            + "+AND+given-names:"
+            //+ "+AND+given-names:"
+            +"/"
             + $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
             //+ "affiliation-org-name:KTH"
-        console.log(url)
-        callapi(url, processJSON_Response_ORCID);
-    })
+            + "/?token=" + orcidapikey;
+            console.log(url)
+            callapi(url, processJSON_Response_ORCID);
+        })
 
-    $(this).before (orcidButtonjq)
-});
+
+        $(this).before (orcidButtonjq)
+    });
+}
 
 //Vänta tills fältet för anmärkning skapats (iframe)
 waitForKeyElements('#' + diva_id + '\\:notes_ifr', actionFunction);
@@ -269,6 +278,7 @@ function actionFunction() {
     $iframe.ready(function() {
         $iframe.contents().find("body").append(QC);
     });
+    init();
 }
 
 //Skapa QC + dagens datum
