@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.0.2
+// @version      1.0.3
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -203,15 +203,20 @@ $('<div/>', {
 
 function init() {
 
+    //Skapa en knapp vid "Scopus-fältet"
+    var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Scopus</button>');
+    console.log( $( "div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val())
+    $( "div.diva2addtextchoicecol:contains('ScopusID')").before(scopusButtonjq)
+
     //Skapa en knapp vid "Anmärknings-fältet"(vanilla javascript)
     var qcButton       = document.createElement ('div');
-    qcButton.innerHTML = '<button id="myButton" type="button">'
+    qcButton.innerHTML = '<button id="qcButton" type="button">'
         + 'Infoga QC datum</button>'
     ;
     document.getElementById(diva_id + ":notes").parentNode.appendChild (qcButton)
 
     //Koppla action till klick på knappen
-    document.getElementById ("myButton").addEventListener (
+    document.getElementById ("qcButton").addEventListener (
         "click", ButtonClickAction, false
     );
 
@@ -221,7 +226,7 @@ function init() {
         var thiz = this;
 
         //LDAP/UG
-        var ldapButtonjq = $('<button id="myButton" type="button">LDAP-info</button>');
+        var ldapButtonjq = $('<button id="ldapButtonjq" type="button">LDAP-info</button>');
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         ldapButtonjq.on("click",function() {
             var url = "https://lib.kth.se/ldap/api/v1/users/"
@@ -235,7 +240,7 @@ function init() {
         $(this).before (ldapButtonjq)
 
         //Leta KTH-anställda
-        var letaButtonjq = $('<button id="myButton" type="button">Leta anställda</button>');
+        var letaButtonjq = $('<button id="letaButtonjq" type="button">Leta anställda</button>');
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         letaButtonjq.on("click",function() {
             var url = "https://apps-ref.lib.kth.se/webservices/letaanstallda/api/v1/users?fname="
@@ -250,7 +255,7 @@ function init() {
         $(this).before (letaButtonjq)
 
         //Sök i ORCiD
-        var orcidButtonjq = $('<button id="myButton" type="button">Sök ORCiD</button>');
+        var orcidButtonjq = $('<button id="orcidButtonjq" type="button">Sök ORCiD</button>');
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         orcidButtonjq.on("click",function() {
             //var url = "https://pub.orcid.org/v3.0/search/?q=family-name:"
