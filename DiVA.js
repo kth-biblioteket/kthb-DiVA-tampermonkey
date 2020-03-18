@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.0.3
+// @version      1.0.4
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -14,6 +14,7 @@
 // @connect  lib.kth.se
 // @connect  pub.orcid.org
 // @connect  localhost
+// @connect  api.elsevier.com
 // ==/UserScript==
 /* global $ */
 /* eslint-disable no-multi-spaces, curly */
@@ -21,6 +22,7 @@
 var ldapapikey = "[LÄGG TILL APIKEY HÄR]";
 var orcidapikey = "[LÄGG TILL APIKEY HÄR]";
 var letaanstalldaapikey = "[LÄGG TILL APIKEY HÄR]"
+var scopusapikey = "[LÄGG TILL APIKEY HÄR]"
 
 function callapi(apiURL, callback) {
     GM_xmlhttpRequest ( {
@@ -175,6 +177,44 @@ function processJSON_Response_ORCID (response) {
     });
 }
 
+//################# Hantera API-svar från Scopus och utför eventuella åtgärder.
+
+function processJSON_Response_scopus (response) {
+    if (response.status != 200  && response.status != 201) {
+        reportAJAX_Error (response);
+        return;
+    }
+
+    var html = '<div id="popup"><div id="close">X</div><h2>Scopus:</h2>';
+
+    if(response.response) {
+        var json = response.response
+        if (response.status == 201) {
+            html += "<p>Hittade inget i Scopus</p>";
+        } else {
+            //hitta ScopusId
+            html += "<p>" + response.response['search-results'].entry[0]['dc:creator'] + ": <i>"
+                + response.response['search-results'].entry[0]['dc:title'] + "</i><br /><br />"
+                + "ScopusId: " + response.response['search-results'].entry[0]['eid'] + "<br />"
+                + "DOI: " + response.response['search-results'].entry[0]['prism:doi'] + "<br />"
+                + "</p>"
+            };
+    }
+
+    html += '</div></div>'
+
+    $('#ldapoverlay').html(html);
+    $('#ldapoverlay').fadeIn(300);
+
+    //Stängknapp till overlay
+    var closeButton = $('#close');
+    closeButton.click(function(){
+        $('#ldapoverlay').fadeOut(300)
+        $('#ldapoverlay').html('');
+    });
+}
+//#################
+
 function reportAJAX_Error (response) {
     console.error (`Error ${response.status}!  ${response.statusText}`);
 }
@@ -206,6 +246,13 @@ function init() {
     //Skapa en knapp vid "Scopus-fältet"
     var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Scopus</button>');
     console.log( $( "div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val())
+    //bind en clickfunktion som anropar API med värdet i DOI-fältet
+    scopusButtonjq.on("click",function() {
+        var url = "https://api.elsevier.com/content/search/scopus?query=DOI("
+             + $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val()
+             + ")&apiKey=" + scopusapikey;
+        callapi(url, processJSON_Response_scopus);
+    })
     $( "div.diva2addtextchoicecol:contains('ScopusID')").before(scopusButtonjq)
 
     //Skapa en knapp vid "Anmärknings-fältet"(vanilla javascript)
@@ -306,7 +353,6 @@ GM_addStyle ( `
 #ldapoverlay a {
     font-size: 1rem !important;
 }
-
 button {
     background-color: #d85497;
     color: #fff;
@@ -328,7 +374,6 @@ button {
    background: rgba(0,0,0,0.8);
    display: none;
 }
-
 #popup {
    max-width: 1000px;
    width: 80%;
@@ -340,7 +385,6 @@ button {
    background: #fff;
    margin: 20px auto;
 }
-
 #close {
    position: absolute;
    top: 10px;
