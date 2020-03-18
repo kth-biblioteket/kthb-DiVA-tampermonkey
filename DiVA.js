@@ -45,9 +45,7 @@ function processJSON_Response_default (response) {
         reportAJAX_Error (response);
         return;
     }
-
    console.log(response.response);
-
 }
 
 //Hantera API-svar och utför eventuella åtgärder.
