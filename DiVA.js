@@ -8,6 +8,7 @@
 // @match    https://kth.diva-portal.org/dream/import/importForm.jsf
 // @match    https://kth.diva-portal.org/dream/publish/publishForm.jsf
 // @match    https://kth.diva-portal.org/dream/review/reviewForm.jsf
+// @match    https://kth.diva-portal.org/dream/add/add2.jsf
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
 // @grant    GM_xmlhttpRequest
@@ -179,7 +180,7 @@ function processJSON_Response_ORCID (response) {
     });
 }
 
-//################# Hantera API-svar från Scopus och utför eventuella åtgärder.
+// Hantera API-svar från Scopus och utför eventuella åtgärder.
 
 function processJSON_Response_scopus (response) {
     if (response.status != 200  && response.status != 201) {
@@ -215,7 +216,8 @@ function processJSON_Response_scopus (response) {
         $('#ldapoverlay').html('');
     });
 }
-//#################
+
+// slut Scopus
 
 function reportAJAX_Error (response) {
     console.error (`Error ${response.status}!  ${response.statusText}`);
@@ -228,7 +230,7 @@ function ButtonClickAction (event) {
     });
 }
 
-//Hämta aktuellt id beroende på DiVA-läge (edit eller import)
+//Hämta aktuellt id beroende på DiVA-läge (edit, publish, review eller import)
 var diva_id
 if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
      waitForKeyElements('#diva2editcontainer', function() {
@@ -242,8 +244,12 @@ if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
      waitForKeyElements('#diva2editcontainer', function() {
         diva_id = $('#diva2editcontainer').closest('form').attr('id')
     });
+} else if ( window.location.href.indexOf("importForm.jsf") !== -1 ) {
+     waitForKeyElements('#diva2addcontainer', function() {
+        diva_id = $('#diva2addcontainer').closest('form').attr('id')
+    });
 } else {
-    diva_id ="importForm";
+    diva_id ="addForm";
 }
 
 //Lägg in overlay för LDAP-resultat på sidan så den kan visas
@@ -340,7 +346,7 @@ waitForKeyElements('#' + diva_id + '\\:notes_ifr', actionFunction);
 function actionFunction() {
     var $iframe = $('#' + diva_id + '\\:notes_ifr');
     $iframe.ready(function() {
-        $iframe.contents().find("body").append(QC);
+//        $iframe.contents().find("body").append(QC);
     });
     init();
 }
