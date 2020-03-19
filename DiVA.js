@@ -6,6 +6,8 @@
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf
 // @match    https://kth.diva-portal.org/dream/import/importForm.jsf
+// @match    https://kth.diva-portal.org/dream/publish/publishForm.jsf
+// @match    https://kth.diva-portal.org/dream/review/reviewForm.jsf
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
 // @grant    GM_xmlhttpRequest
@@ -232,8 +234,16 @@ if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
      waitForKeyElements('#diva2editcontainer', function() {
         diva_id = $('#diva2editcontainer').closest('form').attr('id')
     });
+} else if ( window.location.href.indexOf("importForm.jsf") !== -1 ) {
+     waitForKeyElements('#diva2editcontainer', function() {
+        diva_id = $('#diva2editcontainer').closest('form').attr('id')
+    });
+} else if ( window.location.href.indexOf("reviewForm.jsf") !== -1 ) {
+     waitForKeyElements('#diva2editcontainer', function() {
+        diva_id = $('#diva2editcontainer').closest('form').attr('id')
+    });
 } else {
-    diva_id = "importForm";
+    diva_id ="publishForm";
 }
 
 //Lägg in overlay för LDAP-resultat på sidan så den kan visas
@@ -282,7 +292,8 @@ function init() {
             + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
             + " *"
             + "?token=" + ldapapikey;
-            callapi(url, processJSON_Response_LDAP);
+            var newurl =  url.replace("$$$", "")
+            callapi(newurl, processJSON_Response_LDAP);
         })
         $(this).before (ldapButtonjq)
 
@@ -296,7 +307,8 @@ function init() {
             + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
             + "%"
             + "&api_key=" + letaanstalldaapikey;
-            callapi(url, processJSON_Response_LETA);
+            var newurl =  url.replace("$$$", "")
+            callapi(newurl, processJSON_Response_LETA);
         })
 
         $(this).before (letaButtonjq)
