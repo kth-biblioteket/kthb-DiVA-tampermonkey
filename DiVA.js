@@ -234,7 +234,7 @@ if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
      waitForKeyElements('#diva2editcontainer', function() {
         diva_id = $('#diva2editcontainer').closest('form').attr('id')
     });
-} else if ( window.location.href.indexOf("importForm.jsf") !== -1 ) {
+} else if ( window.location.href.indexOf("publishForm.jsf") !== -1 ) {
      waitForKeyElements('#diva2editcontainer', function() {
         diva_id = $('#diva2editcontainer').closest('form').attr('id')
     });
@@ -243,7 +243,7 @@ if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
         diva_id = $('#diva2editcontainer').closest('form').attr('id')
     });
 } else {
-    diva_id ="publishForm";
+    diva_id ="importForm";
 }
 
 //Lägg in overlay för LDAP-resultat på sidan så den kan visas
