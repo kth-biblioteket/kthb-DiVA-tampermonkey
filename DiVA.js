@@ -523,7 +523,7 @@ function init() {
 }
 
 /**
- * Funktion som körs när sidan iframe för notes-fältet skapats
+ * Funktion som körs när iframe för notes-fältet skapats
  *
  */
 function actionFunction() {
