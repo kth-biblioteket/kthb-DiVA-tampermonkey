@@ -1,16 +1,15 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.0.4
+// @version      1.0.5
+// @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf
 // @match    https://kth.diva-portal.org/dream/import/importForm.jsf
-// @match    https://kth.diva-portal.org/dream/publish/publishForm.jsf
-// @match    https://kth.diva-portal.org/dream/review/reviewForm.jsf
-// @match    https://kth.diva-portal.org/dream/add/add2.jsf
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
+// @require  https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
 // @grant    GM_xmlhttpRequest
 // @grant    GM_addStyle
 // @connect  apps.lib.kth.se
@@ -22,11 +21,122 @@
 /* global $ */
 /* eslint-disable no-multi-spaces, curly */
 
-var ldapapikey = "[LÄGG TILL APIKEY HÄR]";
-var orcidapikey = "[LÄGG TILL APIKEY HÄR]";
-var letaanstalldaapikey = "[LÄGG TILL APIKEY HÄR]"
-var scopusapikey = "[LÄGG TILL APIKEY HÄR]"
+var ldapapikey;
+var orcidapikey;
+var letaanstalldaapikey;
+var scopusapikey;
 
+/**
+ * Funktion för att sätta apinycklar
+ *
+ * @param {
+ * } keys
+ */
+function setapikeys(keys){
+    ldapapikey = keys.apikeys.ldap;
+    orcidapikey = keys.apikeys.orcid;
+    letaanstalldaapikey = keys.apikeys.letaanstallda;
+    scopusapikey = keys.apikeys.scopus;
+}
+
+/**
+ * Funktion som verifierar användarens JWT-token
+ *
+ * @param {
+ * } token
+ */
+function verifytoken(token) {
+    //$('#monkeylogin').remove();
+    $('#monkeylogin').fadeOut(300);
+    $('#username').val('');
+    $('#password').val('');
+    if(token) {
+        $.ajax ({
+            type:       'POST',
+            url:        'https://lib.kth.se/ldap/api/v1/divamonkey',
+            dataType:   'JSON',
+            headers:    {'x-access-token':  token},
+            success:
+            function (response, textStatus, xhr) {
+                //om användaren inte tillhör bibblan
+                if(xhr.status == 201) {
+                    alert('not authorized');
+                    $('#monkeylogin').fadeIn(300);
+                    return;
+                };
+                //Om behörig bibblananvändare
+                if(response.apikeys) {
+                    //Spara token i en cookie (som gäller lång hur tid?)
+                    Cookies.set('token', response.token)
+                    setapikeys(response)
+                    init();
+                } else {
+                    Cookies.remove('token')
+                    $('#monkeylogin').fadeIn(300);
+                }
+            },
+            error:
+            //401 Unauthorized
+            function (response, textStatus, xhr) {
+                alert("Unauthorized")
+                Cookies.remove('token')
+                $('#monkeylogin').fadeIn(300);
+            }
+        });
+    } else {
+        Cookies.remove('token')
+        $('#monkeylogin').fadeIn(300);
+    }
+}
+
+/**
+ *
+ * Funktion som skapar ett loginformulär
+ *
+ */
+function monkeylogin() {
+    var html =
+        '<div id="monkeylogin">' +
+          '<form id="monkeyloginform">' +
+            '<div>Logga in till Apan</div>' +
+            '<div class = "flexbox column rowpadding">' +
+              '<input class="rowmargin" id="username" name="username" placeholder="kthid" type="text">' +
+              '<input class="rowmargin" id="password" name="password" placeholder="password" type="password">' +
+            '</div>' +
+          '</form>' +
+          '<button id="login">Login</button>' +
+        '</div>'
+
+    $('body').append(html);
+
+    var loginButton = $('#login');
+    loginButton.click(function(){
+        var username = $('#username').val() + "@ug.kth.se";
+        var password = $('#password').val();
+        $.ajax ( {
+            type:       'POST',
+            url:        'https://lib.kth.se/ldap/api/v1/login',
+            dataType:   'JSON',
+            data:       { username: username , password: password },
+            success:
+            function (response) {
+                verifytoken(response.token);
+            },
+            error:
+            function (response, textStatus, xhr) {
+                alert("Bad credentials, please try again");
+            }
+        } );
+    });
+}
+
+/**
+ * Funktion för att anropa api:er
+ *
+ * @param {
+ * } apiURL
+ * @param {*} callback
+ */
 function callapi(apiURL, callback) {
     GM_xmlhttpRequest ( {
         method:         "GET",
@@ -42,18 +152,28 @@ function callapi(apiURL, callback) {
     } );
 }
 
-//Hantera API-svar och utför eventuella åtgärder.
+/**
+ * Funktion som hanterar API-svar och utför eventuella åtgärder.
+ *
+ * @param {
+ * } response
+ */
 function processJSON_Response_default (response) {
     if (response.status != 200  &&  response.status != 304) {
         reportAJAX_Error (response);
         return;
     }
-    //Bananklase-1
-    //
-    console.log(response.response);
+
+   console.log(response.response);
+
 }
 
-//Hantera API-svar och utför eventuella åtgärder.
+/**
+ * Funktion som hanterar API-svar och utför eventuella åtgärder.
+ *
+ * @param {
+ * } response
+ */
 function processJSON_Response_LDAP (response) {
     if (response.status != 200  && response.status != 201) {
         reportAJAX_Error (response);
@@ -89,7 +209,12 @@ function processJSON_Response_LDAP (response) {
     });
 }
 
-//Hantera API-svar och utför eventuella åtgärder.
+/**
+ * Funktion som hanterar API-svar och utför eventuella åtgärder.
+ *
+ * @param {
+ * } response
+ */
 function processJSON_Response_LETA (response) {
     if (response.status != 200  && response.status != 201) {
         reportAJAX_Error (response);
@@ -128,7 +253,12 @@ function processJSON_Response_LETA (response) {
     });
 }
 
-//Hantera API-svar och utför eventuella åtgärder.
+/**
+ * Funktion som hanterar API-svar och utför eventuella åtgärder.
+ *
+ * @param {
+ * } response
+ */
 function processJSON_Response_ORCID (response) {
     if (response.status != 200  && response.status != 201) {
         reportAJAX_Error (response);
@@ -136,7 +266,6 @@ function processJSON_Response_ORCID (response) {
     }
 
     var html = '<div id="popup"><div id="close">X</div><h2>Information från ORCiD</h2>';
-    console.log(response)
     if(response.response) {
 
         var json = response.response
@@ -180,7 +309,12 @@ function processJSON_Response_ORCID (response) {
     });
 }
 
-// Hantera API-svar från Scopus och utför eventuella åtgärder.
+/**
+ * Funktion som hanterar API-svar från Scopus och utför eventuella åtgärder.
+ *
+ * @param {
+ * } response
+ */
 
 function processJSON_Response_scopus (response) {
     if (response.status != 200  && response.status != 201) {
@@ -201,6 +335,8 @@ function processJSON_Response_scopus (response) {
                 + "ScopusId: " + response.response['search-results'].entry[0]['eid'] + "<br />"
                 + "DOI: " + response.response['search-results'].entry[0]['prism:doi'] + "<br />"
                 + "</p>"
+        var eid = response.response['search-results'].entry[0]['eid']; //plocka värdet på ScopusId (eid)
+        $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
             };
     }
 
@@ -217,12 +353,75 @@ function processJSON_Response_scopus (response) {
     });
 }
 
-// slut Scopus
-
+/**
+ * Funktion som hanterar fel från api:er
+ *
+ * @param {
+ * } response
+ */
 function reportAJAX_Error (response) {
     console.error (`Error ${response.status}!  ${response.statusText}`);
 }
 
+/**
+ * Funktion för att anrop DBLP och hämta information via DOI
+ * @param {
+ * } doi
+ */
+function getDblp(doi) {
+    $.ajax ({
+        type:       'GET',
+        url:        'https://dblp.uni-trier.de/doi/xml/' + doi,
+        dataType:   'xml',
+        success:
+        function (response, textStatus, xhr) {
+            if($(response).find("crossref").text()){
+                $.ajax ({
+                    type:       'GET',
+                    url:        'https://dblp.uni-trier.de/rec/xml/' + $(response).find("crossref").text(),
+                    dataType:   'xml',
+                    success:
+                    function (response, textStatus, xhr) {
+                        var html = '<div id="popup"><div id="close">X</div><h2>Information från dblp, DOI: ' + doi + '</h2>';
+                        html += "<p>Title: " + $(response).find("title").text() + "</p>"
+                            + "<p>Series: " + $(response).find("series").text() + "</p>"
+                            + "<p>Volume: " + $(response).find("volume").text() + "</p>"
+                            + '</div>'
+
+                        $('#ldapoverlay').html(html);
+                        $('#ldapoverlay').fadeIn(300);
+
+                        //Stängknapp till overlay
+                        var closeButton = $('#close');
+                        closeButton.click(function(){
+                            $('#ldapoverlay').fadeOut(300)
+                            $('#ldapoverlay').html('');
+                        });
+                    },
+                    error:
+                    //TODO felhantering
+                    function (response, textStatus, xhr) {
+                        console.log(xhr);
+                    }
+                });
+            } else {
+                alert("Hittade inget i dblp på: " + doi);
+            }
+        },
+        error:
+        //TODO felhantering
+        function (response, textStatus, xhr) {
+            console.log(xhr);
+        }
+    });
+}
+
+/**
+ * Funktion för att hantera klick på knapp
+ *
+ * @param {
+ * } event
+ */
 function ButtonClickAction (event) {
     var $iframe = $('#' + diva_id + '\\:notes_ifr');
     $iframe.ready(function() {
@@ -230,26 +429,14 @@ function ButtonClickAction (event) {
     });
 }
 
-//Hämta aktuellt id beroende på DiVA-läge (edit, publish, review eller import)
+//Hämta aktuellt id beroende på DiVA-läge (edit eller import)
 var diva_id
 if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
      waitForKeyElements('#diva2editcontainer', function() {
         diva_id = $('#diva2editcontainer').closest('form').attr('id')
     });
-} else if ( window.location.href.indexOf("publishForm.jsf") !== -1 ) {
-     waitForKeyElements('#diva2editcontainer', function() {
-        diva_id = $('#diva2editcontainer').closest('form').attr('id')
-    });
-} else if ( window.location.href.indexOf("reviewForm.jsf") !== -1 ) {
-     waitForKeyElements('#diva2editcontainer', function() {
-        diva_id = $('#diva2editcontainer').closest('form').attr('id')
-    });
-} else if ( window.location.href.indexOf("importForm.jsf") !== -1 ) {
-     waitForKeyElements('#diva2addcontainer', function() {
-        diva_id = $('#diva2addcontainer').closest('form').attr('id')
-    });
 } else {
-    diva_id ="addForm";
+    diva_id = "importForm";
 }
 
 //Lägg in overlay för LDAP-resultat på sidan så den kan visas
@@ -257,11 +444,13 @@ $('<div/>', {
     id: 'ldapoverlay'
 }).appendTo('body');
 
+/**
+ * Funktion för att initiera Apan
+ *
+ */
 function init() {
-
     //Skapa en knapp vid "Scopus-fältet"
     var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Scopus</button>');
-    console.log( $( "div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val())
     //bind en clickfunktion som anropar API med värdet i DOI-fältet
     scopusButtonjq.on("click",function() {
         var url = "https://api.elsevier.com/content/search/scopus?query=DOI("
@@ -270,6 +459,14 @@ function init() {
         callapi(url, processJSON_Response_scopus);
     })
     $( "div.diva2addtextchoicecol:contains('ScopusID')").before(scopusButtonjq)
+
+    //Skapa en knapp vid "Konferens-fältet"
+    var dblpButtonjq = $('<button id="dblpButtonjq" type="button">dblp</button>');
+    //bind en clickfunktion som anropar API med värdet i DOI-fältet
+    dblpButtonjq.on("click",function() {
+        getDblp($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+    })
+    $( "div.diva2addtextchoicecol:contains('Konferens')").after(dblpButtonjq)
 
     //Skapa en knapp vid "Anmärknings-fältet"(vanilla javascript)
     var qcButton       = document.createElement ('div');
@@ -285,11 +482,11 @@ function init() {
 
     //Skapa knappar vid "Författar-avsnittet"(jquery)
     var authors = $('#' + diva_id + '\\:authorSerie');
+    var i = 0;
     $(authors).find('.diva2addtextarea').each(function () {
         var thiz = this;
-
         //LDAP/UG
-        var ldapButtonjq = $('<button id="ldapButtonjq" type="button">LDAP-info</button>');
+        var ldapButtonjq = $('<button id="ldapButtonjq' + i + '" type="button">LDAP-info</button>');
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         ldapButtonjq.on("click",function() {
             var url = "https://lib.kth.se/ldap/api/v1/users/"
@@ -298,13 +495,14 @@ function init() {
             + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
             + " *"
             + "?token=" + ldapapikey;
-            var newurl =  url.replace("$$$", "")
+            var newurl =  url.replace("$$$", "") // ta bort $$$ från efternamnen för sökning i Leta KTH-anställda
             callapi(newurl, processJSON_Response_LDAP);
+       //     callapi(url, processJSON_Response_LDAP);
         })
         $(this).before (ldapButtonjq)
 
         //Leta KTH-anställda
-        var letaButtonjq = $('<button id="letaButtonjq" type="button">Leta anställda</button>');
+        var letaButtonjq = $('<button id="letaButtonjq' + i + '" type="button">Leta anställda</button>');
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         letaButtonjq.on("click",function() {
             var url = "https://apps-ref.lib.kth.se/webservices/letaanstallda/api/v1/users?fname="
@@ -313,14 +511,15 @@ function init() {
             + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
             + "%"
             + "&api_key=" + letaanstalldaapikey;
-            var newurl =  url.replace("$$$", "")
+            var newurl =  url.replace("$$$", "") // ta bort $$$ från efternamnen för sökning i Leta KTH-anställda
             callapi(newurl, processJSON_Response_LETA);
+     //       callapi(url, processJSON_Response_LETA);
         })
 
         $(this).before (letaButtonjq)
 
         //Sök i ORCiD
-        var orcidButtonjq = $('<button id="orcidButtonjq" type="button">Sök ORCiD</button>');
+        var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök ORCiD</button>');
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         orcidButtonjq.on("click",function() {
             //var url = "https://pub.orcid.org/v3.0/search/?q=family-name:"
@@ -336,19 +535,36 @@ function init() {
         })
 
 
-        $(this).before (orcidButtonjq)
+        $(this).before (orcidButtonjq);
+
+        i++;
     });
 }
 
 //Vänta tills fältet för anmärkning skapats (iframe)
 waitForKeyElements('#' + diva_id + '\\:notes_ifr', actionFunction);
 
+/**
+ * Funktion som körs när sidan iframe för notes-fältet skapats
+ *
+ */
 function actionFunction() {
-    var $iframe = $('#' + diva_id + '\\:notes_ifr');
-    $iframe.ready(function() {
-//        $iframe.contents().find("body").append(QC);
-    });
-    init();
+    monkeylogin();
+    //Kolla om användartoken finns och verifera i så fall
+    if (Cookies.get('token')) {
+        if (typeof Cookies.get('token') === 'undefined' ||
+            Cookies.get('token') == 'undefined' ||
+            Cookies.get('token') == '') {
+            Cookies.remove('token');
+        } else {
+            verifytoken(Cookies.get('token'));
+            return
+        }
+    } else {
+        Cookies.remove('token');
+        $('#monkeylogin').fadeIn(300);
+    }
+
 }
 
 //Skapa QC + dagens datum
@@ -368,8 +584,27 @@ function addZero(i) {
 
 //--CSS:
 GM_addStyle ( `
+#monkeylogin {
+    display: none;
+    overflow: hidden;
+    padding: 5px;
+}
 #ldapoverlay a {
     font-size: 1rem !important;
+}
+.flexbox {
+    display: flex;
+}
+.column {
+    flex-direction: column;
+}
+.rowpadding {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.rowmargin {
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 button {
     background-color: #d85497;
