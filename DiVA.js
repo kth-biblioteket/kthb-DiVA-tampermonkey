@@ -334,9 +334,12 @@ function processJSON_Response_scopus (response) {
                 + response.response['search-results'].entry[0]['dc:title'] + "</i><br /><br />"
                 + "ScopusId: " + response.response['search-results'].entry[0]['eid'] + "<br />"
                 + "DOI: " + response.response['search-results'].entry[0]['prism:doi'] + "<br />"
+                + "PMID: " + response.response['search-results'].entry[0]['pubmed-id'] + "<br />"
                 + "</p>"
-        var eid = response.response['search-results'].entry[0]['eid']; //plocka värdet på ScopusId (eid)
+        var eid = response.response['search-results'].entry[0]['eid']; //plocka värdet för ScopusId (eid)
         $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
+        var pmid = response.response['search-results'].entry[0]['pubmed-id']; //plocka värdet för PubMedID (PMID)
+        $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
             };
     }
 
@@ -467,6 +470,7 @@ function init() {
         getDblp($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
     })
     $( "div.diva2addtextchoicecol:contains('Konferens')").after(dblpButtonjq)
+    $( "div.diva2addtextchoicecol:contains('Conference')").after(dblpButtonjq)
 
     //Skapa en knapp vid "Anmärknings-fältet"(vanilla javascript)
     var qcButton       = document.createElement ('div');
