@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.0.5
+// @version      1.0.6
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -431,22 +431,6 @@ function ButtonClickAction (event) {
     });
 }
 
-//Hämta aktuellt id beroende på DiVA-läge (edit eller import)
-//TODO lägg till fler lägen...
-var diva_id
-if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
-     waitForKeyElements('#diva2editcontainer', function() {
-        diva_id = $('#diva2editcontainer').closest('form').attr('id')
-    });
-} else {
-    diva_id = "importForm";
-}
-
-//Lägg in overlay för LDAP-resultat på sidan så den kan visas
-$('<div/>', {
-    id: 'ldapoverlay'
-}).appendTo('body');
-
 /**
  * Funktion för att initiera Apan
  *
@@ -538,9 +522,6 @@ function init() {
     });
 }
 
-//Vänta tills fältet för anmärkning skapats (iframe)
-waitForKeyElements('#' + diva_id + '\\:notes_ifr', actionFunction);
-
 /**
  * Funktion som körs när sidan iframe för notes-fältet skapats
  *
@@ -563,6 +544,51 @@ function actionFunction() {
     }
 
 }
+
+//Hämta aktuellt id beroende på DiVA-läge (edit eller import)
+//TODO lägg till fler lägen...
+var diva_id
+if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
+     waitForKeyElements('#diva2editcontainer', function() {
+        diva_id = $('#diva2editcontainer').closest('form').attr('id')
+    });
+} else {
+    diva_id = "importForm";
+}
+
+//Lägg in overlay för LDAP-resultat på sidan så den kan visas
+$('<div/>', {
+    id: 'ldapoverlay'
+}).appendTo('body');
+
+//Vänta tills fältet för anmärkning skapats (iframe)
+waitForKeyElements('#' + diva_id + '\\:notes_ifr', actionFunction);
+
+//Bevaka uppdateringar i noden som författarna ligger i
+//Sker t ex efter "Koppla personpost"
+//Initiera apan på nytt.
+var target = $('.diva2editmainer .diva2addtextbotmargin')[0];
+var observer = new MutationObserver(function( mutations ) {
+  mutations.forEach(function( mutation ) {
+    var newNodes = mutation.addedNodes;
+    if( newNodes !== null ) {
+        init();
+    	var $nodes = $( newNodes );
+    	$nodes.each(function() {
+    		var $node = $( this );
+    		if( $node.prop("id") == diva_id + ':authorSerie' ) {
+    			console.log('author uppdaterad')
+    		}
+    	});
+    }
+  });
+});
+var config = {
+	attributes: true,
+	childList: true,
+	characterData: true
+};
+observer.observe(target, config);
 
 //Skapa QC + dagens datum
 var d = new Date();
