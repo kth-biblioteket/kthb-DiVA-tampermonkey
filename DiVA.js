@@ -46,7 +46,6 @@ function setapikeys(keys){
  * } token
  */
 function verifytoken(token) {
-    //$('#monkeylogin').remove();
     $('#monkeylogin').fadeOut(300);
     $('#username').val('');
     $('#password').val('');
@@ -336,11 +335,11 @@ function processJSON_Response_scopus (response) {
                 + "DOI: " + response.response['search-results'].entry[0]['prism:doi'] + "<br />"
                 + "PMID: " + response.response['search-results'].entry[0]['pubmed-id'] + "<br />"
                 + "</p>"
-        var eid = response.response['search-results'].entry[0]['eid']; //plocka värdet för ScopusId (eid)
-        $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
-        var pmid = response.response['search-results'].entry[0]['pubmed-id']; //plocka värdet för PubMedID (PMID)
-        $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
-            };
+            var eid = response.response['search-results'].entry[0]['eid']; //plocka värdet för ScopusId (eid)
+            $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
+            var pmid = response.response['search-results'].entry[0]['pubmed-id']; //plocka värdet för PubMedID (PMID)
+            $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
+        };
     }
 
     html += '</div></div>'
@@ -428,11 +427,12 @@ function getDblp(doi) {
 function ButtonClickAction (event) {
     var $iframe = $('#' + diva_id + '\\:notes_ifr');
     $iframe.ready(function() {
-        $iframe.contents().find("body").html(QC);
+        $iframe.contents().find("body p").html($iframe.contents().find("body p").html() + ", " + QC);
     });
 }
 
 //Hämta aktuellt id beroende på DiVA-läge (edit eller import)
+//TODO lägg till fler lägen...
 var diva_id
 if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
      waitForKeyElements('#diva2editcontainer', function() {
@@ -501,7 +501,6 @@ function init() {
             + "?token=" + ldapapikey;
             var newurl =  url.replace("$$$", "") // ta bort $$$ från efternamnen för sökning i Leta KTH-anställda
             callapi(newurl, processJSON_Response_LDAP);
-       //     callapi(url, processJSON_Response_LDAP);
         })
         $(this).before (ldapButtonjq)
 
@@ -515,9 +514,8 @@ function init() {
             + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
             + "%"
             + "&api_key=" + letaanstalldaapikey;
-            var newurl =  url.replace("$$$", "") // ta bort $$$ från efternamnen för sökning i Leta KTH-anställda
+            var newurl = url.replace("$$$", "") // ta bort $$$ från efternamnen för sökning i Leta KTH-anställda
             callapi(newurl, processJSON_Response_LETA);
-     //       callapi(url, processJSON_Response_LETA);
         })
 
         $(this).before (letaButtonjq)
@@ -526,18 +524,13 @@ function init() {
         var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök ORCiD</button>');
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         orcidButtonjq.on("click",function() {
-            //var url = "https://pub.orcid.org/v3.0/search/?q=family-name:"
-            var url = "http://ref.lib.kth.se/orcid/api/v1/orcid/"
+            var url = "http://lib.kth.se/orcid/api/v1/orcid/"
             + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
-            //+ "+AND+given-names:"
             +"/"
             + $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
-            //+ "affiliation-org-name:KTH"
             + "/?token=" + orcidapikey;
-            console.log(url)
             callapi(url, processJSON_Response_ORCID);
         })
-
 
         $(this).before (orcidButtonjq);
 
