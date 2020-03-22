@@ -29,8 +29,7 @@ var scopusapikey;
 /**
  * Funktion för att sätta apinycklar
  *
- * @param {
- * } keys
+ * @param {object} keys
  */
 function setapikeys(keys){
     ldapapikey = keys.apikeys.ldap;
@@ -42,8 +41,7 @@ function setapikeys(keys){
 /**
  * Funktion som verifierar användarens JWT-token
  *
- * @param {
- * } token
+ * @param {string} token
  */
 function verifytoken(token) {
     $('#monkeylogin').fadeOut(300);
@@ -132,9 +130,8 @@ function monkeylogin() {
 /**
  * Funktion för att anropa api:er
  *
- * @param {
- * } apiURL
- * @param {*} callback
+ * @param {string} apiURL
+ * @param {function} callback
  */
 function callapi(apiURL, callback) {
     GM_xmlhttpRequest ( {
@@ -154,8 +151,7 @@ function callapi(apiURL, callback) {
 /**
  * Funktion som hanterar API-svar och utför eventuella åtgärder.
  *
- * @param {
- * } response
+ * @param {object} response
  */
 function processJSON_Response_default (response) {
     if (response.status != 200  &&  response.status != 304) {
@@ -170,8 +166,7 @@ function processJSON_Response_default (response) {
 /**
  * Funktion som hanterar API-svar och utför eventuella åtgärder.
  *
- * @param {
- * } response
+ * @param {object} response
  */
 function processJSON_Response_LDAP (response) {
     if (response.status != 200  && response.status != 201) {
@@ -211,8 +206,7 @@ function processJSON_Response_LDAP (response) {
 /**
  * Funktion som hanterar API-svar och utför eventuella åtgärder.
  *
- * @param {
- * } response
+ * @param {object} response
  */
 function processJSON_Response_LETA (response) {
     if (response.status != 200  && response.status != 201) {
@@ -255,8 +249,7 @@ function processJSON_Response_LETA (response) {
 /**
  * Funktion som hanterar API-svar och utför eventuella åtgärder.
  *
- * @param {
- * } response
+ * @param {object} response
  */
 function processJSON_Response_ORCID (response) {
     if (response.status != 200  && response.status != 201) {
@@ -311,8 +304,7 @@ function processJSON_Response_ORCID (response) {
 /**
  * Funktion som hanterar API-svar från Scopus och utför eventuella åtgärder.
  *
- * @param {
- * } response
+ * @param {object} response
  */
 
 function processJSON_Response_scopus (response) {
@@ -358,17 +350,77 @@ function processJSON_Response_scopus (response) {
 /**
  * Funktion som hanterar fel från api:er
  *
- * @param {
- * } response
+ * @param {object} response
  */
 function reportAJAX_Error (response) {
     console.error (`Error ${response.status}!  ${response.statusText}`);
 }
 
 /**
+ * Funktion för att anropa DiVA och hämta information via "free text search"
+ * 
+ * @param {string} freeText
+ * @param {string} format (csl_json=json, mods=xml)
+ */
+function getDiVA(freeText, format) {
+    var diva_url = 'https://kth.diva-portal.org/smash/export.jsf?format=' + format + '&addFilename=true&aq=[[{"freeText":"'
+                      + freeText + '"}]]&aqe=[]&aq2=[[]]&onlyFullText=false&noOfRows=50&sortOrder=title_sort_asc&sortOrder2=title_sort_asc';
+    $.ajax ({
+        type:       'GET',
+        url:        diva_url,
+        success:
+        function (response, textStatus, xhr) {
+            var results = false;
+            var html = '<div id="popup"><div id="close">X</div><h2>Information från DiVA, Söktext: ' + freeText + '</h2>';
+            if (xhr.getResponseHeader("content-type").indexOf('xml')) {
+                if ($(response).find('mods').length > 0) {
+                    results = true;
+                    $(response).find('mods').each(function(i,j) {
+                        html += '<p>Status: ' + $(j).find('note[type="publicationStatus"]').text() + '</p>'
+                             + '<p>Note: ' + $(j).find('note').text() + '</p>'
+                             + '</br>'
+                    });
+                }
+            }
+            if (xhr.getResponseHeader("content-type").indexOf('json')) {
+                if(response.length > 0) {
+                    results = true;
+                    $.each(response, function(key , value) {
+                        html += '<p>Status: ' + response[key].status + '</p>'
+                             + '<p>Note: ' + response[key].note + '</p>'
+                             + '<p>DOI: ' + response[key].DOI + '</p>'
+                             + '<p>ScopusId: ' + response[key].ScopusId + '</p>'
+                             + '</br>'
+                    });
+                };
+            }
+            if (!results) {
+                alert("Hittade inget i DiVA på: " + freeText);
+                return;
+            }
+            html += '</div>'
+            $('#ldapoverlay').html(html);
+            $('#ldapoverlay').fadeIn(300);
+
+            //Stängknapp till overlay
+            var closeButton = $('#close');
+            closeButton.click(function(){
+                $('#ldapoverlay').fadeOut(300)
+                $('#ldapoverlay').html('');
+            });
+        },
+        error:
+        //TODO felhantering
+        function (response, textStatus, xhr) {
+            console.log(xhr);
+        }
+    });
+}
+
+/**
  * Funktion för att anrop DBLP och hämta information via DOI
- * @param {
- * } doi
+ * 
+ * @param {string} doi
  */
 function getDblp(doi) {
     $.ajax ({
@@ -421,8 +473,7 @@ function getDblp(doi) {
 /**
  * Funktion för att hantera klick på knapp
  *
- * @param {
- * } event
+ * @param {*} event
  */
 function ButtonClickAction (event) {
     var $iframe = $('#' + diva_id + '\\:notes_ifr');
@@ -436,6 +487,15 @@ function ButtonClickAction (event) {
  *
  */
 function init() {
+    //Skapa en knapp överst
+    var DiVAButtonjq = $('<button id="DiVAButtonjq" type="button">Sök i DiVA</button>');
+    //bind en clickfunktion som anropar "DiVA-API" med titelfältet
+    DiVAButtonjq.on("click",function() {
+        var $titleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:')").parent().parent().find('iframe').first()
+        getDiVA($titleiframe.contents().find("body").html(), 'csl_json');
+    })
+    $( ".diva2editmainer").before(DiVAButtonjq)
+
     //Skapa en knapp vid "Scopus-fältet"
     var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Scopus</button>');
     //bind en clickfunktion som anropar API med värdet i DOI-fältet
