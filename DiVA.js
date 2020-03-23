@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.0.6
+// @version      1.0.7
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf
 // @match    https://kth.diva-portal.org/dream/import/importForm.jsf
+// @match    https://kth.diva-portal.org/dream/publish/publishForm.jsf
+// @match    https://kth.diva-portal.org/dream/review/reviewForm.jsf
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
 // @require  https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
@@ -337,9 +339,9 @@ function processJSON_Response_scopus (response) {
             $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
             var oa = response.response['search-results'].entry[0]['openaccessFlag']; // plocka openaccessFlag true or false
         if (oa == true) {
-            document.getElementById("importForm:doiFree").checked = true; // checka boxen
+            document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
         } else {
-            document.getElementById("importForm:doiFree").checked = false; // checka inte boxen... eller avchecka den
+            document.getElementById(diva_id + ":doiFree").checked = false; // checka inte boxen... eller avchecka den
             }
         };
     }
@@ -367,21 +369,21 @@ function reportAJAX_Error (response) {
 }
 
 /**
- * Funktion för att anropa DiVA och hämta information via "free text search"
- * 
- * @param {string} freeText
+ * Funktion för att anropa DiVA och hämta information via "search"
+ *
+ * @param {string} titleAll
  * @param {string} format (csl_json=json, mods=xml)
  */
-function getDiVA(freeText, format) {
-    var diva_url = 'https://kth.diva-portal.org/smash/export.jsf?format=' + format + '&addFilename=true&aq=[[{"freeText":"'
-                      + freeText + '"}]]&aqe=[]&aq2=[[]]&onlyFullText=false&noOfRows=50&sortOrder=title_sort_asc&sortOrder2=title_sort_asc';
+function getDiVA(titleAll, format) {
+    var diva_url = 'https://kth.diva-portal.org/smash/export.jsf?format=' + format + '&addFilename=true&aq=[[{"titleAll":"'
+                      + titleAll + '"}]]&aqe=[]&aq2=[[]]&onlyFullText=false&noOfRows=50&sortOrder=title_sort_asc&sortOrder2=title_sort_asc';
     $.ajax ({
         type:       'GET',
         url:        diva_url,
         success:
         function (response, textStatus, xhr) {
             var results = false;
-            var html = '<div id="popup"><div id="close">X</div><h2>Information från DiVA, Söktext: ' + freeText + '</h2>';
+            var html = '<div id="popup"><div id="close">X</div><h2>Information från DiVA, Söktext: ' + titleAll + '</h2>';
             if (xhr.getResponseHeader("content-type").indexOf('xml')) {
                 if ($(response).find('mods').length > 0) {
                     results = true;
@@ -393,13 +395,17 @@ function getDiVA(freeText, format) {
                 }
             }
             if (xhr.getResponseHeader("content-type").indexOf('json')) {
+                console.log(response)
                 if(response.length > 0) {
                     results = true;
                     $.each(response, function(key , value) {
                         html += '<p>Status: ' + response[key].status + '</p>'
+                             + '<p>ID: ' + response[key].id + '</p>'
                              + '<p>Note: ' + response[key].note + '</p>'
                              + '<p>DOI: ' + response[key].DOI + '</p>'
                              + '<p>ScopusId: ' + response[key].ScopusId + '</p>'
+                             + '<p>Created: ' + response[key].created[0].raw + '</p>'
+                             + '<p>Updated: ' + response[key].updated[0].raw + '</p>'
                              + '</br>'
                     });
                 };
@@ -429,7 +435,7 @@ function getDiVA(freeText, format) {
 
 /**
  * Funktion för att anrop DBLP och hämta information via DOI
- * 
+ *
  * @param {string} doi
  */
 function getDblp(doi) {
@@ -481,54 +487,45 @@ function getDblp(doi) {
 }
 
 /**
- * Funktion för att hantera klick på knapp
- *
- * @param {*} event
- */
-function ButtonClickAction (event) {
-    var $iframe = $('#' + diva_id + '\\:notes_ifr');
-    $iframe.ready(function() {
-        $iframe.contents().find("body p").html($iframe.contents().find("body p").html() + QC);
-    });
-}
-
-//Hämta aktuellt id beroende på DiVA-läge (edit eller import)
-//TODO lägg till fler lägen...
-var diva_id
-if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
-     waitForKeyElements('#diva2editcontainer', function() {
-        diva_id = $('#diva2editcontainer').closest('form').attr('id')
-    });
-}
-
-/**
  * Funktion för att initiera Apan
  *
  */
 function init() {
     //Skapa en knapp överst
+    $('#DiVAButtonjq').remove();
     var DiVAButtonjq = $('<button id="DiVAButtonjq" type="button">Sök i DiVA</button>');
     //bind en clickfunktion som anropar "DiVA-API" med titelfältet
     DiVAButtonjq.on("click",function() {
-        var $titleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:')").parent().parent().find('iframe').first()
-        getDiVA($titleiframe.contents().find("body").html(), 'csl_json');
+        var $maintitleiframe;
+        $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
+        getDiVA($maintitleiframe.contents().find("body").html(), 'csl_json');
     })
     $( ".diva2editmainer").before(DiVAButtonjq)
+    $( ".diva2impmainer").before(DiVAButtonjq)
+    $( ".diva2reviewmainer").before(DiVAButtonjq)
+    $( ".diva2pubmainer").before(DiVAButtonjq)
 
     //Skapa en knapp vid titelfältet för att splitta titel i huvud- och undertitel vid kolon :
+    $('#titlesplitButtonjq').remove();
     var titlesplitButtonjq = $('<button id="titlesplitButtonjq" type="button">Split : </button>');
     //bind en clickfunktion
     titlesplitButtonjq.on("click",function() {
-       var title = $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").parent().find('textarea').val();
-       var maintitle = title.split(":")[0];
-       var subtitle = title.split(":")[1];
-         $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").parent().find('textarea').eq(0).val(maintitle);
-         $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").parent().find('textarea').eq(1).val(subtitle);
-     })
+        var $maintitleiframe;
+        $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
+        var $subtitleiframe;
+        $subtitleiframe = $("div.diva2addtextchoicecol:contains('Undertitel:') , div.diva2addtextchoicecol:contains('Subtitle:')").next().find('iframe').first();
+        var maintitle = $maintitleiframe.contents().find("body").html();
+        var subtitle = $subtitleiframe.contents().find("body").html();
+        var changedmaintitle = maintitle.split(":")[0];
+        subtitle = maintitle.split(":")[1];
+        $maintitleiframe.contents().find("body").html(changedmaintitle);
+        $subtitleiframe.contents().find("body").html(subtitle);
+    })
 
     $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").before(titlesplitButtonjq)
 
     //Skapa en knapp vid "Scopus-fältet"
+    $('#scopusButtonjq').remove();
     var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Scopus</button>');
     //bind en clickfunktion som anropar API med värdet i DOI-fältet
     scopusButtonjq.on("click",function() {
@@ -541,41 +538,39 @@ function init() {
     $( "div.diva2addtextchoicecol:contains('ScopusID')").before(scopusButtonjq)
 
     //Skapa en knapp vid "Konferens-fältet"
+    $('#dblpButtonjq').remove();
     var dblpButtonjq = $('<button id="dblpButtonjq" type="button">dblp</button>');
     //bind en clickfunktion som anropar API med värdet i DOI-fältet
     dblpButtonjq.on("click",function() {
         getDblp($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
     })
-    $( "div.diva2addtextchoicecol:contains('Konferens')").after(dblpButtonjq)
-    $( "div.diva2addtextchoicecol:contains('Conference')").after(dblpButtonjq)
+    $( "div.diva2addtextchoicecol:contains('Konferens') , div.diva2addtextchoicecol:contains('Conference') ").after(dblpButtonjq);
 
     //Kolla så att inte det finns dubbletter
-        var dubblettButtonjq = $('<button id="dubblettButtonjq" type="button">Dubblett?</button>');
-        //bind en clickfunktion som anropar DiVA KTH:s webbgränssnitt och söker på titel
-        dubblettButtonjq.on("click",function() {
-            var url = "https://kth.diva-portal.org/smash/resultList.jsf?dswid=-4067&language=en&searchType=RESEARCH&query=&af=%5B%5D&aq=%5B%5B%7B%22titleAll%22%3A%22"
+    $('#dubblettButtonjq').remove();
+    var dubblettButtonjq = $('<button id="dubblettButtonjq" type="button">Dubblett?</button>');
+    //bind en clickfunktion som anropar DiVA KTH:s webbgränssnitt och söker på titel
+    dubblettButtonjq.on("click",function() {
+        var url = "https://kth.diva-portal.org/smash/resultList.jsf?dswid=-4067&language=en&searchType=RESEARCH&query=&af=%5B%5D&aq=%5B%5B%7B%22titleAll%22%3A%22"
         //    + $(document.getElementById(diva_id + ":j_id774")).val()
-            + $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").parent().find('textarea').eq(0).val() // https://stackoverflow.com/questions/2416803/jquery-contains-selector-to-search-for-multiple-strings/2417076#2417076
-            + "%22%7D%5D%5D&aq2=%5B%5B%5D%5D&aqe=%5B%5D&noOfRimportForm:j_id758ows=50&sortOrder=author_sort_asc&sortOrder2=title_sort_asc&onlyFullText=false&sf=all"
-            window.open(url, '_blank'); // sök i DiVA webb på titel, öppna i ett nytt fönster
+        + $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").parent().find('textarea').eq(0).val() // https://stackoverflow.com/questions/2416803/jquery-contains-selector-to-search-for-multiple-strings/2417076#2417076
+        + "%22%7D%5D%5D&aq2=%5B%5B%5D%5D&aqe=%5B%5D&noOfRimportForm:j_id758ows=50&sortOrder=author_sort_asc&sortOrder2=title_sort_asc&onlyFullText=false&sf=all"
+        window.open(url, '_blank'); // sök i DiVA webb på titel, öppna i ett nytt fönster
 
-        })
+    })
 
-        $( "div.diva2identifierheading:contains('Identifikatorer')").before(dubblettButtonjq) // skapa knapp uppe till vänster svenska
-        $( "div.diva2identifierheading:contains('Identifiers')").before(dubblettButtonjq) // skapa knapp uppe till vänster engelska
+    $( "div.diva2identifierheading:contains('Identifikatorer') , div.diva2identifierheading:contains('Identifiers')").before(dubblettButtonjq); // skapa knapp uppe till vänster svenska
 
-
-    //Skapa en knapp vid "Anmärknings-fältet"(vanilla javascript)
-    var qcButton       = document.createElement ('div');
-    qcButton.innerHTML = '<button id="qcButton" type="button">'
-        + 'Infoga QC datum</button>'
-    ;
-    document.getElementById(diva_id + ":notes").parentNode.appendChild (qcButton)
-
-    //Koppla action till klick på knappen
-    document.getElementById ("qcButton").addEventListener (
-        "click", ButtonClickAction, false
-    );
+    //Skapa en knapp vid "Anmärknings-fältet"
+    $('#qcButton').remove();
+    var qcButton = $('<button id="qcButton" type="button">Infoga QC datum</button>');
+    qcButton.on("click",function() {
+        var $iframe = $('#' + diva_id + '\\:notes_ifr');
+        $iframe.ready(function() {
+            $iframe.contents().find("body p").html($iframe.contents().find("body p").html() + QC);
+        });
+    })
+    $('#' + diva_id + '\\:notes').after(qcButton)
 
     //Skapa knappar vid "Författar-avsnittet"(jquery)
     var authors = $('#' + diva_id + '\\:authorSerie');
@@ -684,15 +679,31 @@ function actionFunction() {
 
 }
 
-//Hämta aktuellt id beroende på DiVA-läge (edit eller import)
-//TODO lägg till fler lägen...
+//Hämta aktuellt id beroende på DiVA-läge (edit, publish, review eller import)
 var diva_id
+var authortarget
 if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
-     waitForKeyElements('#diva2editcontainer', function() {
+    authortarget = $('.diva2editmainer .diva2addtextbotmargin')[0];
+    waitForKeyElements('#diva2editcontainer', function() {
         diva_id = $('#diva2editcontainer').closest('form').attr('id')
     });
+} else if ( window.location.href.indexOf("publishForm.jsf") !== -1 ) {
+    authortarget = $('.diva2pubmainer .diva2addtextbotmargin')[0];
+    waitForKeyElements('#diva2editcontainer', function() {
+        diva_id = $('#diva2editcontainer').closest('form').attr('id')
+    });
+} else if ( window.location.href.indexOf("reviewForm.jsf") !== -1 ) {
+    authortarget = $('.diva2reviewmainer .diva2addtextbotmargin')[0];
+    waitForKeyElements('#diva2editcontainer', function() {
+        diva_id = $('#diva2editcontainer').closest('form').attr('id')
+    });
+} else if ( window.location.href.indexOf("importForm.jsf") !== -1 ) {
+    authortarget = $('.diva2impmainer .diva2addtextbotmargin')[0];
+    waitForKeyElements('#diva2addcontainer', function() {
+        diva_id = $('#diva2addcontainer').closest('form').attr('id')
+    });
 } else {
-    diva_id = "importForm";
+    diva_id ="addForm";
 }
 
 //Lägg in overlay för LDAP-resultat på sidan så den kan visas
@@ -706,7 +717,6 @@ waitForKeyElements('#' + diva_id + '\\:notes_ifr', actionFunction);
 //Bevaka uppdateringar i noden som författarna ligger i
 //Sker t ex efter "Koppla personpost"
 //Initiera apan på nytt.
-var target = $('.diva2editmainer .diva2addtextbotmargin')[0];
 var observer = new MutationObserver(function( mutations ) {
   mutations.forEach(function( mutation ) {
     var newNodes = mutation.addedNodes;
@@ -727,7 +737,7 @@ var config = {
 	childList: true,
 	characterData: true
 };
-observer.observe(target, config);
+observer.observe(authortarget, config);
 
 //Skapa QC + dagens datum
 var d = new Date();
@@ -752,7 +762,7 @@ GM_addStyle ( `
     padding: 5px;
 }
 #ldapoverlay a {
-    font-size: 1rem !important;
+    font-size: 0.8rem !important;
 }
 .flexbox {
     display: flex;
@@ -788,9 +798,10 @@ button {
    left: 0;
    background: rgba(0,0,0,0.8);
    display: none;
+   font-size: 0.8rem
 }
 #popup {
-   max-width: 1000px;
+   max-width: 1200px;
    width: 80%;
    max-height: 1000px;
    overflow: scroll;
