@@ -17,6 +17,8 @@
 // @connect  pub.orcid.org
 // @connect  localhost
 // @connect  api.elsevier.com
+// @connect  google.com
+// @connect  kth.diva-portal.org
 // ==/UserScript==
 /* global $ */
 /* eslint-disable no-multi-spaces, curly */
@@ -168,6 +170,7 @@ function processJSON_Response_default (response) {
  *
  * @param {object} response
  */
+
 function processJSON_Response_LDAP (response) {
     if (response.status != 200  && response.status != 201) {
         reportAJAX_Error (response);
@@ -326,11 +329,18 @@ function processJSON_Response_scopus (response) {
                 + "ScopusId: " + response.response['search-results'].entry[0]['eid'] + "<br />"
                 + "DOI: " + response.response['search-results'].entry[0]['prism:doi'] + "<br />"
                 + "PMID: " + response.response['search-results'].entry[0]['pubmed-id'] + "<br />"
+                + "Open Access: " + response.response['search-results'].entry[0]['openaccessFlag'] + "<br />"
                 + "</p>"
             var eid = response.response['search-results'].entry[0]['eid']; //plocka värdet för ScopusId (eid)
             $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
-            var pmid = response.response['search-results'].entry[0]['pubmed-id']; //plocka värdet för PubMedID (PMID)
+            var pmid = response.response['search-results'].entry[0]['pubmed-id']; //plocka värdet för PubMedID (PMID
             $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
+            var oa = response.response['search-results'].entry[0]['openaccessFlag']; // plocka openaccessFlag true or false
+        if (oa == true) {
+            document.getElementById("importForm:doiFree").checked = true; // checka boxen
+        } else {
+            document.getElementById("importForm:doiFree").checked = false; // checka inte boxen... eller avchecka den
+            }
         };
     }
 
@@ -437,7 +447,7 @@ function getDblp(doi) {
                     success:
                     function (response, textStatus, xhr) {
                         var html = '<div id="popup"><div id="close">X</div><h2>Information från dblp, DOI: ' + doi + '</h2>';
-                        html += "<p>Title: " + $(response).find("title").text() + "</p>"
+                        html += "<p>" + $(response).find("title").text() + "</p>"
                             + "<p>Series: " + $(response).find("series").text() + "</p>"
                             + "<p>Volume: " + $(response).find("volume").text() + "</p>"
                             + '</div>'
@@ -478,7 +488,16 @@ function getDblp(doi) {
 function ButtonClickAction (event) {
     var $iframe = $('#' + diva_id + '\\:notes_ifr');
     $iframe.ready(function() {
-        $iframe.contents().find("body p").html($iframe.contents().find("body p").html() + ", " + QC);
+        $iframe.contents().find("body p").html($iframe.contents().find("body p").html() + QC);
+    });
+}
+
+//Hämta aktuellt id beroende på DiVA-läge (edit eller import)
+//TODO lägg till fler lägen...
+var diva_id
+if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
+     waitForKeyElements('#diva2editcontainer', function() {
+        diva_id = $('#diva2editcontainer').closest('form').attr('id')
     });
 }
 
@@ -496,6 +515,19 @@ function init() {
     })
     $( ".diva2editmainer").before(DiVAButtonjq)
 
+    //Skapa en knapp vid titelfältet för att splitta titel i huvud- och undertitel vid kolon :
+    var titlesplitButtonjq = $('<button id="titlesplitButtonjq" type="button">Split : </button>');
+    //bind en clickfunktion
+    titlesplitButtonjq.on("click",function() {
+       var title = $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").parent().find('textarea').val();
+       var maintitle = title.split(":")[0];
+       var subtitle = title.split(":")[1];
+         $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").parent().find('textarea').eq(0).val(maintitle);
+         $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").parent().find('textarea').eq(1).val(subtitle);
+     })
+
+    $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").before(titlesplitButtonjq)
+
     //Skapa en knapp vid "Scopus-fältet"
     var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Scopus</button>');
     //bind en clickfunktion som anropar API med värdet i DOI-fältet
@@ -505,6 +537,7 @@ function init() {
              + ")&apiKey=" + scopusapikey;
         callapi(url, processJSON_Response_scopus);
     })
+
     $( "div.diva2addtextchoicecol:contains('ScopusID')").before(scopusButtonjq)
 
     //Skapa en knapp vid "Konferens-fältet"
@@ -515,6 +548,22 @@ function init() {
     })
     $( "div.diva2addtextchoicecol:contains('Konferens')").after(dblpButtonjq)
     $( "div.diva2addtextchoicecol:contains('Conference')").after(dblpButtonjq)
+
+    //Kolla så att inte det finns dubbletter
+        var dubblettButtonjq = $('<button id="dubblettButtonjq" type="button">Dubblett?</button>');
+        //bind en clickfunktion som anropar DiVA KTH:s webbgränssnitt och söker på titel
+        dubblettButtonjq.on("click",function() {
+            var url = "https://kth.diva-portal.org/smash/resultList.jsf?dswid=-4067&language=en&searchType=RESEARCH&query=&af=%5B%5D&aq=%5B%5B%7B%22titleAll%22%3A%22"
+        //    + $(document.getElementById(diva_id + ":j_id774")).val()
+            + $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").parent().find('textarea').eq(0).val() // https://stackoverflow.com/questions/2416803/jquery-contains-selector-to-search-for-multiple-strings/2417076#2417076
+            + "%22%7D%5D%5D&aq2=%5B%5B%5D%5D&aqe=%5B%5D&noOfRimportForm:j_id758ows=50&sortOrder=author_sort_asc&sortOrder2=title_sort_asc&onlyFullText=false&sf=all"
+            window.open(url, '_blank'); // sök i DiVA webb på titel, öppna i ett nytt fönster
+
+        })
+
+        $( "div.diva2identifierheading:contains('Identifikatorer')").before(dubblettButtonjq) // skapa knapp uppe till vänster svenska
+        $( "div.diva2identifierheading:contains('Identifiers')").before(dubblettButtonjq) // skapa knapp uppe till vänster engelska
+
 
     //Skapa en knapp vid "Anmärknings-fältet"(vanilla javascript)
     var qcButton       = document.createElement ('div');
@@ -533,6 +582,7 @@ function init() {
     var i = 0;
     $(authors).find('.diva2addtextarea').each(function () {
         var thiz = this;
+
         //LDAP/UG
         var ldapButtonjq = $('<button id="ldapButtonjq' + i + '" type="button">LDAP-info</button>');
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
@@ -577,6 +627,35 @@ function init() {
         })
 
         $(this).before (orcidButtonjq);
+
+          //KTH Intranät förnamn efternamn
+        var kthintraButtonjq = $('<button id="kthintraButtonjq' + i + '" type="button">KTH Intra</button>');
+        //bind en clickfunktion som anropar KTH Intranät med de värden som finns i för- och efternamn
+        kthintraButtonjq.on("click",function() {
+            var url = "https://www.kth.se/search?q="
+            + $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
+            + "%20"
+            + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
+            + "&urlFilter=https://intra.kth.se&filterLabel=KTH%20Intran%C3%A4t&entityFilter=kth-profile,kth-place,%20kth-system"
+            var newurl =  url.replace("$$$", "") // ta bort eventuella $$$ från efternamnen före sökning
+            window.open(newurl, '_blank'); // sök på förnamn efternamn på KTH Intranät
+        })
+
+        $(this).before (kthintraButtonjq)
+
+        //Google.com förnamn + efternamn + KTH
+        var googleButtonjq = $('<button id="googleButtonjq' + i + '" type="button">Google</button>');
+        //bind en clickfunktion som anropar google.com med de värden som finns i för- och efternamn
+        googleButtonjq.on("click",function() {
+            var url = "https://www.google.com/search?q=KTH+"
+            + $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
+            + "+"
+            + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
+            var newurl =  url.replace("$$$", "") // ta bort eventuella $$$ från efternamnen före sökning
+            window.open(newurl, '_blank'); // sök på förnamn efternamn + KTH i google
+        })
+
+        $(this).before (googleButtonjq)
 
         i++;
     });
