@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.0.8
+// @version      1.0.9
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -395,7 +395,6 @@ function getDiVA(titleAll, format) {
                 }
             }
             if (xhr.getResponseHeader("content-type").indexOf('json')) {
-                console.log(response)
                 if(response.length > 0) {
                     results = true;
                     $.each(response, function(key , value) {
@@ -495,9 +494,11 @@ function init() {
     $('#DiVAButtonjq').remove();
     var DiVAButtonjq = $('<button id="DiVAButtonjq" type="button">Sök i DiVA</button>');
     //bind en clickfunktion som anropar "DiVA-API" med titelfältet
-    DiVAButtonjq.on("click",function() {
-        var $maintitleiframe;
+    var $maintitleiframe;
+    waitForKeyElements("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')", function() {
         $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
+    });
+    DiVAButtonjq.on("click",function() {
         getDiVA($maintitleiframe.contents().find("body").html(), 'csl_json');
     })
     $( ".diva2editmainer").before(DiVAButtonjq)
@@ -745,7 +746,7 @@ if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
 //Lägg in overlay för LDAP-resultat på sidan så den kan visas
 $('<div/>', {
     id: 'ldapoverlay'
-}).appendTo('body');
+}).appendTo('body.diva2margin');
 
 //Vänta tills fältet för anmärkning skapats (iframe)
 waitForKeyElements('#' + diva_id + '\\:notes_ifr', actionFunction);
