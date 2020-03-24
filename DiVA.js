@@ -679,41 +679,6 @@ function actionFunction() {
 
 }
 
-//Hämta aktuellt id beroende på DiVA-läge (edit, publish, review eller import)
-var diva_id
-var authortarget
-if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
-    authortarget = $('.diva2editmainer .diva2addtextbotmargin')[0];
-    waitForKeyElements('#diva2editcontainer', function() {
-        diva_id = $('#diva2editcontainer').closest('form').attr('id')
-    });
-} else if ( window.location.href.indexOf("publishForm.jsf") !== -1 ) {
-    authortarget = $('.diva2pubmainer .diva2addtextbotmargin')[0];
-    waitForKeyElements('#diva2editcontainer', function() {
-        diva_id = $('#diva2editcontainer').closest('form').attr('id')
-    });
-} else if ( window.location.href.indexOf("reviewForm.jsf") !== -1 ) {
-    authortarget = $('.diva2reviewmainer .diva2addtextbotmargin')[0];
-    waitForKeyElements('#diva2editcontainer', function() {
-        diva_id = $('#diva2editcontainer').closest('form').attr('id')
-    });
-} else if ( window.location.href.indexOf("importForm.jsf") !== -1 ) {
-    authortarget = $('.diva2impmainer .diva2addtextbotmargin')[0];
-    waitForKeyElements('#diva2addcontainer', function() {
-        diva_id = $('#diva2addcontainer').closest('form').attr('id')
-    });
-} else {
-    diva_id ="addForm";
-}
-
-//Lägg in overlay för LDAP-resultat på sidan så den kan visas
-$('<div/>', {
-    id: 'ldapoverlay'
-}).appendTo('body');
-
-//Vänta tills fältet för anmärkning skapats (iframe)
-waitForKeyElements('#' + diva_id + '\\:notes_ifr', actionFunction);
-
 //Bevaka uppdateringar i noden som författarna ligger i
 //Sker t ex efter "Koppla personpost"
 //Initiera apan på nytt.
@@ -737,7 +702,53 @@ var config = {
 	childList: true,
 	characterData: true
 };
-observer.observe(authortarget, config);
+
+//Hämta aktuellt id beroende på DiVA-läge (edit, publish, review eller import)
+var diva_id
+var authortarget
+if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
+    waitForKeyElements('.diva2editmainer .diva2addtextbotmargin', function() {
+        authortarget = $('.diva2editmainer .diva2addtextbotmargin')[0];
+        observer.observe(authortarget, config);
+    });
+    waitForKeyElements('#diva2editcontainer', function() {
+        diva_id = $('#diva2editcontainer').closest('form').attr('id')
+    });
+} else if ( window.location.href.indexOf("publishForm.jsf") !== -1 ) {
+    waitForKeyElements('.diva2pubmainer .diva2addtextbotmargin', function() {
+        authortarget = $('.diva2pubmainer .diva2addtextbotmargin')[0];
+        observer.observe(authortarget, config);
+    });
+    waitForKeyElements('#diva2editcontainer', function() {
+        diva_id = $('#diva2editcontainer').closest('form').attr('id')
+    });
+} else if ( window.location.href.indexOf("reviewForm.jsf") !== -1 ) {
+    waitForKeyElements('.diva2reviewmainer .diva2addtextbotmargin', function() {
+        authortarget = $('.diva2reviewmainer .diva2addtextbotmargin')[0];
+        observer.observe(authortarget, config);
+    });
+    waitForKeyElements('#diva2editcontainer', function() {
+        diva_id = $('#diva2editcontainer').closest('form').attr('id')
+    });
+} else if ( window.location.href.indexOf("importForm.jsf") !== -1 ) {
+    waitForKeyElements('.divaimpmainer .diva2addtextbotmargin', function() {
+        authortarget = $('.divaimpmainer .diva2addtextbotmargin')[0];
+        observer.observe(authortarget, config);
+    });
+    waitForKeyElements('#diva2addcontainer', function() {
+        diva_id = $('#diva2addcontainer').closest('form').attr('id')
+    });
+} else {
+    diva_id ="addForm";
+}
+
+//Lägg in overlay för LDAP-resultat på sidan så den kan visas
+$('<div/>', {
+    id: 'ldapoverlay'
+}).appendTo('body');
+
+//Vänta tills fältet för anmärkning skapats (iframe)
+waitForKeyElements('#' + diva_id + '\\:notes_ifr', actionFunction);
 
 //Skapa QC + dagens datum
 var d = new Date();
