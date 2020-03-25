@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.0.10
+// @version      1.0.11
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -614,7 +614,7 @@ function init() {
         var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök ORCiD</button>');
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         orcidButtonjq.on("click",function() {
-            var url = "http://lib.kth.se/orcid/api/v1/orcid/"
+            var url = "https://lib.kth.se/orcid/api/v1/orcid/"
             + $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
             +"/"
             + $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
@@ -733,8 +733,8 @@ if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
         diva_id = $('#diva2editcontainer').closest('form').attr('id')
     });
 } else if ( window.location.href.indexOf("importForm.jsf") !== -1 ) {
-    waitForKeyElements('.divaimpmainer .diva2addtextbotmargin', function() {
-        authortarget = $('.divaimpmainer .diva2addtextbotmargin')[0];
+    waitForKeyElements('.diva2impmainer .diva2addtextbotmargin .diva2addtextbotmargin', function() {
+        authortarget = $('.diva2impmainer .diva2addtextbotmargin .diva2addtextbotmargin')[0];
         observer.observe(authortarget, config);
     });
     waitForKeyElements('#diva2addcontainer', function() {
