@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.0.9
+// @version      1.0.10
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -62,7 +62,7 @@ function verifytoken(token) {
                 //om användaren inte tillhör bibblan
                 if(xhr.status == 201) {
                     alert('not authorized');
-                    $('#monkeylogin').fadeIn(300);
+                    $('#monkeylogin').css("display", "block");
                     return;
                 };
                 //Om behörig bibblananvändare
@@ -73,7 +73,7 @@ function verifytoken(token) {
                     init();
                 } else {
                     Cookies.remove('token')
-                    $('#monkeylogin').fadeIn(300);
+                    $('#monkeylogin').css("display", "block");
                 }
             },
             error:
@@ -81,12 +81,12 @@ function verifytoken(token) {
             function (response, textStatus, xhr) {
                 alert("Unauthorized")
                 Cookies.remove('token')
-                $('#monkeylogin').fadeIn(300);
+                $('#monkeylogin').css("display", "block");
             }
         });
     } else {
         Cookies.remove('token')
-        $('#monkeylogin').fadeIn(300);
+        $('#monkeylogin').css("display", "block");
     }
 }
 
@@ -199,11 +199,11 @@ function processJSON_Response_LDAP (response) {
 
     html += '</div></div>'
     $('#ldapoverlay').html(html);
-    $('#ldapoverlay').fadeIn(300);
+    $('#ldapoverlay').css("display", "block");
     //Stängknapp till overlay
     var closeButton = $('#close');
     closeButton.click(function(){
-        $('#ldapoverlay').fadeOut(300)
+        $('#ldapoverlay').css("display", "none");
         $('#ldapoverlay').html('');
     });
 }
@@ -242,11 +242,11 @@ function processJSON_Response_LETA (response) {
 
     html += '</div></div>'
     $('#ldapoverlay').html(html);
-    $('#ldapoverlay').fadeIn(300);
+    $('#ldapoverlay').css("display", "block");
     //Stängknapp till overlay
     var closeButton = $('#close');
     closeButton.click(function(){
-        $('#ldapoverlay').fadeOut(300)
+        $('#ldapoverlay').css("display", "none");
         $('#ldapoverlay').html('');
     });
 }
@@ -297,11 +297,11 @@ function processJSON_Response_ORCID (response) {
 
     html += '</div></div>'
     $('#ldapoverlay').html(html);
-    $('#ldapoverlay').fadeIn(300);
+    $('#ldapoverlay').css("display", "block");
     //Stängknapp till overlay
     var closeButton = $('#close');
     closeButton.click(function(){
-        $('#ldapoverlay').fadeOut(300)
+        $('#ldapoverlay').css("display", "none");
         $('#ldapoverlay').html('');
     });
 }
@@ -349,12 +349,12 @@ function processJSON_Response_scopus (response) {
     html += '</div></div>'
 
     $('#ldapoverlay').html(html);
-    $('#ldapoverlay').fadeIn(300);
+    $('#ldapoverlay').css("display", "block");
 
     //Stängknapp till overlay
     var closeButton = $('#close');
     closeButton.click(function(){
-        $('#ldapoverlay').fadeOut(300)
+        $('#ldapoverlay').css("display", "none");
         $('#ldapoverlay').html('');
     });
 }
@@ -415,12 +415,12 @@ function getDiVA(titleAll, format) {
             }
             html += '</div>'
             $('#ldapoverlay').html(html);
-            $('#ldapoverlay').fadeIn(300);
+            $('#ldapoverlay').css("display", "block");
 
             //Stängknapp till overlay
             var closeButton = $('#close');
             closeButton.click(function(){
-                $('#ldapoverlay').fadeOut(300)
+                $('#ldapoverlay').css("display", "none");
                 $('#ldapoverlay').html('');
             });
         },
@@ -458,12 +458,12 @@ function getDblp(doi) {
                             + '</div>'
 
                         $('#ldapoverlay').html(html);
-                        $('#ldapoverlay').fadeIn(300);
+                        $('#ldapoverlay').css("display", "block");
 
                         //Stängknapp till overlay
                         var closeButton = $('#close');
                         closeButton.click(function(){
-                            $('#ldapoverlay').fadeOut(300)
+                            $('#ldapoverlay').css("display", "none");
                             $('#ldapoverlay').html('');
                         });
                     },
@@ -662,8 +662,9 @@ function init() {
  *
  */
 function actionFunction() {
+    console.log('actionFunction started')
     monkeylogin();
-    //Kolla om användartoken finns och verifera i så fall
+    //Kolla om användartoken finns och verifera i så fall, annars visa inloggning
     if (Cookies.get('token')) {
         if (typeof Cookies.get('token') === 'undefined' ||
             Cookies.get('token') == 'undefined' ||
@@ -675,7 +676,7 @@ function actionFunction() {
         }
     } else {
         Cookies.remove('token');
-        $('#monkeylogin').fadeIn(300);
+        $('#monkeylogin').css("display", "block");
     }
 
 }
