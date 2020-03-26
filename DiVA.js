@@ -589,7 +589,7 @@ function init() {
     WoSButtonjq.on("click",function() {
         var url = "http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&req_id=mailto%3Apublicering%40kth.se&&rft_id=info%3Adoi%2F"
              + $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val()
-             + "&svc_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Asch_svc&svc.fullrec=yes&&rft.genre=article&&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal";
+             + "";
         window.open(url, '_blank'); // sök på DOI i WoS och öppna ett nytt fönster
     })
 
