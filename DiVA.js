@@ -582,6 +582,20 @@ function init() {
 
     $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding'), div.diva2addtextchoice2:contains('Part of proceedings')").parent().before(proctitlecaseButtonjq)
 
+    //Skapa en knapp vid "ISI-fältet"
+    $('#WoSButtonjq').remove();
+    var WoSButtonjq = $('<button id="WoSButtonjq" type="button">WoS</button>');
+    //bind en clickfunktion som anropar WoS med värdet i DOI-fältet
+    WoSButtonjq.on("click",function() {
+        var url = "http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&req_id=mailto%3Apublicering%40kth.se&&rft_id=info%3Adoi%2F"
+             + $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val()
+             + "&svc_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Asch_svc&svc.fullrec=yes&&rft.genre=article&&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal";
+        window.open(url, '_blank'); // sök på DOI i WoS och öppna ett nytt fönster
+    })
+
+    $( "div.diva2addtextchoicecol:contains('ISI')").before(WoSButtonjq)
+
+
     //Skapa en knapp vid "Scopus-fältet"
     $('#scopusButtonjq').remove();
     var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Scopus</button>');
