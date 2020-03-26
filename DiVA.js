@@ -733,8 +733,8 @@ if ( window.location.href.indexOf("editForm.jsf") !== -1 ) {
         diva_id = $('#diva2editcontainer').closest('form').attr('id')
     });
 } else if ( window.location.href.indexOf("importForm.jsf") !== -1 ) {
-    waitForKeyElements('.divaimpmainer .diva2addtextbotmargin', function() {
-        authortarget = $('.divaimpmainer .diva2addtextbotmargin')[0];
+    waitForKeyElements('.diva2impmainer .diva2addtextbotmargin .diva2addtextbotmargin', function() {
+        authortarget = $('.diva2impmainer .diva2addtextbotmargin .diva2addtextbotmargin')[0];
         observer.observe(authortarget, config);
     });
     waitForKeyElements('#diva2addcontainer', function() {
