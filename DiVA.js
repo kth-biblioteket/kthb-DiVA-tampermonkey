@@ -411,7 +411,7 @@ function getDiVA(titleAll, format) {
                 };
             }
             if (!results) {
-                alert("Hittade inget i DiVA på: " + freeText);
+                alert("Hittade inget i DiVA på: " + titleAll);
                 return;
             }
             html += '</div>'
