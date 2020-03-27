@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.0.11
+// @version      1.0.12
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -628,10 +628,11 @@ function init() {
         window.open(url, '_blank'); // öppna hjälpsida i ett nytt fönster
     })
 
-    $( ".diva2editmainer").before(helpButtonjq)
+    $( ".diva2editmainer").before(helpButtonjq) // hjälpknapp längst upp på sidan
     $( ".diva2impmainer").before(helpButtonjq)
     $( ".diva2reviewmainer").before(helpButtonjq)
     $( ".diva2pubmainer").before(helpButtonjq)
+
 
     //Kolla så att inte det finns dubbletter
     $('#dubblettButtonjq').remove();
@@ -646,11 +647,11 @@ function init() {
 
     })
 
-//    $( "div.diva2identifierheading:contains('Identifikatorer') , div.diva2identifierheading:contains('Identifiers')").before(dubblettButtonjq); // skapa knapp uppe till vänster svenska
-    $( ".diva2editmainer").before(dubblettButtonjq)
+    $( ".diva2editmainer").before(dubblettButtonjq) // dubblettknapp längst upp på sidan
     $( ".diva2impmainer").before(dubblettButtonjq)
     $( ".diva2reviewmainer").before(dubblettButtonjq)
     $( ".diva2pubmainer").before(dubblettButtonjq)
+
 
     //Skapa en knapp vid "Anmärknings-fältet"
     $('#qcButton').remove();
