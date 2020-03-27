@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.0.11
+// @version      1.0.12
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -21,6 +21,7 @@
 // @connect  api.elsevier.com
 // @connect  google.com
 // @connect  kth.diva-portal.org
+// @connect  ws.isiknowledge.com
 // ==/UserScript==
 /* global $ */
 /* eslint-disable no-multi-spaces, curly */
@@ -525,6 +526,77 @@ function init() {
 
     $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").before(titlesplitButtonjq)
 
+    //Skapa en knapp vid titelfältet för att ändra versaler till gemener förutom första bokstaven
+    $('#caseButtonjq').remove();
+    var caseButtonjq = $('<button id="caseButtonjq" type="button">A->a</button>');
+    //bind en clickfunktion
+    caseButtonjq.on("click",function() {
+        var $maintitleiframe;
+        $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
+        var $subtitleiframe;
+        $subtitleiframe = $("div.diva2addtextchoicecol:contains('Undertitel:') , div.diva2addtextchoicecol:contains('Subtitle:')").next().find('iframe').first();
+        var maintitle = $maintitleiframe.contents().find("body").html();
+        var subtitle = $subtitleiframe.contents().find("body").html();
+        var changedmaintitle = maintitle.charAt(0) + maintitle.substring(1).toLowerCase();
+        var changedsubtitle = subtitle.charAt(0) + subtitle.substring(1).toLowerCase();
+        $maintitleiframe.contents().find("body").html(changedmaintitle);
+        $subtitleiframe.contents().find("body").html(changedsubtitle);
+    })
+
+    $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").before(caseButtonjq)
+
+    //Skapa en knapp vid titelfältet för proceedings, att splitta titel i huvud- och undertitel vid kolon :
+    $('#proctitlesplitButtonjq').remove();
+    var proctitlesplitButtonjq = $('<button id="proctitlesplitButtonjq" type="button">Split : </button>');
+    //bind en clickfunktion
+    proctitlesplitButtonjq.on("click",function() {
+        var $procmaintitleiframe;
+        $procmaintitleiframe = $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding') , div.diva2addtextchoice2:contains('Part of proceedings')").parent().next().next().find('iframe').first();
+        var $procsubtitleiframe;
+        $procsubtitleiframe = $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding') , div.diva2addtextchoice2:contains('Part of proceedings')").parent().next().next().next().next().find('iframe').first();
+        var procmaintitle = $procmaintitleiframe.contents().find("body").html();
+        var procsubtitle = $procsubtitleiframe.contents().find("body").html();
+        var changedprocmaintitle = procmaintitle.split(":")[0];
+        procsubtitle = procmaintitle.split(":")[1];
+        $procmaintitleiframe.contents().find("body").html(changedprocmaintitle);
+        $procsubtitleiframe.contents().find("body").html(procsubtitle);
+    })
+
+    $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding'), div.diva2addtextchoice2:contains('Part of proceedings')").parent().before(proctitlesplitButtonjq)
+
+    //Skapa en knapp vid titelfältet för proceedings, att ändra versaler till gemener förutom första bokstaven
+    $('#proctitlecaseButtonjq').remove();
+    var proctitlecaseButtonjq = $('<button id="proctitlecaseButtonjq" type="button">A->a</button>');
+    //bind en clickfunktion
+    proctitlecaseButtonjq.on("click",function() {
+        var $procmaintitleiframe;
+        $procmaintitleiframe = $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding') , div.diva2addtextchoice2:contains('Part of proceedings')").parent().next().next().find('iframe').first();
+        var $procsubtitleiframe;
+        $procsubtitleiframe = $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding') , div.diva2addtextchoice2:contains('Part of proceedings')").parent().next().next().next().next().find('iframe').first()
+        var procmaintitle = $procmaintitleiframe.contents().find("body").html();
+        var procsubtitle = $procsubtitleiframe.contents().find("body").html();
+        var changedprocmaintitle = procmaintitle.charAt(0) + procmaintitle.substring(1).toLowerCase();
+        var changedprocsubtitle = procsubtitle.charAt(0) + procsubtitle.substring(1).toLowerCase();
+        $procmaintitleiframe.contents().find("body").html(changedprocmaintitle);
+        $procsubtitleiframe.contents().find("body").html(changedprocsubtitle);
+    })
+
+    $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding'), div.diva2addtextchoice2:contains('Part of proceedings')").parent().before(proctitlecaseButtonjq)
+
+    //Skapa en knapp vid "ISI-fältet"
+    $('#WoSButtonjq').remove();
+    var WoSButtonjq = $('<button id="WoSButtonjq" type="button">WoS</button>');
+    //bind en clickfunktion som anropar WoS med värdet i DOI-fältet
+    WoSButtonjq.on("click",function() {
+        var url = "http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&req_id=mailto%3Apublicering%40kth.se&&rft_id=info%3Adoi%2F"
+             + $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val()
+             + "";
+        window.open(url, '_blank'); // sök på DOI i WoS och öppna ett nytt fönster
+    })
+
+    $( "div.diva2addtextchoicecol:contains('ISI')").before(WoSButtonjq)
+
+
     //Skapa en knapp vid "Scopus-fältet"
     $('#scopusButtonjq').remove();
     var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Scopus</button>');
@@ -547,6 +619,21 @@ function init() {
     })
     $( "div.diva2addtextchoicecol:contains('Konferens') , div.diva2addtextchoicecol:contains('Conference') ").after(dblpButtonjq);
 
+    //Länk till hjälpsida i Confluence
+    $('#helpButtonjq').remove();
+    var helpButtonjq = $('<button id="helpButtonjq" type="button">Hjälp</button>');
+    //bind en clickfunktion öppnar en hjälpsida
+    helpButtonjq.on("click",function() {
+        var url = "https://confluence.sys.kth.se/confluence/pages/viewpage.action?pageId=74259261"
+        window.open(url, '_blank'); // öppna hjälpsida i ett nytt fönster
+    })
+
+    $( ".diva2editmainer").before(helpButtonjq) // hjälpknapp längst upp på sidan
+    $( ".diva2impmainer").before(helpButtonjq)
+    $( ".diva2reviewmainer").before(helpButtonjq)
+    $( ".diva2pubmainer").before(helpButtonjq)
+
+
     //Kolla så att inte det finns dubbletter
     $('#dubblettButtonjq').remove();
     var dubblettButtonjq = $('<button id="dubblettButtonjq" type="button">Dubblett?</button>');
@@ -560,7 +647,11 @@ function init() {
 
     })
 
-    $( "div.diva2identifierheading:contains('Identifikatorer') , div.diva2identifierheading:contains('Identifiers')").before(dubblettButtonjq); // skapa knapp uppe till vänster svenska
+    $( ".diva2editmainer").before(dubblettButtonjq) // dubblettknapp längst upp på sidan
+    $( ".diva2impmainer").before(dubblettButtonjq)
+    $( ".diva2reviewmainer").before(dubblettButtonjq)
+    $( ".diva2pubmainer").before(dubblettButtonjq)
+
 
     //Skapa en knapp vid "Anmärknings-fältet"
     $('#qcButton').remove();
