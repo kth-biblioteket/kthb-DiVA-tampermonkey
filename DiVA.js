@@ -753,6 +753,10 @@ function init() {
 
 
     ////Skapa en knapp vid "Annan organisation" för varje författare, för att kunna radera detta fält när vi kopplat en KTH-person
+ /**
+ * Funktion för att skapa en knapp vid "Annan organisation" för varje författare, för att sedan kunna radera detta fält när vi kopplat en KTH-person
+ *
+ */   
     var otherorg = $('#' + diva_id + '\\:authorSerie');
     var j = 0;
     $(otherorg).find("div.diva2addtextchoicecol:contains('Annan organisation') , div.diva2addtextchoicecol:contains('Other organisation')").each(function() {
