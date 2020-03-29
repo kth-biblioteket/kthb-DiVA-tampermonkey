@@ -672,8 +672,11 @@ function init() {
     var WoSButtonjq = $('<button id="WoSButtonjq" type="button">WoS</button>');
     //bind en clickfunktion som anropar WoS med värdet i DOI-fältet
     WoSButtonjq.on("click", function() {
+<<<<<<< HEAD
         var url = "http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&req_id=mailto%3Apublicering%40kth.se&&rft_id=info%3Adoi%2F" +
+=======
         var url = "https://focus.lib.kth.se/login?url=http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&req_id=mailto%3Apublicering%40kth.se&&rft_id=info%3Adoi%2F" +
+>>>>>>> e9b4d6a9ebb41aeedc473e0eeb9331246ff8fd2a
             $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() +
             "";
         window.open(url, '_blank'); // sök på DOI i WoS och öppna ett nytt fönster
@@ -806,6 +809,7 @@ function init() {
         })
 
         $(this).before(letaButtonjq)
+<<<<<<< HEAD
 
         //Sök i ORCiD
         var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök ORCiD</button>');
@@ -820,6 +824,8 @@ function init() {
         })
 
         $(this).before(orcidButtonjq);
+=======
+>>>>>>> e9b4d6a9ebb41aeedc473e0eeb9331246ff8fd2a
 
         //KTH Intranät förnamn efternamn
         var kthintraButtonjq = $('<button id="kthintraButtonjq' + i + '" type="button">KTH Intra</button>');
@@ -849,6 +855,8 @@ function init() {
         })
 
         $(this).before(googleButtonjq)
+<<<<<<< HEAD
+=======
 
 		//Sök i ORCiD
         var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök ORCiD</button>');
@@ -863,6 +871,7 @@ function init() {
         })
 
         $(this).before(orcidButtonjq);
+>>>>>>> e9b4d6a9ebb41aeedc473e0eeb9331246ff8fd2a
 
         i++;
     });
