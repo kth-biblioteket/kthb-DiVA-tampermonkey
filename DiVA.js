@@ -36,7 +36,6 @@ var orcidapikey;
 var letaanstalldaapikey;
 var scopusapikey;
 
-/// Ny kommentar här
 /**
  * Funktion för att sätta apinycklar
  *
@@ -320,7 +319,6 @@ function processJSON_Response_ORCID(response) {
  *
  * @param {object} response
  */
-
 function processJSON_Response_scopus(response) {
     if (response.status != 200 && response.status != 201) {
         reportAJAX_Error(response);
@@ -335,19 +333,21 @@ function processJSON_Response_scopus(response) {
             html += "<p>Hittade inget i Scopus</p>";
         } else {
             //hitta ScopusId
-            html += "<p>" + response.response['search-results'].entry[0]['dc:creator'] + ": <i>" +
-                response.response['search-results'].entry[0]['dc:title'] + "</i><br /><br />" +
-                "ScopusId: " + response.response['search-results'].entry[0]['eid'] + "<br />" +
-                "DOI: " + response.response['search-results'].entry[0]['prism:doi'] + "<br />" +
-                "PMID: " + response.response['search-results'].entry[0]['pubmed-id'] + "<br />" +
-                "Open Access: " + response.response['search-results'].entry[0]['openaccessFlag'] + "<br />" +
+            html += "<p>" + "<i>" +
+                response.response['abstracts-retrieval-response']['coredata']['dc:title'] + "</i><br /><br />" +
+                "ScopusId: " + response.response['abstracts-retrieval-response']['coredata']['eid'] + "<br />" +
+                "DOI: " + response.response['abstracts-retrieval-response']['coredata']['prism:doi'] + "<br />" +
+                "PMID: " + response.response['abstracts-retrieval-response']['coredata']['pubmed-id'] + "<br />" +
+                "Open Access: " + response.response['abstracts-retrieval-response']['coredata']['openaccessFlag'] + "<br /><br />" +
+                "Publisher: " + response.response['abstracts-retrieval-response']['coredata']['dc:publisher'] + "<br />" +
                 "</p>"
-            var eid = response.response['search-results'].entry[0]['eid']; //plocka värdet för ScopusId (eid)
+            var eid = response.response['abstracts-retrieval-response']['coredata']['eid']; //plocka värdet för ScopusId (eid)
             $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
-            var pmid = response.response['search-results'].entry[0]['pubmed-id']; //plocka värdet för PubMedID (PMID
+            var pmid = response.response['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
             $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
-            var oa = response.response['search-results'].entry[0]['openaccessFlag']; // plocka openaccessFlag true or false
-            if (oa == true) {
+            var oa = response.response['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
+
+            if (oa == 'true') { //sen jag bytte till absract search funkar detta som str men inte som boolean, varför?
                 document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
             } else {
                 document.getElementById(diva_id + ":doiFree").checked = false; // checka inte boxen... eller avchecka den
@@ -673,11 +673,7 @@ function init() {
     var WoSButtonjq = $('<button id="WoSButtonjq" type="button">WoS</button>');
     //bind en clickfunktion som anropar WoS med värdet i DOI-fältet
     WoSButtonjq.on("click", function() {
-<<<<<<< HEAD
-        var url = "http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&req_id=mailto%3Apublicering%40kth.se&&rft_id=info%3Adoi%2F" +
-=======
         var url = "https://focus.lib.kth.se/login?url=http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&req_id=mailto%3Apublicering%40kth.se&&rft_id=info%3Adoi%2F" +
->>>>>>> e9b4d6a9ebb41aeedc473e0eeb9331246ff8fd2a
             $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() +
             "";
         window.open(url, '_blank'); // sök på DOI i WoS och öppna ett nytt fönster
@@ -690,9 +686,9 @@ function init() {
     var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Scopus</button>');
     //bind en clickfunktion som anropar API med värdet i DOI-fältet
     scopusButtonjq.on("click", function() {
-        var url = "https://api.elsevier.com/content/search/scopus?query=DOI(" +
+        var url = "https://api.elsevier.com/content/abstract/doi/" +
             $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() +
-            ")&apiKey=" + scopusapikey;
+            "?apiKey=" + scopusapikey;
         callapi(url, processJSON_Response_scopus);
     })
 
@@ -741,9 +737,9 @@ function init() {
     $(".diva2reviewmainer").before(dubblettButtonjq)
     $(".diva2pubmainer").before(dubblettButtonjq)
 
-    //Skapa en knapp vid "Anmärknings-fältet"
+    //Skapa en knapp vid "Anmärknings-fältet" för att sätta in QC + dagens datum efter det som redan står i fältet
     $('#qcButton').remove();
-    var qcButton = $('<button id="qcButton" type="button">Infoga QC datum</button>');
+    var qcButton = $('<button id="qcButton" type="button">QC</button>');
     qcButton.on("click", function() {
         var $iframe = $('#' + diva_id + '\\:notes_ifr');
         $iframe.ready(function() {
@@ -752,19 +748,29 @@ function init() {
     })
     $('#' + diva_id + '\\:notes').after(qcButton)
 
+    //Skapa en knapp vid "Anmärknings-fältet", radera det som finns i fältet och sätt in QC + dagens datum
+    $('#qcclearButton').remove();
+    var qcclearButton = $('<button id="qcclearButton" type="button">X + QC</button>');
+    qcclearButton.on("click", function() {
+        var $iframe = $('#' + diva_id + '\\:notes_ifr');
+        $iframe.ready(function() {
+            $iframe.contents().find("body p").html($iframe.contents().find("body p").html(""));
+            $iframe.contents().find("body p").html($iframe.contents().find("body p").html()+ QC);
+        });
+    })
+    $('#' + diva_id + '\\:notes').after(qcclearButton)
 
-    ////Skapa en knapp vid "Annan organisation" för varje författare, för att kunna radera detta fält när vi kopplat en KTH-person
+
  /**
  * Funktion för att skapa en knapp vid "Annan organisation" för varje författare, för att sedan kunna radera detta fält när vi kopplat en KTH-person
  *
- */   
+ */
     var otherorg = $('#' + diva_id + '\\:authorSerie');
     var j = 0;
     $(otherorg).find("div.diva2addtextchoicecol:contains('Annan organisation') , div.diva2addtextchoicecol:contains('Other organisation')").each(function() {
         var thiz = this;
 
         //CLEAR ORG
-        var clearorgButtonjq = $('<button id="clearorgButtonjq' + j + '" type="button">Clear org</button>');
         var clearorgButtonjq = $('<button id="clearorgButtonjq' + j + '" type="button">X</button>');
         //bind en clickfunktion som skall rensa fältet för "Annan organisation"
         clearorgButtonjq.on("click", function() {
@@ -815,23 +821,6 @@ function init() {
         })
 
         $(this).before(letaButtonjq)
-<<<<<<< HEAD
-
-        //Sök i ORCiD
-        var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök ORCiD</button>');
-        //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
-        orcidButtonjq.on("click", function() {
-            var url = "http://lib.kth.se/orcid/api/v1/orcid/" +
-                $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val() +
-                "/" +
-                $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val() +
-                "/?token=" + orcidapikey;
-            callapi(url, processJSON_Response_ORCID);
-        })
-
-        $(this).before(orcidButtonjq);
-=======
->>>>>>> e9b4d6a9ebb41aeedc473e0eeb9331246ff8fd2a
 
         //KTH Intranät förnamn efternamn
         var kthintraButtonjq = $('<button id="kthintraButtonjq' + i + '" type="button">KTH Intra</button>');
@@ -861,8 +850,6 @@ function init() {
         })
 
         $(this).before(googleButtonjq)
-<<<<<<< HEAD
-=======
 
 		//Sök i ORCiD
         var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök ORCiD</button>');
@@ -877,7 +864,6 @@ function init() {
         })
 
         $(this).before(orcidButtonjq);
->>>>>>> e9b4d6a9ebb41aeedc473e0eeb9331246ff8fd2a
 
         i++;
     });
