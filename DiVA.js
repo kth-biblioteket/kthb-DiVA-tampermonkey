@@ -673,6 +673,7 @@ function init() {
     //bind en clickfunktion som anropar WoS med värdet i DOI-fältet
     WoSButtonjq.on("click", function() {
         var url = "http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&req_id=mailto%3Apublicering%40kth.se&&rft_id=info%3Adoi%2F" +
+        var url = "https://focus.lib.kth.se/login?url=http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&req_id=mailto%3Apublicering%40kth.se&&rft_id=info%3Adoi%2F" +
             $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() +
             "";
         window.open(url, '_blank'); // sök på DOI i WoS och öppna ett nytt fönster
@@ -849,6 +850,20 @@ function init() {
 
         $(this).before(googleButtonjq)
 
+		//Sök i ORCiD
+        var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök ORCiD</button>');
+        //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
+        orcidButtonjq.on("click", function() {
+            var url = "https://lib.kth.se/orcid/api/v1/orcid/" +
+                $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val() +
+                "/" +
+                $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val() +
+                "/?token=" + orcidapikey;
+            callapi(url, processJSON_Response_ORCID);
+        })
+
+        $(this).before(orcidButtonjq);
+
         i++;
     });
 }
@@ -996,7 +1011,7 @@ button {
     font-size: 1rem;
     line-height: 1.5;
     border-radius: .25rem;
- }
+}
 #ldapoverlay {
    position: fixed;
    height: 100%;
