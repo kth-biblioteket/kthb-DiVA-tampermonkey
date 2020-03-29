@@ -764,6 +764,7 @@ function init() {
 
         //CLEAR ORG
         var clearorgButtonjq = $('<button id="clearorgButtonjq' + j + '" type="button">Clear org</button>');
+        var clearorgButtonjq = $('<button id="clearorgButtonjq' + j + '" type="button">X</button>');
         //bind en clickfunktion som skall rensa fältet för "Annan organisation"
         clearorgButtonjq.on("click", function() {
             $(thiz).next().find('input').val("");
