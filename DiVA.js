@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.0.13
+// @version      1.0.14
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -492,6 +492,54 @@ function getDblp(doi) {
 }
 
 /**
+ * Funktion för att anrop DBLP och hämta information via DOI
+ *
+ * @param {string} doi
+ */
+function getClarivate(doi) {
+    $.ajax({
+        type: 'GET',
+        url: 'https://apps.lib.kth.se/alma/wos/wosapi_b.php?source=wos&doi=' + doi,
+        dataType: 'json',
+        beforeSend: function(){
+            $("#clarivateButtonjq i").css("display", "inline-block");
+        },
+        success: function(response, textStatus, xhr) {
+            console.log(response)
+            var html = '<div id="popup"><div id="close">X</div><h2>Information från Clarivate</h2>';
+            if (response.status == 201) {
+                html += "<p>Hittade inget i Scopus</p>";
+            } else {
+                //hitta ScopusId
+                html += "<p>" + "<i>Clarivate</i><br /><br />" +
+                    "DOI: " + response.wos.doi + "<br />" +
+                    "PMID: " + response.wos.pmid + "<br />" +
+                    "UT: " + response.wos.ut + "<br /><br />" +
+                    "</p>"
+            };
+            html += '</div>'
+            $('#ldapoverlay').html(html);
+            $('#ldapoverlay').css("display", "block");
+
+            //Stängknapp till overlay
+            var closeButton = $('#close');
+            closeButton.click(function() {
+                $('#ldapoverlay').css("display", "none");
+                $('#ldapoverlay').html('');
+            });
+        },
+        complete: function(){
+            $("#clarivateButtonjq i").css("display", "none");
+        },
+        error:
+            //TODO felhantering
+            function(response, textStatus, xhr) {
+                console.log(xhr);
+            }
+    });
+}
+
+/**
  * Funktion för att initiera Apan
  *
  */
@@ -678,8 +726,15 @@ function init() {
             "";
         window.open(url, '_blank'); // sök på DOI i WoS och öppna ett nytt fönster
     })
-
     $("div.diva2addtextchoicecol:contains('ISI')").before(WoSButtonjq)
+    //Skapa en knapp vid "ISI-fältet"
+    $('#clarivateButtonjq').remove();
+    var clarivateButtonjq = $('<button id="clarivateButtonjq" type="button" class="buttonload"><i class="fa fa-spinner fa-spin"></i>Clarivate</button>');
+    //bind en clickfunktion som anropar WoS med värdet i DOI-fältet
+    clarivateButtonjq.on("click", function() {
+        getClarivate($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+    })
+    $("div.diva2addtextchoicecol:contains('ISI')").before(clarivateButtonjq)
 
     //Skapa en knapp vid "Scopus-fältet"
     $('#scopusButtonjq').remove();
@@ -981,6 +1036,12 @@ function addZero(i) {
 
 //--CSS:
 GM_addStyle(`
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css");
+
+#clarivateButtonjq i {
+    display: none;
+}
+
 #monkeylogin {
     display: none;
     overflow: hidden;
