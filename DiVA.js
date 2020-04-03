@@ -1,20 +1,15 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.0.14
+// @version      1.0.15
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
 // @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
-// @match    https://kth.diva-portal.org/dream/edit/editForm.jsf
-// @match    https://kth.diva-portal.org/dream/import/importForm.jsf
-// @match    https://kth.diva-portal.org/dream/publish/publishForm.jsf
-// @match    https://kth.diva-portal.org/dream/review/reviewForm.jsf
-// @match    https://kth.diva-portal.org/dream/info.jsf
-// @match    https://kth.diva-portal.org/dream/edit/editForm.jsf?rvn=1
-// @match    https://kth.diva-portal.org/dream/import/importForm.jsf?rvn=1
-// @match    https://kth.diva-portal.org/dream/publish/publishForm.jsf?rvn=1
-// @match    https://kth.diva-portal.org/dream/review/reviewForm.jsf?rvn=1
-// @match    https://kth.diva-portal.org/dream/info.jsf?rvn=1
+// @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
+// @match    https://kth.diva-portal.org/dream/import/importForm.jsf*
+// @match    https://kth.diva-portal.org/dream/publish/publishForm.jsf*
+// @match    https://kth.diva-portal.org/dream/review/reviewForm.jsf*
+// @match    https://kth.diva-portal.org/dream/info.jsf*
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
 // @require  https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
@@ -84,12 +79,12 @@ function verifytoken(token) {
                 }
             },
             error:
-                //401 Unauthorized
-                function(response, textStatus, xhr) {
-                    alert("Unauthorized")
-                    Cookies.remove('token')
-                    $('#monkeylogin').css("display", "block");
-                }
+            //401 Unauthorized
+            function(response, textStatus, xhr) {
+                alert("Unauthorized")
+                Cookies.remove('token')
+                $('#monkeylogin').css("display", "block");
+            }
         });
     } else {
         Cookies.remove('token')
@@ -165,21 +160,6 @@ function callapi(apiURL, callback) {
  *
  * @param {object} response
  */
-function processJSON_Response_default(response) {
-    if (response.status != 200 && response.status != 304) {
-        reportAJAX_Error(response);
-        return;
-    }
-
-    console.log(response.response);
-
-}
-
-/**
- * Funktion som hanterar API-svar och utför eventuella åtgärder.
- *
- * @param {object} response
- */
 
 function processJSON_Response_LDAP(response) {
     if (response.status != 200 && response.status != 201) {
@@ -187,7 +167,7 @@ function processJSON_Response_LDAP(response) {
         return;
     }
 
-    var html = '<div id="popup"><div id="close">X</div><h2>Information från KTH UG(LDAP)</h2>';
+    var html = '<div><h2>Information från KTH UG(LDAP)</h2>';
 
     if (response.response) {
         var json = response.response
@@ -204,8 +184,11 @@ function processJSON_Response_LDAP(response) {
             });
         }
     }
-
+    
     html += '</div></div>'
+    $("#monkeyresultswrapper i").css("display", "none");
+    $('#monkeyresults').html(html);
+    /*
     $('#ldapoverlay').html(html);
     $('#ldapoverlay').css("display", "block");
     //Stängknapp till overlay
@@ -214,6 +197,7 @@ function processJSON_Response_LDAP(response) {
         $('#ldapoverlay').css("display", "none");
         $('#ldapoverlay').html('');
     });
+    */
 }
 
 /**
@@ -227,7 +211,7 @@ function processJSON_Response_LETA(response) {
         return;
     }
 
-    var html = '<div id="popup"><div id="close">X</div><h2>Information från Leta anställda</h2>';
+    var html = '<div><h2>Information från Leta anställda</h2>';
 
     if (response.response) {
 
@@ -249,6 +233,9 @@ function processJSON_Response_LETA(response) {
     }
 
     html += '</div></div>'
+    $("#monkeyresultswrapper i").css("display", "none");
+    $('#monkeyresults').html(html);
+    /*
     $('#ldapoverlay').html(html);
     $('#ldapoverlay').css("display", "block");
     //Stängknapp till overlay
@@ -257,6 +244,7 @@ function processJSON_Response_LETA(response) {
         $('#ldapoverlay').css("display", "none");
         $('#ldapoverlay').html('');
     });
+    */
 }
 
 /**
@@ -270,7 +258,7 @@ function processJSON_Response_ORCID(response) {
         return;
     }
 
-    var html = '<div id="popup"><div id="close">X</div><h2>Information från ORCiD</h2>';
+    var html = '<div><h2>Information från ORCiD</h2>';
     if (response.response) {
 
         var json = response.response
@@ -301,17 +289,9 @@ function processJSON_Response_ORCID(response) {
                 html += '</a></p>'
             });
         }
+        $("#monkeyresultswrapper i").css("display", "none");
+        $('#monkeyresults').html(html);
     }
-
-    html += '</div></div>'
-    $('#ldapoverlay').html(html);
-    $('#ldapoverlay').css("display", "block");
-    //Stängknapp till overlay
-    var closeButton = $('#close');
-    closeButton.click(function() {
-        $('#ldapoverlay').css("display", "none");
-        $('#ldapoverlay').html('');
-    });
 }
 
 /**
@@ -320,12 +300,13 @@ function processJSON_Response_ORCID(response) {
  * @param {object} response
  */
 function processJSON_Response_scopus(response) {
+    $("#monkeyresultswrapper i").css("display", "inline-block");
     if (response.status != 200 && response.status != 201) {
         reportAJAX_Error(response);
         return;
     }
 
-    var html = '<div id="popup"><div id="close">X</div><h2>Scopus:</h2>';
+    var html = '';
 
     if (response.response) {
         var json = response.response
@@ -333,18 +314,26 @@ function processJSON_Response_scopus(response) {
             html += "<p>Hittade inget i Scopus</p>";
         } else {
             //hitta ScopusId
-            html += "<p>" + "<i>" +
-                response.response['abstracts-retrieval-response']['coredata']['dc:title'] + "</i><br /><br />" +
-                "ScopusId: " + response.response['abstracts-retrieval-response']['coredata']['eid'] + "<br />" +
-                "DOI: " + response.response['abstracts-retrieval-response']['coredata']['prism:doi'] + "<br />" +
-                "PMID: " + response.response['abstracts-retrieval-response']['coredata']['pubmed-id'] + "<br />" +
-                "Open Access: " + response.response['abstracts-retrieval-response']['coredata']['openaccessFlag'] + "<br /><br />" +
-                "Publisher: " + response.response['abstracts-retrieval-response']['coredata']['dc:publisher'] + "<br />" +
-                "</p>"
             var eid = response.response['abstracts-retrieval-response']['coredata']['eid']; //plocka värdet för ScopusId (eid)
+            if(eid == "" 
+                || typeof eid === 'undefined' 
+                || eid == 'undefined') {
+                html += '<p>PubMedID hittades inte</p>';
+            } else {
+                html += '<p>Uppdaterat ScopusID: ' + eid + '</p>';
+            }
             $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
             var pmid = response.response['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
+            console.log(pmid)
+            if(pmid == "" 
+                || typeof pmid === 'undefined' 
+                || pmid == 'undefined') {
+                html += '<p>PubMedID hittades inte</p>';
+            } else {
+                html += '<p>Uppdaterat PubMedID: ' + pmid + '</p>';
+            }
             $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
+
             var oa = response.response['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
 
             if (oa == 'true') { //sen jag bytte till absract search funkar detta som str men inte som boolean, varför?
@@ -352,21 +341,16 @@ function processJSON_Response_scopus(response) {
             } else {
                 document.getElementById(diva_id + ":doiFree").checked = false; // checka inte boxen... eller avchecka den
             }
+            $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+            $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+            $(window).scrollTop(0);
+            
         };
+        $("#monkeyresultswrapper i").css("display", "none");
+        $('#monkeyresults').html(html);
     }
+};
 
-    html += '</div></div>'
-
-    $('#ldapoverlay').html(html);
-    $('#ldapoverlay').css("display", "block");
-
-    //Stängknapp till overlay
-    var closeButton = $('#close');
-    closeButton.click(function() {
-        $('#ldapoverlay').css("display", "none");
-        $('#ldapoverlay').html('');
-    });
-}
 
 /**
  * Funktion som hanterar fel från api:er
@@ -375,6 +359,8 @@ function processJSON_Response_scopus(response) {
  */
 function reportAJAX_Error(response) {
     console.error(`Error ${response.status}!  ${response.statusText}`);
+    $("#monkeyresultswrapper i").css("display", "none");
+    $('#monkeyresults').html('<p>' + response.statusText + '</p>');
 }
 
 /**
@@ -433,15 +419,15 @@ function getDiVA(titleAll, format) {
             });
         },
         error:
-            //TODO felhantering
-            function(response, textStatus, xhr) {
-                console.log(xhr);
-            }
+        //TODO felhantering
+        function(response, textStatus, xhr) {
+            console.log(xhr);
+        }
     });
 }
 
 /**
- * Funktion för att anrop DBLP och hämta information via DOI
+ * Funktion för att anropa DBLP och hämta information via DOI
  *
  * @param {string} doi
  */
@@ -474,25 +460,25 @@ function getDblp(doi) {
                         });
                     },
                     error:
-                        //TODO felhantering
-                        function(response, textStatus, xhr) {
-                            console.log(xhr);
-                        }
+                    //TODO felhantering
+                    function(response, textStatus, xhr) {
+                        console.log(xhr);
+                    }
                 });
             } else {
                 alert("Hittade inget i dblp på: " + doi);
             }
         },
         error:
-            //TODO felhantering
-            function(response, textStatus, xhr) {
-                console.log(xhr);
-            }
+        //TODO felhantering
+        function(response, textStatus, xhr) {
+            console.log(xhr);
+        }
     });
 }
 
 /**
- * Funktion för att anrop DBLP och hämta information via DOI
+ * Funktion för att anrop WoS och hämta information via DOI
  *
  * @param {string} doi
  */
@@ -508,14 +494,16 @@ function getClarivate(doi) {
             console.log(response)
             var html = '<div id="popup"><div id="close">X</div><h2>Information från Clarivate</h2>';
             if (response.status == 201) {
-                html += "<p>Hittade inget i Scopus</p>";
+                html += "<p>Hittade inget i WoS</p>";
             } else {
-                //hitta ScopusId
+                //hitta ISIid
                 html += "<p>" + "<i>Clarivate</i><br /><br />" +
                     "DOI: " + response.wos.doi + "<br />" +
                     "PMID: " + response.wos.pmid + "<br />" +
                     "UT: " + response.wos.ut + "<br /><br />" +
                     "</p>"
+                $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val(response.wos.ut); // skriv in värdet för ISI/UT i fältet för ISI
+                $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(response.wos.pmid); // skriv in värdet för PMID i fältet för PMID
             };
             html += '</div>'
             $('#ldapoverlay').html(html);
@@ -532,10 +520,10 @@ function getClarivate(doi) {
             $("#clarivateButtonjq i").css("display", "none");
         },
         error:
-            //TODO felhantering
-            function(response, textStatus, xhr) {
-                console.log(xhr);
-            }
+        //TODO felhantering
+        function(response, textStatus, xhr) {
+            console.log(xhr);
+        }
     });
 }
 
@@ -560,6 +548,11 @@ function init() {
     $(".diva2reviewmainer").before(DiVAButtonjq)
     $(".diva2pubmainer").before(DiVAButtonjq)
 
+/**
+ * Fixar titelfälten; bryta vid kolon samt dekapitalisera kapitaliserade bokstäver ;)
+ *
+ *
+ */
     //Skapa en knapp vid titelfältet för att splitta titel i huvud- och undertitel vid kolon :
     $('#titlesplitButtonjq').remove();
     var titlesplitButtonjq = $('<button id="titlesplitButtonjq" type="button">Split : </button>');
@@ -715,18 +708,39 @@ function init() {
     })
 
     $("div.diva2addtextchoice2:contains('Alternativ'), div.diva2addtextchoice2:contains('Alternative')").parent().before(alttitlecaseButtonjq)
-
+/**
+ * WoS och "Clarivate" kommer här
+ *
+ *
+ */
     //Skapa en knapp vid "ISI-fältet"
     $('#WoSButtonjq').remove();
     var WoSButtonjq = $('<button id="WoSButtonjq" type="button">WoS</button>');
     //bind en clickfunktion som anropar WoS med värdet i DOI-fältet
     WoSButtonjq.on("click", function() {
-        var url = "https://focus.lib.kth.se/login?url=http://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&req_id=mailto%3Apublicering%40kth.se&&rft_id=info%3Adoi%2F" +
+        var url = "https://focus.lib.kth.se/login?url=https://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&req_id=mailto%3Apublicering%40kth.se&&rft_id=info%3Adoi%2F" +
             $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() +
             "";
         window.open(url, '_blank'); // sök på DOI i WoS och öppna ett nytt fönster
     })
     $("div.diva2addtextchoicecol:contains('ISI')").before(WoSButtonjq)
+
+
+    //nnnnnnnnnnnnnnnnnnnnn Hämtar Scopus-grejor automatiskt när posten öppnas - det jag kallar headless nnnnnnnnnnnnnnnnnnnnnn
+
+    $("#monkeyresultswrapper i").css("display", "inline-block");
+    var url = "https://api.elsevier.com/content/abstract/doi/" +
+        $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() +
+        "?apiKey=" + scopusapikey;
+    callapi(url, processJSON_Response_scopus);
+
+
+
+
+    //nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+
+
+
     //Skapa en knapp vid "ISI-fältet"
     $('#clarivateButtonjq').remove();
     var clarivateButtonjq = $('<button id="clarivateButtonjq" type="button" class="buttonload"><i class="fa fa-spinner fa-spin"></i>Clarivate</button>');
@@ -736,6 +750,11 @@ function init() {
     })
     $("div.diva2addtextchoicecol:contains('ISI')").before(clarivateButtonjq)
 
+/**
+ * Scopus
+ *
+ *
+ */
     //Skapa en knapp vid "Scopus-fältet"
     $('#scopusButtonjq').remove();
     var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Scopus</button>');
@@ -746,9 +765,13 @@ function init() {
             "?apiKey=" + scopusapikey;
         callapi(url, processJSON_Response_scopus);
     })
-
     $("div.diva2addtextchoicecol:contains('ScopusID')").before(scopusButtonjq)
 
+/**
+ * Knapp för dblp vid konferensfältet
+ *
+ *
+ */
     //Skapa en knapp vid "Konferens-fältet"
     $('#dblpButtonjq').remove();
     var dblpButtonjq = $('<button id="dblpButtonjq" type="button">dblp</button>');
@@ -758,6 +781,11 @@ function init() {
     })
     $("div.diva2addtextchoicecol:contains('Konferens') , div.diva2addtextchoicecol:contains('Conference') ").after(dblpButtonjq);
 
+/**
+ * Knapp och länk till hjälpsida i Confluence
+ *
+ *
+ */
     //Länk till hjälpsida i Confluence
     $('#helpButtonjq').remove();
     var helpButtonjq = $('<button id="helpButtonjq" type="button">Hjälp</button>');
@@ -772,19 +800,20 @@ function init() {
     $(".diva2reviewmainer").before(helpButtonjq)
     $(".diva2pubmainer").before(helpButtonjq)
 
+/**
+ * Knapp och länk till extern sökning i KTH webb-DiVA för att se eventuella dubbletter
+ *
+ *
+ */
     //Kolla så att inte det finns dubbletter
     $('#dubblettButtonjq').remove();
     var dubblettButtonjq = $('<button id="dubblettButtonjq" type="button">Dubblett?</button>');
     //bind en clickfunktion som anropar DiVA KTH:s webbgränssnitt och söker på titel
     dubblettButtonjq.on("click", function() {
-        var url = "https://kth.diva-portal.org/smash/resultList.jsf?dswid=-4067&language=en&searchType=RESEARCH&query=&af=%5B%5D&aq=%5B%5B%7B%22titleAll%22%3A%22"
-            //    + $(document.getElementById(diva_id + ":j_id774")).val()
-            +
-            $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").parent().find('textarea').eq(0).val() // https://stackoverflow.com/questions/2416803/jquery-contains-selector-to-search-for-multiple-strings/2417076#2417076
-            +
+        var url = "https://kth.diva-portal.org/smash/resultList.jsf?dswid=-4067&language=en&searchType=RESEARCH&query=&af=%5B%5D&aq=%5B%5B%7B%22titleAll%22%3A%22" +
+            $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").parent().find('textarea').eq(0).val() +
             "%22%7D%5D%5D&aq2=%5B%5B%5D%5D&aqe=%5B%5D&noOfRimportForm:j_id758ows=50&sortOrder=author_sort_asc&sortOrder2=title_sort_asc&onlyFullText=false&sf=all"
         window.open(url, '_blank'); // sök i DiVA webb på titel, öppna i ett nytt fönster
-
     })
 
     $(".diva2editmainer").before(dubblettButtonjq) // dubblettknapp längst upp på sidan
@@ -792,6 +821,11 @@ function init() {
     $(".diva2reviewmainer").before(dubblettButtonjq)
     $(".diva2pubmainer").before(dubblettButtonjq)
 
+/**
+ * QC och X + QC
+ *
+ *
+ */
     //Skapa en knapp vid "Anmärknings-fältet" för att sätta in QC + dagens datum efter det som redan står i fältet
     $('#qcButton').remove();
     var qcButton = $('<button id="qcButton" type="button">QC</button>');
@@ -834,12 +868,13 @@ function init() {
         })
 
         $(this).parent().after(clearorgButtonjq);
-        //      $("div.diva2addtextchoicecol:contains('Annan organisation'), div.diva2addtextchoicecol:contains('Other organisation')").parent().after(clearorgButtonjq)
-
         j++;
     });
 
-
+/**
+ *  Knappar till LDAP, Leta KTH anställda, KTH Intra, Google och ORCiD
+ *
+ */
     //Skapa knappar vid "Författar-avsnittet"(jquery)
     var authors = $('#' + diva_id + '\\:authorSerie');
     var i = 0;
@@ -850,14 +885,19 @@ function init() {
         var ldapButtonjq = $('<button id="ldapButtonjq' + i + '" type="button">LDAP-info</button>');
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         ldapButtonjq.on("click", function() {
+            $("#monkeyresultswrapper i").css("display", "inline-block");
+            $("#monkeyresults").html("");
+            var fnamn = $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
+            var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, "");  // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
+            var enamn = $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
+            var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
             var url = "https://lib.kth.se/ldap/api/v1/users/" +
-                $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val() +
+                fnamn2 +
                 "* " +
-                $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val() +
+                enamn2 +
                 " *" +
                 "?token=" + ldapapikey;
-            var newurl = url.replace("$$$", "") // ta bort $$$ från efternamnen för sökning i Leta KTH-anställda
-            callapi(newurl, processJSON_Response_LDAP);
+            callapi(url, processJSON_Response_LDAP);
         })
         $(this).before(ldapButtonjq)
 
@@ -865,14 +905,19 @@ function init() {
         var letaButtonjq = $('<button id="letaButtonjq' + i + '" type="button">Leta anställda</button>');
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         letaButtonjq.on("click", function() {
+            $("#monkeyresultswrapper i").css("display", "inline-block");
+            $("#monkeyresults").html("");
+            var fnamn = $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
+            var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
+            var enamn = $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
+            var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
             var url = "https://apps-ref.lib.kth.se/webservices/letaanstallda/api/v1/users?fname=" +
-                $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val() +
+                fnamn2 +
                 "%&ename=" +
-                $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val() +
+                enamn2 +
                 "%" +
                 "&api_key=" + letaanstalldaapikey;
-            var newurl = url.replace("$$$", "") // ta bort $$$ från efternamnen för sökning i Leta KTH-anställda
-            callapi(newurl, processJSON_Response_LETA);
+            callapi(url, processJSON_Response_LETA);
         })
 
         $(this).before(letaButtonjq)
@@ -887,7 +932,9 @@ function init() {
                 $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val() +
                 "&urlFilter=https://intra.kth.se&filterLabel=KTH%20Intran%C3%A4t&entityFilter=kth-profile,kth-place,%20kth-system"
             var newurl = url.replace("$$$", "") // ta bort eventuella $$$ från efternamnen före sökning
-            window.open(newurl, '_blank'); // sök på förnamn efternamn på KTH Intranät
+            var newurl2 = newurl.replace(/[A-Z]\./g, "") // ta bort allt som ser ut som en VERSAL med en punkt efter, typ förnamn från Scopus. Verkar ge bättre resultat med bara efternamn vid sökning i KTH Intra
+            console.log(newurl2);
+            window.open(newurl2, '_blank'); // sök på förnamn efternamn på KTH Intranät
         })
 
         $(this).before(kthintraButtonjq)
@@ -906,15 +953,22 @@ function init() {
 
         $(this).before(googleButtonjq)
 
-		//Sök i ORCiD
+        //Sök i ORCiD
         var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök ORCiD</button>');
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         orcidButtonjq.on("click", function() {
+            $("#monkeyresultswrapper i").css("display", "inline-block");
+            $("#monkeyresults").html("");
+            var fnamn = $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
+            var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
+            var enamn = $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
+            var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
             var url = "https://lib.kth.se/orcid/api/v1/orcid/" +
-                $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val() +
+                enamn2 +
                 "/" +
-                $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val() +
+                fnamn2 +
                 "/?token=" + orcidapikey;
+            console.log(url);
             callapi(url, processJSON_Response_ORCID);
         })
 
@@ -972,7 +1026,10 @@ var config = {
     characterData: true
 };
 
-//Hämta aktuellt id beroende på DiVA-läge (edit, publish, review eller import)
+/**
+ * Hämta aktuellt id beroende på DiVA-läge (edit, publish, review eller import)
+ *
+ */
 var diva_id
 var authortarget
 if (window.location.href.indexOf("editForm.jsf") !== -1) {
@@ -1016,6 +1073,10 @@ $('<div/>', {
     id: 'ldapoverlay'
 }).appendTo('body.diva2margin');
 
+//Lägg in div för resultat
+var monkeyresults = $('<div id="monkeyresultswrapper"><h2>Apans resultat</h2><i class="fa fa-spinner fa-spin"></i><div id="monkeyresults" class="flexbox column"></div></div>');
+$('body.diva2margin').append(monkeyresults);
+
 //Vänta tills fältet för anmärkning skapats (iframe)
 waitForKeyElements('#' + diva_id + '\\:notes_ifr', actionFunction);
 
@@ -1038,7 +1099,8 @@ function addZero(i) {
 GM_addStyle(`
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css");
 
-#clarivateButtonjq i {
+#clarivateButtonjq i,
+#monkeyresultswrapper i {
     display: none;
 }
 
@@ -1047,23 +1109,44 @@ GM_addStyle(`
     overflow: hidden;
     padding: 5px;
 }
+
+#monkeyresultswrapper {
+    position:fixed; 
+    top:20px; 
+    left:0; 
+    width:400px; 
+    height:100%; 
+    overflow:auto;
+    padding: 10px;
+}
+
+#monkeyresults {
+    padding-bottom: 10px;
+    font-size: 10px;
+}
+
 #ldapoverlay a {
     font-size: 0.8rem !important;
 }
+
 .flexbox {
     display: flex;
 }
+
 .column {
     flex-direction: column;
 }
+
 .rowpadding {
     padding-top: 5px;
     padding-bottom: 5px;
 }
+
 .rowmargin {
     margin-top: 5px;
     margin-bottom: 5px;
 }
+
 button {
     background-color: #d85497;
     color: #fff;
@@ -1074,34 +1157,37 @@ button {
     line-height: 1.5;
     border-radius: .25rem;
 }
+
 #ldapoverlay {
-   position: fixed;
-   height: 100%;
-   width: 100%;
-   top: 0;
-   right: 0;
-   bottom: 0;
-   left: 0;
-   background: rgba(0,0,0,0.8);
-   display: none;
-   font-size: 0.8rem
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    font-size: 0.8rem
 }
+
 #popup {
-   max-width: 1200px;
-   width: 80%;
-   max-height: 1000px;
-   overflow: scroll;
-   height: 80%;
-   padding: 20px;
-   position: relative;
-   background: #fff;
-   margin: 20px auto;
+    max-width: 1200px;
+    width: 80%;
+    max-height: 1000px;
+    overflow: scroll;
+    height: 80%;
+    padding: 20px;
+    position: relative;
+    background: #fff;
+    margin: 20px auto;
 }
+
 #close {
-   position: absolute;
-   top: 10px;
-   right: 10px;
-   cursor: pointer;
-   color: #000;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    color: #000;
 }
 `);
