@@ -100,16 +100,15 @@ function verifytoken(token) {
 function monkeylogin() {
     var html =
         '<div id="monkeylogin">' +
-        '<form id="monkeyloginform">' +
-        '<div>Logga in till Apan</div>' +
-        '<div class = "flexbox column rowpadding">' +
-        '<input class="rowmargin" id="username" name="username" placeholder="kthid" type="text">' +
-        '<input class="rowmargin" id="password" name="password" placeholder="password" type="password">' +
-        '</div>' +
-        '</form>' +
-        '<button id="login">Login</button>' +
+            '<form id="monkeyloginform">' +
+                '<div>Logga in till Apan</div>' +
+                '<div class = "flexbox column rowpadding">' +
+                    '<input class="rowmargin" id="username" name="username" placeholder="kthid" type="text">' +
+                    '<input class="rowmargin" id="password" name="password" placeholder="password" type="password">' +
+                '</div>' +
+            '</form>' +
+            '<button id="login">Login</button>' +
         '</div>'
-
     $('body').append(html);
 
     var loginButton = $('#login');
@@ -188,16 +187,6 @@ function processJSON_Response_LDAP(response) {
     html += '</div></div>'
     $("#monkeyresultswrapper i").css("display", "none");
     $('#monkeyresults').html(html);
-    /*
-    $('#ldapoverlay').html(html);
-    $('#ldapoverlay').css("display", "block");
-    //Stängknapp till overlay
-    var closeButton = $('#close');
-    closeButton.click(function() {
-        $('#ldapoverlay').css("display", "none");
-        $('#ldapoverlay').html('');
-    });
-    */
 }
 
 /**
@@ -548,20 +537,18 @@ function init() {
     $(".diva2reviewmainer").before(DiVAButtonjq)
     $(".diva2pubmainer").before(DiVAButtonjq)
 
-/**
- * Fixar titelfälten; bryta vid kolon samt dekapitalisera kapitaliserade bokstäver ;)
- *
- *
- */
+    /**
+     * Fixar titelfälten; bryta vid kolon samt dekapitalisera kapitaliserade bokstäver ;)
+     *
+     *
+     */
     //Skapa en knapp vid titelfältet för att splitta titel i huvud- och undertitel vid kolon :
+    var $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
+    var $subtitleiframe = $("div.diva2addtextchoicecol:contains('Undertitel:') , div.diva2addtextchoicecol:contains('Subtitle:')").next().find('iframe').first();
     $('#titlesplitButtonjq').remove();
     var titlesplitButtonjq = $('<button id="titlesplitButtonjq" type="button">Split : </button>');
     //bind en clickfunktion
     titlesplitButtonjq.on("click", function() {
-        var $maintitleiframe;
-        $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
-        var $subtitleiframe;
-        $subtitleiframe = $("div.diva2addtextchoicecol:contains('Undertitel:') , div.diva2addtextchoicecol:contains('Subtitle:')").next().find('iframe').first();
         var maintitle = $maintitleiframe.contents().find("body").html();
         var subtitle = $subtitleiframe.contents().find("body").html();
         var changedmaintitle = maintitle.split(":")[0];
@@ -569,7 +556,6 @@ function init() {
         $maintitleiframe.contents().find("body").html(changedmaintitle);
         $subtitleiframe.contents().find("body").html(subtitle);
     })
-
     // extremt fult sätt att skilja 'titel' från 'alternativ titel' eftersom 'alternativ titel' innehåller 'titel'
     var s_title = $("div.diva2addtextchoicebr:contains('Titel'), div.diva2addtextchoicebr:contains('Title')").not($("div.diva2addtextchoicebr:contains('Alternativ'), div.diva2addtextchoicebr:contains('Alternative')"))
     $(s_title).before(titlesplitButtonjq)
@@ -579,10 +565,6 @@ function init() {
     var caseButtonjq = $('<button id="caseButtonjq" type="button">A->a</button>');
     //bind en clickfunktion
     caseButtonjq.on("click", function() {
-        var $maintitleiframe;
-        $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
-        var $subtitleiframe;
-        $subtitleiframe = $("div.diva2addtextchoicecol:contains('Undertitel:') , div.diva2addtextchoicecol:contains('Subtitle:')").next().find('iframe').first();
         var maintitle = $maintitleiframe.contents().find("body").html();
         var subtitle = $subtitleiframe.contents().find("body").html();
         var changedmaintitle = maintitle.charAt(0) + maintitle.substring(1).toLowerCase();
@@ -590,20 +572,17 @@ function init() {
         $maintitleiframe.contents().find("body").html(changedmaintitle);
         $subtitleiframe.contents().find("body").html(changedsubtitle);
     })
-
     // extremt fult sätt att skilja 'titel' från 'alternativ titel' eftersom 'alternativ titel' innehåller 'titel'
     var c_title = $("div.diva2addtextchoicebr:contains('Titel'), div.diva2addtextchoicebr:contains('Title')").not($("div.diva2addtextchoicebr:contains('Alternativ'), div.diva2addtextchoicebr:contains('Alternative')"));
     $(c_title).before(caseButtonjq)
 
     //Skapa en knapp vid titelfältet för proceedings, att splitta titel i huvud- och undertitel vid kolon :
+    var $procmaintitleiframe = $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding') , div.diva2addtextchoice2:contains('Part of proceedings')").parent().next().next().find('iframe').first();
+    var $procsubtitleiframe = $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding') , div.diva2addtextchoice2:contains('Part of proceedings')").parent().next().next().next().next().find('iframe').first();
     $('#proctitlesplitButtonjq').remove();
     var proctitlesplitButtonjq = $('<button id="proctitlesplitButtonjq" type="button">Split : </button>');
     //bind en clickfunktion
     proctitlesplitButtonjq.on("click", function() {
-        var $procmaintitleiframe;
-        $procmaintitleiframe = $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding') , div.diva2addtextchoice2:contains('Part of proceedings')").parent().next().next().find('iframe').first();
-        var $procsubtitleiframe;
-        $procsubtitleiframe = $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding') , div.diva2addtextchoice2:contains('Part of proceedings')").parent().next().next().next().next().find('iframe').first();
         var procmaintitle = $procmaintitleiframe.contents().find("body").html();
         var procsubtitle = $procsubtitleiframe.contents().find("body").html();
         var changedprocmaintitle = procmaintitle.split(":")[0];
@@ -611,7 +590,6 @@ function init() {
         $procmaintitleiframe.contents().find("body").html(changedprocmaintitle);
         $procsubtitleiframe.contents().find("body").html(procsubtitle);
     })
-
     $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding'), div.diva2addtextchoice2:contains('Part of proceedings')").parent().before(proctitlesplitButtonjq)
 
     //Skapa en knapp vid titelfältet för proceedings, att ändra versaler till gemener förutom första bokstaven
@@ -619,29 +597,22 @@ function init() {
     var proctitlecaseButtonjq = $('<button id="proctitlecaseButtonjq" type="button">A->a</button>');
     //bind en clickfunktion
     proctitlecaseButtonjq.on("click", function() {
-        var $procmaintitleiframe;
-        $procmaintitleiframe = $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding') , div.diva2addtextchoice2:contains('Part of proceedings')").parent().next().next().find('iframe').first();
-        var $procsubtitleiframe;
-        $procsubtitleiframe = $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding') , div.diva2addtextchoice2:contains('Part of proceedings')").parent().next().next().next().next().find('iframe').first()
         var procmaintitle = $procmaintitleiframe.contents().find("body").html();
-        var procsubtitle = $procsubtitleiframe.contents().find("body").html();
+        var procsubtitle = $procsubtitleiframe.contents().find("body").html();   
         var changedprocmaintitle = procmaintitle.charAt(0) + procmaintitle.substring(1).toLowerCase();
         var changedprocsubtitle = procsubtitle.charAt(0) + procsubtitle.substring(1).toLowerCase();
         $procmaintitleiframe.contents().find("body").html(changedprocmaintitle);
         $procsubtitleiframe.contents().find("body").html(changedprocsubtitle);
     })
-
     $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding'), div.diva2addtextchoice2:contains('Part of proceedings')").parent().before(proctitlecaseButtonjq)
 
     //Skapa en knapp vid titelfältet för böcker, att splitta titel i huvud- och undertitel vid kolon :
+    var $bookmaintitleiframe = $("div.diva2addtextchoice2:contains('Ingår i bok') , div.diva2addtextchoice2:contains('Part of book')").parent().next().next().find('iframe').first();
+    var $booksubtitleiframe = $("div.diva2addtextchoice2:contains('Ingår i bok') , div.diva2addtextchoice2:contains('Part of book')").parent().next().next().next().next().find('iframe').first();
     $('#booktitlesplitButtonjq').remove();
     var booktitlesplitButtonjq = $('<button id="booktitlesplitButtonjq" type="button">Split : </button>');
     //bind en clickfunktion
     booktitlesplitButtonjq.on("click", function() {
-        var $bookmaintitleiframe;
-        $bookmaintitleiframe = $("div.diva2addtextchoice2:contains('Ingår i bok') , div.diva2addtextchoice2:contains('Part of book')").parent().next().next().find('iframe').first();
-        var $booksubtitleiframe;
-        $booksubtitleiframe = $("div.diva2addtextchoice2:contains('Ingår i bok') , div.diva2addtextchoice2:contains('Part of book')").parent().next().next().next().next().find('iframe').first();
         var bookmaintitle = $bookmaintitleiframe.contents().find("body").html();
         var booksubtitle = $booksubtitleiframe.contents().find("body").html();
         var changedbookmaintitle = bookmaintitle.split(":")[0];
@@ -649,7 +620,6 @@ function init() {
         $bookmaintitleiframe.contents().find("body").html(changedbookmaintitle);
         $booksubtitleiframe.contents().find("body").html(booksubtitle);
     })
-
     $("div.diva2addtextchoice2:contains('Ingår i bok'), div.diva2addtextchoice2:contains('Part of book')").parent().before(booktitlesplitButtonjq)
 
     //Skapa en knapp vid titelfältet för böcker, att ändra versaler till gemener förutom första bokstaven
@@ -657,10 +627,6 @@ function init() {
     var booktitlecaseButtonjq = $('<button id="booktitlecaseButtonjq" type="button">A->a</button>');
     //bind en clickfunktion
     booktitlecaseButtonjq.on("click", function() {
-        var $bookmaintitleiframe;
-        $bookmaintitleiframe = $("div.diva2addtextchoice2:contains('Ingår i bok') , div.diva2addtextchoice2:contains('Part of book')").parent().next().next().find('iframe').first();
-        var $booksubtitleiframe;
-        $booksubtitleiframe = $("div.diva2addtextchoice2:contains('Ingår i bok') , div.diva2addtextchoice2:contains('Part of book')").parent().next().next().next().next().find('iframe').first()
         var bookmaintitle = $bookmaintitleiframe.contents().find("body").html();
         var booksubtitle = $booksubtitleiframe.contents().find("body").html();
         var changedbookmaintitle = bookmaintitle.charAt(0) + bookmaintitle.substring(1).toLowerCase();
@@ -668,18 +634,15 @@ function init() {
         $bookmaintitleiframe.contents().find("body").html(changedbookmaintitle);
         $booksubtitleiframe.contents().find("body").html(changedbooksubtitle);
     })
-
     $("div.diva2addtextchoice2:contains('Ingår i bok'), div.diva2addtextchoice2:contains('Part of book')").parent().before(booktitlecaseButtonjq)
 
     //Skapa en knapp vid alternativtitelfältet, att splitta titel i huvud- och undertitel vid kolon :
+    var $altmaintitleiframe = $("div.diva2addtextchoice2:contains('Alternativ') , div.diva2addtextchoice2:contains('Alternative')").parent().next().find('iframe').first();
+    var $altsubtitleiframe = $("div.diva2addtextchoice2:contains('Alternativ') , div.diva2addtextchoice2:contains('Alternative')").parent().next().next().next().find('iframe').first();
     $('#alttitlesplitButtonjq').remove();
     var alttitlesplitButtonjq = $('<button id="alttitlesplitButtonjq" type="button">Split : </button>');
     //bind en clickfunktion
     alttitlesplitButtonjq.on("click", function() {
-        var $altmaintitleiframe;
-        $altmaintitleiframe = $("div.diva2addtextchoice2:contains('Alternativ') , div.diva2addtextchoice2:contains('Alternative')").parent().next().find('iframe').first();
-        var $altsubtitleiframe;
-        $altsubtitleiframe = $("div.diva2addtextchoice2:contains('Alternativ') , div.diva2addtextchoice2:contains('Alternative')").parent().next().next().next().find('iframe').first();
         var altmaintitle = $altmaintitleiframe.contents().find("body").html();
         var altsubtitle = $altsubtitleiframe.contents().find("body").html();
         var changedaltmaintitle = altmaintitle.split(":")[0];
@@ -687,7 +650,6 @@ function init() {
         $altmaintitleiframe.contents().find("body").html(changedaltmaintitle);
         $altsubtitleiframe.contents().find("body").html(altsubtitle);
     })
-
     $("div.diva2addtextchoice2:contains('Alternativ'), div.diva2addtextchoice2:contains('Alternative')").parent().before(alttitlesplitButtonjq)
 
     //Skapa en knapp vid alternativtitelfältet, att ändra versaler till gemener förutom första bokstaven
@@ -695,10 +657,6 @@ function init() {
     var alttitlecaseButtonjq = $('<button id="alttitlecaseButtonjq" type="button">A->a</button>');
     //bind en clickfunktion
     alttitlecaseButtonjq.on("click", function() {
-        var $altmaintitleiframe;
-        $altmaintitleiframe = $("div.diva2addtextchoice2:contains('Alternativ') , div.diva2addtextchoice2:contains('Alternative')").parent().next().find('iframe').first();
-        var $altsubtitleiframe;
-        $altsubtitleiframe = $("div.diva2addtextchoice2:contains('Alternativ') , div.diva2addtextchoice2:contains('Alternative')").parent().next().next().next().find('iframe').first()
         var altmaintitle = $altmaintitleiframe.contents().find("body").html();
         var altsubtitle = $altsubtitleiframe.contents().find("body").html();
         var changedaltmaintitle = altmaintitle.charAt(0) + altmaintitle.substring(1).toLowerCase();
@@ -708,11 +666,12 @@ function init() {
     })
 
     $("div.diva2addtextchoice2:contains('Alternativ'), div.diva2addtextchoice2:contains('Alternative')").parent().before(alttitlecaseButtonjq)
-/**
- * WoS och "Clarivate" kommer här
- *
- *
- */
+
+    /////////////////////////////////////
+    //
+    // WoS och "Clarivate" kommer här
+    //
+    /////////////////////////////////////
     //Skapa en knapp vid "ISI-fältet"
     $('#WoSButtonjq').remove();
     var WoSButtonjq = $('<button id="WoSButtonjq" type="button">WoS</button>');
@@ -725,22 +684,6 @@ function init() {
     })
     $("div.diva2addtextchoicecol:contains('ISI')").before(WoSButtonjq)
 
-
-    //nnnnnnnnnnnnnnnnnnnnn Hämtar Scopus-grejor automatiskt när posten öppnas - det jag kallar headless nnnnnnnnnnnnnnnnnnnnnn
-
-    $("#monkeyresultswrapper i").css("display", "inline-block");
-    var url = "https://api.elsevier.com/content/abstract/doi/" +
-        $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() +
-        "?apiKey=" + scopusapikey;
-    callapi(url, processJSON_Response_scopus);
-
-
-
-
-    //nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
-
-
-
     //Skapa en knapp vid "ISI-fältet"
     $('#clarivateButtonjq').remove();
     var clarivateButtonjq = $('<button id="clarivateButtonjq" type="button" class="buttonload"><i class="fa fa-spinner fa-spin"></i>Clarivate</button>');
@@ -750,12 +693,11 @@ function init() {
     })
     $("div.diva2addtextchoicecol:contains('ISI')").before(clarivateButtonjq)
 
-/**
- * Scopus
- *
- *
- */
-    //Skapa en knapp vid "Scopus-fältet"
+    ////////////////////////////////////
+    //
+    // Scopus knapp vid "Scopus-fältet"
+    //
+    ////////////////////////////////////
     $('#scopusButtonjq').remove();
     var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Scopus</button>');
     //bind en clickfunktion som anropar API med värdet i DOI-fältet
@@ -767,12 +709,11 @@ function init() {
     })
     $("div.diva2addtextchoicecol:contains('ScopusID')").before(scopusButtonjq)
 
-/**
- * Knapp för dblp vid konferensfältet
- *
- *
- */
-    //Skapa en knapp vid "Konferens-fältet"
+    //////////////////////////////////////////////////
+    //
+    //Knapp för dblp vid konferensfältet
+    //
+    //////////////////////////////////////////////////
     $('#dblpButtonjq').remove();
     var dblpButtonjq = $('<button id="dblpButtonjq" type="button">dblp</button>');
     //bind en clickfunktion som anropar API med värdet i DOI-fältet
@@ -781,12 +722,11 @@ function init() {
     })
     $("div.diva2addtextchoicecol:contains('Konferens') , div.diva2addtextchoicecol:contains('Conference') ").after(dblpButtonjq);
 
-/**
- * Knapp och länk till hjälpsida i Confluence
- *
- *
- */
-    //Länk till hjälpsida i Confluence
+    /////////////////////////////////////////////////////
+    //
+    //Knapp och länk till hjälpsida i Confluence
+    //
+    /////////////////////////////////////////////////////
     $('#helpButtonjq').remove();
     var helpButtonjq = $('<button id="helpButtonjq" type="button">Hjälp</button>');
     //bind en clickfunktion öppnar en hjälpsida
@@ -794,18 +734,16 @@ function init() {
         var url = "https://confluence.sys.kth.se/confluence/pages/viewpage.action?pageId=74259261"
         window.open(url, '_blank'); // öppna hjälpsida i ett nytt fönster
     })
-
     $(".diva2editmainer").before(helpButtonjq) // hjälpknapp längst upp på sidan
     $(".diva2impmainer").before(helpButtonjq)
     $(".diva2reviewmainer").before(helpButtonjq)
     $(".diva2pubmainer").before(helpButtonjq)
 
-/**
- * Knapp och länk till extern sökning i KTH webb-DiVA för att se eventuella dubbletter
- *
- *
- */
-    //Kolla så att inte det finns dubbletter
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    //Knapp och länk till extern sökning i KTH webb-DiVA för att se eventuella dubbletter
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     $('#dubblettButtonjq').remove();
     var dubblettButtonjq = $('<button id="dubblettButtonjq" type="button">Dubblett?</button>');
     //bind en clickfunktion som anropar DiVA KTH:s webbgränssnitt och söker på titel
@@ -815,18 +753,16 @@ function init() {
             "%22%7D%5D%5D&aq2=%5B%5B%5D%5D&aqe=%5B%5D&noOfRimportForm:j_id758ows=50&sortOrder=author_sort_asc&sortOrder2=title_sort_asc&onlyFullText=false&sf=all"
         window.open(url, '_blank'); // sök i DiVA webb på titel, öppna i ett nytt fönster
     })
-
     $(".diva2editmainer").before(dubblettButtonjq) // dubblettknapp längst upp på sidan
     $(".diva2impmainer").before(dubblettButtonjq)
     $(".diva2reviewmainer").before(dubblettButtonjq)
     $(".diva2pubmainer").before(dubblettButtonjq)
 
-/**
- * QC och X + QC
- *
- *
- */
-    //Skapa en knapp vid "Anmärknings-fältet" för att sätta in QC + dagens datum efter det som redan står i fältet
+    /////////////////////////////////
+    //
+    //QC och X + QC
+    //
+    /////////////////////////////////
     $('#qcButton').remove();
     var qcButton = $('<button id="qcButton" type="button">QC</button>');
     qcButton.on("click", function() {
@@ -837,7 +773,6 @@ function init() {
     })
     $('#' + diva_id + '\\:notes').after(qcButton)
 
-    //Skapa en knapp vid "Anmärknings-fältet", radera det som finns i fältet och sätt in QC + dagens datum
     $('#qcclearButton').remove();
     var qcclearButton = $('<button id="qcclearButton" type="button">X + QC</button>');
     qcclearButton.on("click", function() {
@@ -850,43 +785,41 @@ function init() {
     $('#' + diva_id + '\\:notes').after(qcclearButton)
 
 
- /**
- * Funktion för att skapa en knapp vid "Annan organisation" för varje författare, för att sedan kunna radera detta fält när vi kopplat en KTH-person
- *
- */
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    //Funktion för att skapa en knapp vid "Annan organisation" för varje författare, 
+    //för att sedan kunna radera detta fält när vi kopplat en KTH-person
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
     var otherorg = $('#' + diva_id + '\\:authorSerie');
     var j = 0;
     $(otherorg).find("div.diva2addtextchoicecol:contains('Annan organisation') , div.diva2addtextchoicecol:contains('Other organisation')").each(function() {
         var thiz = this;
-
         //CLEAR ORG
         var clearorgButtonjq = $('<button id="clearorgButtonjq' + j + '" type="button">X</button>');
         //bind en clickfunktion som skall rensa fältet för "Annan organisation"
         clearorgButtonjq.on("click", function() {
             $(thiz).next().find('input').val("");
-            console.log(thiz);
         })
-
         $(this).parent().after(clearorgButtonjq);
         j++;
     });
 
-/**
- *  Knappar till LDAP, Leta KTH anställda, KTH Intra, Google och ORCiD
- *
- */
-    //Skapa knappar vid "Författar-avsnittet"(jquery)
+    //////////////////////////////////////////////////////////////////////////
+    //
+    //Knappar till LDAP, Leta KTH anställda, KTH Intra, Google och ORCiD
+    //
+    //////////////////////////////////////////////////////////////////////////
     var authors = $('#' + diva_id + '\\:authorSerie');
     var i = 0;
     $(authors).find('.diva2addtextarea').each(function() {
         var thiz = this;
-
         //LDAP/UG
         var ldapButtonjq = $('<button id="ldapButtonjq' + i + '" type="button">LDAP-info</button>');
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         ldapButtonjq.on("click", function() {
             $("#monkeyresultswrapper i").css("display", "inline-block");
-            $("#monkeyresults").html("");
+            $("#monkeyresults").html("Apan pratar med LDAP...");
             var fnamn = $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
             var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, "");  // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
             var enamn = $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
@@ -906,7 +839,7 @@ function init() {
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         letaButtonjq.on("click", function() {
             $("#monkeyresultswrapper i").css("display", "inline-block");
-            $("#monkeyresults").html("");
+            $("#monkeyresults").html("Apan pratar med Leta anställda...");
             var fnamn = $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
             var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
             var enamn = $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
@@ -919,7 +852,6 @@ function init() {
                 "&api_key=" + letaanstalldaapikey;
             callapi(url, processJSON_Response_LETA);
         })
-
         $(this).before(letaButtonjq)
 
         //KTH Intranät förnamn efternamn
@@ -936,7 +868,6 @@ function init() {
             console.log(newurl2);
             window.open(newurl2, '_blank'); // sök på förnamn efternamn på KTH Intranät
         })
-
         $(this).before(kthintraButtonjq)
 
         //Google.com förnamn + efternamn + KTH
@@ -950,7 +881,6 @@ function init() {
             var newurl = url.replace("$$$", "") // ta bort eventuella $$$ från efternamnen före sökning
             window.open(newurl, '_blank'); // sök på förnamn efternamn + KTH i google
         })
-
         $(this).before(googleButtonjq)
 
         //Sök i ORCiD
@@ -958,7 +888,7 @@ function init() {
         //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         orcidButtonjq.on("click", function() {
             $("#monkeyresultswrapper i").css("display", "inline-block");
-            $("#monkeyresults").html("");
+            $("#monkeyresults").html("Apan pratar med ORCiD...");
             var fnamn = $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
             var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
             var enamn = $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
@@ -971,11 +901,21 @@ function init() {
             console.log(url);
             callapi(url, processJSON_Response_ORCID);
         })
-
         $(this).before(orcidButtonjq);
-
         i++;
     });
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Hämtar Scopus-grejor automatiskt när posten öppnas - det Anders kallar headless
+    //
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    $("#monkeyresultswrapper i").css("display", "inline-block");
+    $("#monkeyresults").html("Apan pratar med Scopus...");
+    var url = "https://api.elsevier.com/content/abstract/doi/" +
+        $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() +
+        "?apiKey=" + scopusapikey;
+    callapi(url, processJSON_Response_scopus);
 }
 
 /**
@@ -1002,9 +942,13 @@ function actionFunction() {
 
 }
 
+//////////////////////////////////////////////////////////
+//
 //Bevaka uppdateringar i noden som författarna ligger i
 //Sker t ex efter "Koppla personpost"
 //Initiera apan på nytt.
+//
+///////////////////////////////////////////////////////////
 var observer = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
         var newNodes = mutation.addedNodes;
@@ -1026,10 +970,12 @@ var config = {
     characterData: true
 };
 
-/**
- * Hämta aktuellt id beroende på DiVA-läge (edit, publish, review eller import)
- *
- */
+///////////////////////////////////////////////////////////////////////////////////
+//
+//Hämta aktuellt id beroende på DiVA-läge (edit, publish, review eller import)
+//Vänta på att element har skapats av DiVA
+//
+///////////////////////////////////////////////////////////////////////////////////
 var diva_id
 var authortarget
 if (window.location.href.indexOf("editForm.jsf") !== -1) {
@@ -1068,14 +1014,17 @@ if (window.location.href.indexOf("editForm.jsf") !== -1) {
     diva_id = "addForm";
 }
 
-//Lägg in overlay för LDAP-resultat på sidan så den kan visas
-$('<div/>', {
-    id: 'ldapoverlay'
-}).appendTo('body.diva2margin');
+//Overlay för att visa "popup" på sidan
+var ldapoverlay = $('<div id="ldapoverlay"></div>');
+$('body.diva2margin').append(ldapoverlay);
 
-//Lägg in div för resultat
+//DIV för att visa Apans resultat till vänster på sidan
 var monkeyresults = $('<div id="monkeyresultswrapper"><h2>Apans resultat</h2><i class="fa fa-spinner fa-spin"></i><div id="monkeyresults" class="flexbox column"></div></div>');
 $('body.diva2margin').append(monkeyresults);
+
+//Visa loader...
+$("#monkeyresultswrapper i").css("display", "inline-block");
+$("#monkeyresults").html("Apan gör sig redo...");
 
 //Vänta tills fältet för anmärkning skapats (iframe)
 waitForKeyElements('#' + diva_id + '\\:notes_ifr', actionFunction);
@@ -1085,7 +1034,6 @@ var d = new Date();
 var day = addZero(d.getDate());
 var month = addZero(d.getMonth() + 1);
 var year = addZero(d.getFullYear());
-
 var QC = "QC " + year + month + day;
 
 function addZero(i) {
@@ -1126,7 +1074,7 @@ GM_addStyle(`
     font-size: 10px;
 }
 
-#ldapoverlay a {
+#monkeyresults a, #ldapoverlay a {
     font-size: 0.8rem !important;
 }
 
