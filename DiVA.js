@@ -1112,16 +1112,17 @@ GM_addStyle(`
 
 #monkeyresultswrapper {
     position:fixed; 
-    top:20px; 
+    top:0px; 
     left:0; 
-    width:400px; 
+    width:300px; 
     height:100%; 
     overflow:auto;
-    padding: 10px;
+    padding-left: 10px;
+    background: #ffffff
 }
 
 #monkeyresults {
-    padding-bottom: 10px;
+    padding: 0px 10px 10px 0px;
     font-size: 10px;
 }
 
