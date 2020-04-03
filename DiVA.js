@@ -13,6 +13,7 @@
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
 // @require  https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
+// @require  https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js
 // @grant    GM_xmlhttpRequest
 // @grant    GM_addStyle
 // @connect  apps.lib.kth.se
@@ -134,219 +135,45 @@ function monkeylogin() {
 }
 
 /**
- * Funktion för att anropa api:er
- *
- * @param {string} apiURL
- * @param {function} callback
+ * Sorterar en array(json response)
+ * 
+ * @param {*} array 
+ * @param  {...any} attrs 
+ * 
  */
-function callapi(apiURL, callback) {
-    GM_xmlhttpRequest({
-        method: "GET",
-        url: apiURL,
-        responseType: "json",
-        headers: {
-            "Accept": "application/json"
-        },
-        onload: callback,
-        onabort: reportAJAX_Error,
-        onerror: reportAJAX_Error,
-        ontimeout: reportAJAX_Error
+function sortByAttribute(array, ...attrs) {
+    let predicates = attrs.map(pred => {
+      let descending = pred.charAt(0) === '-' ? -1 : 1;
+      pred = pred.replace(/^-/, '');
+      return {
+        getter: o => o[pred],
+        descend: descending
+      };
     });
+    return array.map(item => {
+      return {
+        src: item,
+        compareValues: predicates.map(predicate => predicate.getter(item))
+      };
+    })
+    .sort((o1, o2) => {
+      let i = -1, result = 0;
+      while (++i < predicates.length) {
+        if (o1.compareValues[i] < o2.compareValues[i]) result = -1;
+        if (o1.compareValues[i] > o2.compareValues[i]) result = 1;
+        if (result *= predicates[i].descend) break;
+      }
+      return result;
+    })
+    .map(item => item.src);
 }
-
-/**
- * Funktion som hanterar API-svar och utför eventuella åtgärder.
- *
- * @param {object} response
- */
-
-function processJSON_Response_LDAP(response) {
-    if (response.status != 200 && response.status != 201) {
-        reportAJAX_Error(response);
-        return;
-    }
-
-    var html = '<div><h2>Information från KTH UG(LDAP)</h2>';
-
-    if (response.response) {
-        var json = response.response
-        if (response.status == 201) {
-            html += "<p>Inga användare hittades</p>";
-        } else {
-            //gå igenom alla users och lägg till i html
-            $.each(json.ugusers, function(key, value) {
-                html += "<p>" + json.ugusers[key].displayName + ", " +
-                    json.ugusers[key].ugKthid + ", " +
-                    json.ugusers[key].title + ", " +
-                    json.ugusers[key].kthPAGroupMembership +
-                    "</p>"
-            });
-        }
-    }
-    
-    html += '</div></div>'
-    $("#monkeyresultswrapper i").css("display", "none");
-    $('#monkeyresults').html(html);
-}
-
-/**
- * Funktion som hanterar API-svar och utför eventuella åtgärder.
- *
- * @param {object} response
- */
-function processJSON_Response_LETA(response) {
-    if (response.status != 200 && response.status != 201) {
-        reportAJAX_Error(response);
-        return;
-    }
-
-    var html = '<div><h2>Information från Leta anställda</h2>';
-
-    if (response.response) {
-
-        var json = response.response
-        if (response.status == 201) {
-            html += "<p>Inga användare hittades</p>";
-        } else {
-            //gå igenom alla users och lägg till i html
-            $.each(json, function(key, value) {
-                html += "<p>" + json[key].Fnamn + " " + json[key].Enamn + ", " +
-                    json[key].KTH_id + ", " +
-                    json[key].ORCIDid + ", " +
-                    json[key].Orgnamn + ", " +
-                    json[key].skola + ", " +
-                    json[key].datum +
-                    "</p>"
-            });
-        }
-    }
-
-    html += '</div></div>'
-    $("#monkeyresultswrapper i").css("display", "none");
-    $('#monkeyresults').html(html);
-    /*
-    $('#ldapoverlay').html(html);
-    $('#ldapoverlay').css("display", "block");
-    //Stängknapp till overlay
-    var closeButton = $('#close');
-    closeButton.click(function() {
-        $('#ldapoverlay').css("display", "none");
-        $('#ldapoverlay').html('');
-    });
-    */
-}
-
-/**
- * Funktion som hanterar API-svar och utför eventuella åtgärder.
- *
- * @param {object} response
- */
-function processJSON_Response_ORCID(response) {
-    if (response.status != 200 && response.status != 201) {
-        reportAJAX_Error(response);
-        return;
-    }
-
-    var html = '<div><h2>Information från ORCiD</h2>';
-    if (response.response) {
-
-        var json = response.response
-        if (response.status == 201) {
-            html += "<p>Inga användare hittades</p>";
-        } else {
-            //gå igenom alla users och lägg till i html
-            $.each(json, function(key, value) {
-                html += '<p><a target="_new" href="' + json[key]['orcid-identifier'].uri + '">' +
-                    json[key]['orcid-identifier'].uri + ", " + json[key].person.name['family-name'].value + " " + json[key].person.name['given-names'].value
-                if (json[key]["activities-summary"].employments["affiliation-group"].length > 0) {
-                    console.log(json[key]["activities-summary"].employments["affiliation-group"])
-                    $.each(json[key]["activities-summary"].employments["affiliation-group"], function(empkey, empvalue) {
-                        html += ", " + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"].organization.name
-                        if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"]) {
-                            if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year) {
-                                html += ", " + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year.value
-                            }
-                            if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month) {
-                                html += "-" + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month.value
-                            }
-                            if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day) {
-                                html += "-" + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day.value
-                            }
-                        }
-                    })
-                }
-                html += '</a></p>'
-            });
-        }
-        $("#monkeyresultswrapper i").css("display", "none");
-        $('#monkeyresults').html(html);
-    }
-}
-
-/**
- * Funktion som hanterar API-svar från Scopus och utför eventuella åtgärder.
- *
- * @param {object} response
- */
-function processJSON_Response_scopus(response) {
-    $("#monkeyresultswrapper i").css("display", "inline-block");
-    if (response.status != 200 && response.status != 201) {
-        reportAJAX_Error(response);
-        return;
-    }
-
-    var html = '';
-
-    if (response.response) {
-        var json = response.response
-        if (response.status == 201) {
-            html += "<p>Hittade inget i Scopus</p>";
-        } else {
-            //hitta ScopusId
-            var eid = response.response['abstracts-retrieval-response']['coredata']['eid']; //plocka värdet för ScopusId (eid)
-            if(eid == "" 
-                || typeof eid === 'undefined' 
-                || eid == 'undefined') {
-                html += '<p>PubMedID hittades inte</p>';
-            } else {
-                html += '<p>Uppdaterat ScopusID: ' + eid + '</p>';
-            }
-            $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
-            var pmid = response.response['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
-            console.log(pmid)
-            if(pmid == "" 
-                || typeof pmid === 'undefined' 
-                || pmid == 'undefined') {
-                html += '<p>PubMedID hittades inte</p>';
-            } else {
-                html += '<p>Uppdaterat PubMedID: ' + pmid + '</p>';
-            }
-            $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
-
-            var oa = response.response['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
-
-            if (oa == 'true') { //sen jag bytte till absract search funkar detta som str men inte som boolean, varför?
-                document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
-            } else {
-                document.getElementById(diva_id + ":doiFree").checked = false; // checka inte boxen... eller avchecka den
-            }
-            $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-            $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-            $(window).scrollTop(0);
-            
-        };
-        $("#monkeyresultswrapper i").css("display", "none");
-        $('#monkeyresults').html(html);
-    }
-};
-
 
 /**
  * Funktion som hanterar fel från api:er
  *
  * @param {object} response
  */
-function reportAJAX_Error(response) {
+function api_error(response) {
     console.error(`Error ${response.status}!  ${response.statusText}`);
     $("#monkeyresultswrapper i").css("display", "none");
     $('#monkeyresults').html('<p>' + response.statusText + '</p>');
@@ -526,9 +353,7 @@ function init() {
     var DiVAButtonjq = $('<button id="DiVAButtonjq" type="button">Sök i DiVA</button>');
     //bind en clickfunktion som anropar "DiVA-API" med titelfältet
     var $maintitleiframe;
-    waitForKeyElements("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')", function() {
-        $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
-    });
+    $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
     DiVAButtonjq.on("click", function() {
         getDiVA($maintitleiframe.contents().find("body").html(), 'csl_json');
     })
@@ -537,17 +362,15 @@ function init() {
     $(".diva2reviewmainer").before(DiVAButtonjq)
     $(".diva2pubmainer").before(DiVAButtonjq)
 
-    /**
-     * Fixar titelfälten; bryta vid kolon samt dekapitalisera kapitaliserade bokstäver ;)
-     *
-     *
-     */
-    //Skapa en knapp vid titelfältet för att splitta titel i huvud- och undertitel vid kolon :
-    var $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
+    ///////////////////////////////////////////////////////////
+    //
+    // Skapa en knapp vid titelfältet för att splitta 
+    // titel i huvud- och undertitel vid kolon :
+    //
+    ///////////////////////////////////////////////////////////
     var $subtitleiframe = $("div.diva2addtextchoicecol:contains('Undertitel:') , div.diva2addtextchoicecol:contains('Subtitle:')").next().find('iframe').first();
     $('#titlesplitButtonjq').remove();
     var titlesplitButtonjq = $('<button id="titlesplitButtonjq" type="button">Split : </button>');
-    //bind en clickfunktion
     titlesplitButtonjq.on("click", function() {
         var maintitle = $maintitleiframe.contents().find("body").html();
         var subtitle = $subtitleiframe.contents().find("body").html();
@@ -560,7 +383,12 @@ function init() {
     var s_title = $("div.diva2addtextchoicebr:contains('Titel'), div.diva2addtextchoicebr:contains('Title')").not($("div.diva2addtextchoicebr:contains('Alternativ'), div.diva2addtextchoicebr:contains('Alternative')"))
     $(s_title).before(titlesplitButtonjq)
 
-    //Skapa en knapp vid titelfältet för att ändra versaler till gemener förutom första bokstaven
+    ///////////////////////////////////////////////////////////
+    //
+    // Skapa en knapp vid titelfältet för att ändra versaler 
+    // till gemener förutom första bokstaven
+    //
+    ///////////////////////////////////////////////////////////
     $('#caseButtonjq').remove();
     var caseButtonjq = $('<button id="caseButtonjq" type="button">A->a</button>');
     //bind en clickfunktion
@@ -576,12 +404,16 @@ function init() {
     var c_title = $("div.diva2addtextchoicebr:contains('Titel'), div.diva2addtextchoicebr:contains('Title')").not($("div.diva2addtextchoicebr:contains('Alternativ'), div.diva2addtextchoicebr:contains('Alternative')"));
     $(c_title).before(caseButtonjq)
 
-    //Skapa en knapp vid titelfältet för proceedings, att splitta titel i huvud- och undertitel vid kolon :
+    ///////////////////////////////////////////////////////////
+    //
+    // Skapa en knapp vid titelfältet för proceedings, 
+    // att splitta titel i huvud- och undertitel vid kolon :
+    //
+    ///////////////////////////////////////////////////////////
     var $procmaintitleiframe = $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding') , div.diva2addtextchoice2:contains('Part of proceedings')").parent().next().next().find('iframe').first();
     var $procsubtitleiframe = $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding') , div.diva2addtextchoice2:contains('Part of proceedings')").parent().next().next().next().next().find('iframe').first();
     $('#proctitlesplitButtonjq').remove();
     var proctitlesplitButtonjq = $('<button id="proctitlesplitButtonjq" type="button">Split : </button>');
-    //bind en clickfunktion
     proctitlesplitButtonjq.on("click", function() {
         var procmaintitle = $procmaintitleiframe.contents().find("body").html();
         var procsubtitle = $procsubtitleiframe.contents().find("body").html();
@@ -591,11 +423,15 @@ function init() {
         $procsubtitleiframe.contents().find("body").html(procsubtitle);
     })
     $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding'), div.diva2addtextchoice2:contains('Part of proceedings')").parent().before(proctitlesplitButtonjq)
-
-    //Skapa en knapp vid titelfältet för proceedings, att ändra versaler till gemener förutom första bokstaven
+    
+    ///////////////////////////////////////////////////////////
+    //
+    // Skapa en knapp vid titelfältet för proceedings, 
+    // att ändra versaler till gemener förutom första bokstaven
+    //
+    ///////////////////////////////////////////////////////////
     $('#proctitlecaseButtonjq').remove();
     var proctitlecaseButtonjq = $('<button id="proctitlecaseButtonjq" type="button">A->a</button>');
-    //bind en clickfunktion
     proctitlecaseButtonjq.on("click", function() {
         var procmaintitle = $procmaintitleiframe.contents().find("body").html();
         var procsubtitle = $procsubtitleiframe.contents().find("body").html();   
@@ -606,12 +442,16 @@ function init() {
     })
     $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding'), div.diva2addtextchoice2:contains('Part of proceedings')").parent().before(proctitlecaseButtonjq)
 
-    //Skapa en knapp vid titelfältet för böcker, att splitta titel i huvud- och undertitel vid kolon :
+    ///////////////////////////////////////////////////////////
+    //
+    // Skapa en knapp vid titelfältet för böcker, 
+    // att splitta titel i huvud- och undertitel vid kolon :
+    //
+    ///////////////////////////////////////////////////////////
     var $bookmaintitleiframe = $("div.diva2addtextchoice2:contains('Ingår i bok') , div.diva2addtextchoice2:contains('Part of book')").parent().next().next().find('iframe').first();
     var $booksubtitleiframe = $("div.diva2addtextchoice2:contains('Ingår i bok') , div.diva2addtextchoice2:contains('Part of book')").parent().next().next().next().next().find('iframe').first();
     $('#booktitlesplitButtonjq').remove();
     var booktitlesplitButtonjq = $('<button id="booktitlesplitButtonjq" type="button">Split : </button>');
-    //bind en clickfunktion
     booktitlesplitButtonjq.on("click", function() {
         var bookmaintitle = $bookmaintitleiframe.contents().find("body").html();
         var booksubtitle = $booksubtitleiframe.contents().find("body").html();
@@ -622,10 +462,13 @@ function init() {
     })
     $("div.diva2addtextchoice2:contains('Ingår i bok'), div.diva2addtextchoice2:contains('Part of book')").parent().before(booktitlesplitButtonjq)
 
+    ///////////////////////////////////////////////////////////
+    //
     //Skapa en knapp vid titelfältet för böcker, att ändra versaler till gemener förutom första bokstaven
+    //
+    ///////////////////////////////////////////////////////////
     $('#booktitlecaseButtonjq').remove();
     var booktitlecaseButtonjq = $('<button id="booktitlecaseButtonjq" type="button">A->a</button>');
-    //bind en clickfunktion
     booktitlecaseButtonjq.on("click", function() {
         var bookmaintitle = $bookmaintitleiframe.contents().find("body").html();
         var booksubtitle = $booksubtitleiframe.contents().find("body").html();
@@ -636,12 +479,16 @@ function init() {
     })
     $("div.diva2addtextchoice2:contains('Ingår i bok'), div.diva2addtextchoice2:contains('Part of book')").parent().before(booktitlecaseButtonjq)
 
-    //Skapa en knapp vid alternativtitelfältet, att splitta titel i huvud- och undertitel vid kolon :
+    ///////////////////////////////////////////////////////////
+    //
+    // Skapa en knapp vid alternativtitelfältet, 
+    // att splitta titel i huvud- och undertitel vid kolon :
+    //
+    ///////////////////////////////////////////////////////////
     var $altmaintitleiframe = $("div.diva2addtextchoice2:contains('Alternativ') , div.diva2addtextchoice2:contains('Alternative')").parent().next().find('iframe').first();
     var $altsubtitleiframe = $("div.diva2addtextchoice2:contains('Alternativ') , div.diva2addtextchoice2:contains('Alternative')").parent().next().next().next().find('iframe').first();
     $('#alttitlesplitButtonjq').remove();
     var alttitlesplitButtonjq = $('<button id="alttitlesplitButtonjq" type="button">Split : </button>');
-    //bind en clickfunktion
     alttitlesplitButtonjq.on("click", function() {
         var altmaintitle = $altmaintitleiframe.contents().find("body").html();
         var altsubtitle = $altsubtitleiframe.contents().find("body").html();
@@ -652,10 +499,14 @@ function init() {
     })
     $("div.diva2addtextchoice2:contains('Alternativ'), div.diva2addtextchoice2:contains('Alternative')").parent().before(alttitlesplitButtonjq)
 
-    //Skapa en knapp vid alternativtitelfältet, att ändra versaler till gemener förutom första bokstaven
+    ///////////////////////////////////////////////////////////////
+    //
+    // Skapa en knapp vid alternativtitelfältet, 
+    // att ändra versaler till gemener förutom första bokstaven
+    //
+    ///////////////////////////////////////////////////////////////
     $('#alttitlecaseButtonjq').remove();
     var alttitlecaseButtonjq = $('<button id="alttitlecaseButtonjq" type="button">A->a</button>');
-    //bind en clickfunktion
     alttitlecaseButtonjq.on("click", function() {
         var altmaintitle = $altmaintitleiframe.contents().find("body").html();
         var altsubtitle = $altsubtitleiframe.contents().find("body").html();
@@ -664,18 +515,15 @@ function init() {
         $altmaintitleiframe.contents().find("body").html(changedaltmaintitle);
         $altsubtitleiframe.contents().find("body").html(changedaltsubtitle);
     })
-
     $("div.diva2addtextchoice2:contains('Alternativ'), div.diva2addtextchoice2:contains('Alternative')").parent().before(alttitlecaseButtonjq)
 
-    /////////////////////////////////////
+    ////////////////////////////////////////
     //
-    // WoS och "Clarivate" kommer här
+    // WoS och "Clarivate" knappar vid ISI
     //
-    /////////////////////////////////////
-    //Skapa en knapp vid "ISI-fältet"
+    ////////////////////////////////////////
     $('#WoSButtonjq').remove();
     var WoSButtonjq = $('<button id="WoSButtonjq" type="button">WoS</button>');
-    //bind en clickfunktion som anropar WoS med värdet i DOI-fältet
     WoSButtonjq.on("click", function() {
         var url = "https://focus.lib.kth.se/login?url=https://ws.isiknowledge.com/cps/openurl/service?url_ver=Z39.88-2004&req_id=mailto%3Apublicering%40kth.se&&rft_id=info%3Adoi%2F" +
             $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() +
@@ -684,10 +532,8 @@ function init() {
     })
     $("div.diva2addtextchoicecol:contains('ISI')").before(WoSButtonjq)
 
-    //Skapa en knapp vid "ISI-fältet"
     $('#clarivateButtonjq').remove();
     var clarivateButtonjq = $('<button id="clarivateButtonjq" type="button" class="buttonload"><i class="fa fa-spinner fa-spin"></i>Clarivate</button>');
-    //bind en clickfunktion som anropar WoS med värdet i DOI-fältet
     clarivateButtonjq.on("click", function() {
         getClarivate($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
     })
@@ -700,12 +546,8 @@ function init() {
     ////////////////////////////////////
     $('#scopusButtonjq').remove();
     var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Scopus</button>');
-    //bind en clickfunktion som anropar API med värdet i DOI-fältet
     scopusButtonjq.on("click", function() {
-        var url = "https://api.elsevier.com/content/abstract/doi/" +
-            $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() +
-            "?apiKey=" + scopusapikey;
-        callapi(url, processJSON_Response_scopus);
+        getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
     })
     $("div.diva2addtextchoicecol:contains('ScopusID')").before(scopusButtonjq)
 
@@ -814,49 +656,30 @@ function init() {
     var i = 0;
     $(authors).find('.diva2addtextarea').each(function() {
         var thiz = this;
+
         //LDAP/UG
         var ldapButtonjq = $('<button id="ldapButtonjq' + i + '" type="button">LDAP-info</button>');
-        //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         ldapButtonjq.on("click", function() {
-            $("#monkeyresultswrapper i").css("display", "inline-block");
-            $("#monkeyresults").html("Apan pratar med LDAP...");
-            var fnamn = $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
-            var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, "");  // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
-            var enamn = $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
-            var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
-            var url = "https://lib.kth.se/ldap/api/v1/users/" +
-                fnamn2 +
-                "* " +
-                enamn2 +
-                " *" +
-                "?token=" + ldapapikey;
-            callapi(url, processJSON_Response_LDAP);
+            getLDAP($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val());
         })
         $(this).before(ldapButtonjq)
 
         //Leta KTH-anställda
         var letaButtonjq = $('<button id="letaButtonjq' + i + '" type="button">Leta anställda</button>');
-        //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
         letaButtonjq.on("click", function() {
-            $("#monkeyresultswrapper i").css("display", "inline-block");
-            $("#monkeyresults").html("Apan pratar med Leta anställda...");
-            var fnamn = $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
-            var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
-            var enamn = $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
-            var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
-            var url = "https://apps-ref.lib.kth.se/webservices/letaanstallda/api/v1/users?fname=" +
-                fnamn2 +
-                "%&ename=" +
-                enamn2 +
-                "%" +
-                "&api_key=" + letaanstalldaapikey;
-            callapi(url, processJSON_Response_LETA);
+            getLeta($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val());
         })
         $(this).before(letaButtonjq)
 
+        //Sök i ORCiD
+        var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök ORCiD</button>');
+        orcidButtonjq.on("click", function() {
+            getOrcid($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val());
+        })
+        $(this).before(orcidButtonjq);
+
         //KTH Intranät förnamn efternamn
         var kthintraButtonjq = $('<button id="kthintraButtonjq' + i + '" type="button">KTH Intra</button>');
-        //bind en clickfunktion som anropar KTH Intranät med de värden som finns i för- och efternamn
         kthintraButtonjq.on("click", function() {
             var url = "https://www.kth.se/search?q=" +
                 $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val() +
@@ -872,7 +695,6 @@ function init() {
 
         //Google.com förnamn + efternamn + KTH
         var googleButtonjq = $('<button id="googleButtonjq' + i + '" type="button">Google</button>');
-        //bind en clickfunktion som anropar google.com med de värden som finns i för- och efternamn
         googleButtonjq.on("click", function() {
             var url = "https://www.google.com/search?q=KTH+" +
                 $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val() +
@@ -883,39 +705,255 @@ function init() {
         })
         $(this).before(googleButtonjq)
 
-        //Sök i ORCiD
-        var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök ORCiD</button>');
-        //bind en clickfunktion som anropar API med de värden som finns i för- och efternamn
-        orcidButtonjq.on("click", function() {
-            $("#monkeyresultswrapper i").css("display", "inline-block");
-            $("#monkeyresults").html("Apan pratar med ORCiD...");
-            var fnamn = $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val()
-            var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
-            var enamn = $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
-            var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
-            var url = "https://lib.kth.se/orcid/api/v1/orcid/" +
-                enamn2 +
-                "/" +
-                fnamn2 +
-                "/?token=" + orcidapikey;
-            console.log(url);
-            callapi(url, processJSON_Response_ORCID);
-        })
-        $(this).before(orcidButtonjq);
         i++;
     });
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     //
-    // Hämtar Scopus-grejor automatiskt när posten öppnas - det Anders kallar headless
+    // Hämtar diverse automatiskt när posten öppnas - det Anders kallar headless
+    //
+    // T ex från Scopus, WoS
     //
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+}
+
+function getOrcid(fnamn, enamn) {
+    $("#monkeyresultswrapper i").css("display", "inline-block");
+    $("#monkeyresults").html("Apan pratar med ORCiD...");
+    var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
+    var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
+
+    var url = "https://lib.kth.se/orcid/api/v1/orcid/" + enamn2 + "/" + fnamn2 + "/?token=" + orcidapikey;
+    axios.get(url)
+        .then(function (response) {
+            if (response.status != 200 && response.status != 201) {
+                api_error(response);
+                return;
+            }
+            var html = '<div><h2>Information från ORCiD</h2>';
+            if (response.data) {
+        
+                var json = response.data
+                if (response.status == 201) {
+                    html += "<p>Inga användare hittades</p>";
+                } else {                            
+                    $.each(json, function(key, value) {
+                        html += '<div class="ldapusers flexbox column" style="padding-bottom: 5px;padding-top: 5px;border-bottom: 1px solid">';
+                        html += '<div>' + 
+                                    '<span>Namn: </span>' + 
+                                    '<span>' + 
+                                        '<a target="_new" href="' + json[key]['orcid-identifier'].uri + '">' + 
+                                            json[key].person.name['family-name'].value + " " + json[key].person.name['given-names'].value + 
+                                        '</a>' +
+                                    '</span>' +
+                                '</div>'
+                        if (json[key]["activities-summary"].employments["affiliation-group"].length > 0) {
+                            $.each(json[key]["activities-summary"].employments["affiliation-group"], function(empkey, empvalue) {
+                                html += '<div>' + 
+                                            '<span>Org: </span>' + 
+                                            '<span>' + 
+                                                json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"].organization.name +
+                                            '</span>' + 
+                                        '</div>'
+                                if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"]) {
+                                    if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year) {
+                                        html += '<div>' + 
+                                                    '<span>Year: </span>' + 
+                                                    '<span>' + 
+                                                        json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year.value +
+                                                    '</span>' + 
+                                                '</div>'
+                                    }
+                                    if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month) {
+                                        html += '<div>' + 
+                                                    '<span>Year: </span>' + 
+                                                    '<span>' + 
+                                                        json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month.value +
+                                                    '</span>' + 
+                                                '</div>'
+                                    }
+                                    if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day) {
+                                        html += '<div>' + 
+                                                    '<span>Year: </span>' + 
+                                                    '<span>' + 
+                                                        json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day.value +
+                                                    '</span>' + 
+                                                '</div>'
+                                    }
+                                }
+                            })
+                        }
+                        html += '</div>'
+                    });
+                }
+            }
+            html += '</div>'
+            $("#monkeyresultswrapper i").css("display", "none");
+            $('#monkeyresults').html(html);
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+        .then(function () {
+        });
+}
+
+function getLDAP(fnamn, enamn) {
+    $("#monkeyresultswrapper i").css("display", "inline-block");
+    $("#monkeyresults").html("Apan pratar med LDAP...");
+    var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
+    var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
+    var url = "https://lib.kth.se/ldap/api/v1/users/" +
+                fnamn2 +
+                "* " +
+                enamn2 +
+                " *" +
+                "?token=" + ldapapikey;
+    axios.get(url)
+        .then(function (response) {
+            if (response.status != 200 && response.status != 201) {
+                api_error(response);
+                return;
+            }
+        
+            var html = '<div><h2>Information från KTH UG(LDAP)</h2>';
+        
+            if (response.data) {
+                var json = response.data
+                if (response.status == 201) {
+                    html += "<p>Inga användare hittades</p>";
+                } else {
+                    //gå igenom alla users och lägg till i html
+                    //Sortering
+                    json.ugusers = sortByAttribute(json.ugusers, 'sn', 'givenName')
+                    $.each(json.ugusers, function(key, value) {
+                        html += '<div class="ldapusers flexbox column" style="padding-bottom: 5px;padding-top: 5px;border-bottom: 1px solid">';
+                        html += "<div><span>Efternamn: </span><span>" + json.ugusers[key].sn + "</span></div>" +
+                        "<div><span>Förnamn: </span><span>" + json.ugusers[key].givenName + "</span></div>" +
+                        "<div><span>Kthid: </span><span>" + json.ugusers[key].ugKthid + "</span></div>" +
+                        "<div><span>Titel: </span><span>" + json.ugusers[key].title + "</span></div>" +
+                        "<div><span>Skola/org: </span><span>" + json.ugusers[key].kthPAGroupMembership + "</span></div>"
+                        html += '</div>';
+                    });
+                    
+                }
+            }
+            
+            html += '</div>'
+            $("#monkeyresultswrapper i").css("display", "none");
+            $('#monkeyresults').html(html);
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+        .then(function () {
+        });
+}
+
+function getLeta(fnamn, enamn) {
+    $("#monkeyresultswrapper i").css("display", "inline-block");
+    $("#monkeyresults").html("Apan pratar med Leta anställda...");
+    var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
+    var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
+    var url = "https://apps-ref.lib.kth.se/webservices/letaanstallda/api/v1/users?fname=" +
+                fnamn2 +
+                "%&ename=" +
+                enamn2 +
+                "%" +
+                "&api_key=" + letaanstalldaapikey;
+    axios.get(url)
+        .then(function (response) {
+            if (response.status != 200 && response.status != 201) {
+                api_error(response);
+                return;
+            }
+        
+            var html = '<div><h2>Information från Leta anställda</h2>';
+        
+            if (response.data) {
+                var json = response.data
+                if (response.status == 201) {
+                    html += "<p>Inga användare hittades</p>";
+                } else {
+                    //gå igenom alla users och lägg till i html
+                    $.each(json, function(key, value) {
+                        html += "<p>" + json[key].Fnamn + " " + json[key].Enamn + ", " +
+                            json[key].KTH_id + ", " +
+                            json[key].ORCIDid + ", " +
+                            json[key].Orgnamn + ", " +
+                            json[key].skola + ", " +
+                            json[key].datum +
+                            "</p>"
+                    });
+                }
+            }
+        
+            html += '</div></div>'
+            $("#monkeyresultswrapper i").css("display", "none");
+            $('#monkeyresults').html(html);
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+        .then(function () {
+        });
+}
+
+function getScopus(doi) {
     $("#monkeyresultswrapper i").css("display", "inline-block");
     $("#monkeyresults").html("Apan pratar med Scopus...");
     var url = "https://api.elsevier.com/content/abstract/doi/" +
-        $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() +
-        "?apiKey=" + scopusapikey;
-    callapi(url, processJSON_Response_scopus);
+        doi +
+        "?apiKey=f37c94f0e0ac2b22130965e88d76d788"// + scopusapikey;
+    axios.get(url)
+        .then(function (response) {
+            console.log(response)
+            var html = '';
+            if (response.status == 201) {
+                html += "<p>Hittade inget i Scopus</p>";
+            } else {
+                //hitta ScopusId
+                var eid = response.data['abstracts-retrieval-response']['coredata']['eid']; //plocka värdet för ScopusId (eid)
+                if(eid == "" 
+                    || typeof eid === 'undefined' 
+                    || eid == 'undefined') {
+                    html += '<p>PubMedID hittades inte</p>';
+                } else {
+                    html += '<p>Uppdaterat ScopusID: ' + eid + '</p>';
+                }
+                $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
+                var pmid = response.data['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
+                console.log(pmid)
+                if(pmid == "" 
+                    || typeof pmid === 'undefined' 
+                    || pmid == 'undefined') {
+                    html += '<p>PubMedID hittades inte</p>';
+                } else {
+                    html += '<p>Uppdaterat PubMedID: ' + pmid + '</p>';
+                }
+                $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
+    
+                var oa = response.data['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
+    
+                if (oa == 'true') { //sen jag bytte till absract search funkar detta som str men inte som boolean, varför?
+                    document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
+                } else {
+                    document.getElementById(diva_id + ":doiFree").checked = false; // checka inte boxen... eller avchecka den
+                }
+                $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                $(window).scrollTop(0);
+                
+            };
+            $("#monkeyresultswrapper i").css("display", "none");
+            $('#monkeyresults').html(html);
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+        .then(function () {
+        });
 }
 
 /**
@@ -1078,6 +1116,10 @@ GM_addStyle(`
     font-size: 0.8rem !important;
 }
 
+.ldapusers span {
+    word-break: break-all;
+}
+
 .flexbox {
     display: flex;
 }
@@ -1105,6 +1147,7 @@ button {
     font-size: 1rem;
     line-height: 1.5;
     border-radius: .25rem;
+    outline: none;
 }
 
 #ldapoverlay {
