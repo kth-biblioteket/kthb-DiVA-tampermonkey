@@ -41,8 +41,9 @@
     var orcid_apiurl = 'https://lib.kth.se/orcid/api/v1/orcid/';
     var letaanstallda_apiurl = 'https://apps-ref.lib.kth.se/webservices/letaanstallda/api/v1/';
     var scopus_apiurl = 'https://api.elsevier.com/content/abstract/doi/';
-    var dblp_apiurl1 = 'https://dblp.uni-trier.de/doi/xml/'
-    var dblp_apiurl2 = 'https://dblp.uni-trier.de/rec/xml/'
+    var wos_apiurl = 'https://apps.lib.kth.se/alma/wos/wosapi_b.php?source=wos&doi=';
+    var dblp_apiurl1 = 'https://dblp.uni-trier.de/doi/xml/';
+    var dblp_apiurl2 = 'https://dblp.uni-trier.de/rec/xml/';
     var diva_searchurl = 'https://kth.diva-portal.org/smash/export.jsf';
 
     var observer_config = {
@@ -80,7 +81,7 @@
         if (token) {
             $.ajax({
                 type: 'POST',
-                url: 'https://lib.kth.se/ldap/api/v1/divamonkey',
+                url: ldap_apiurl + 'divamonkey',
                 dataType: 'JSON',
                 headers: {
                     'x-access-token': token
@@ -142,7 +143,7 @@
             var password = $('#password').val();
             $.ajax({
                 type: 'POST',
-                url: 'https://lib.kth.se/ldap/api/v1/login',
+                url:  ldap_apiurl + 'login',
                 dataType: 'JSON',
                 data: {
                     username: username,
@@ -847,7 +848,7 @@
     function getWoS(doi) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $("#monkeyresults").html("Apan pratar med Scopus...");
-        var url = 'https://apps.lib.kth.se/alma/wos/wosapi_b.php?source=wos&doi=' + doi;
+        var url = wos_apiurl + doi;
         axios.get(url)
             .then(function (response) {
                 var html = '';
