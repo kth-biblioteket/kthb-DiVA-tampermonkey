@@ -597,6 +597,7 @@
         //
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
         getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+        getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
     }
 
     function getOrcid(fnamn, enamn) {
@@ -632,31 +633,23 @@
                                                     json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"].organization.name +
                                                 '</span>' + 
                                             '</div>'
+                                    var date;
                                     if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"]) {
                                         if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year) {
-                                            html += '<div>' + 
-                                                        '<span class="fieldtitle">Year: </span>' + 
-                                                        '<span>' + 
-                                                            json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year.value +
-                                                        '</span>' + 
-                                                    '</div>'
+                                            date = json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year.value
                                         }
                                         if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month) {
-                                            html += '<div>' + 
-                                                        '<span class="fieldtitle">Year: </span>' + 
-                                                        '<span>' + 
-                                                            json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month.value +
-                                                        '</span>' + 
-                                                    '</div>'
+                                            date += '-' + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month.value 
                                         }
                                         if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day) {
-                                            html += '<div>' + 
-                                                        '<span class="fieldtitle">Year: </span>' + 
-                                                        '<span>' + 
-                                                            json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day.value +
-                                                        '</span>' + 
-                                                    '</div>'
+                                            date += '-' + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day.value 
                                         }
+                                        html += '<div>' + 
+                                                    '<span class="fieldtitle">Datum: </span>' + 
+                                                    '<span>' + 
+                                                        date +
+                                                    '</span>' + 
+                                                '</div>'
                                     }
                                 })
                             }
@@ -794,7 +787,7 @@
             '?apiKey=' + scopus_apikey;
         axios.get(url)
             .then(function (response) {
-                var html = '';
+                var html = '<div><h2>Data uppdaterad från Scopus</h2>';
                 if (response.status == 201) {
                     html += "<p>Hittade inget i Scopus</p>";
                 } else {
@@ -831,7 +824,8 @@
                     
                 };
                 $("#monkeyresultswrapper i").css("display", "none");
-                $('#monkeyresults').html(html);
+                $('#monkeyupdates').html(html + $('#monkeyupdates').html());
+                $("#monkeyresults").html("");
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -847,11 +841,11 @@
      */
     function getWoS(doi) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $("#monkeyresults").html("Apan pratar med Scopus...");
+        $("#monkeyresults").html("Apan pratar med Web of Science...");
         var url = wos_apiurl + doi;
         axios.get(url)
             .then(function (response) {
-                var html = '';
+                var html = '<div><h2>Data uppdaterad från Web of Science</h2>';
                 if (response.status == 201) {
                     html += "<p>Hittade inget i Web of Science</p>";
                 } else {
@@ -881,7 +875,8 @@
                     
                 };
                 $("#monkeyresultswrapper i").css("display", "none");
-                $('#monkeyresults').html(html);
+                $('#monkeyupdates').html(html + $('#monkeyupdates').html());
+                $("#monkeyresults").html("");
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -1060,7 +1055,22 @@
     $('body.diva2margin').append($('<div id="ldapoverlay"></div>'));
 
     //DIV för att visa Apans resultat till vänster på sidan
-    $('body.diva2margin').append($('<div id="monkeyresultswrapper"><h2>Apans resultat</h2><i class="fa fa-spinner fa-spin"></i><div id="monkeyresults" class="flexbox column"></div></div>'));
+    $('body.diva2margin')
+    .append($('<div id="monkeyresultswrapper">' + 
+                '<h2>Apans Arbete <i class="fa fa-spinner fa-spin"></i></h2>' + 
+                '' + 
+                '<div>' +
+                    'Apans uppdateringar' +
+                '</div>' +
+                '<div id="monkeyupdates" class="flexbox column">' +
+                '</div>' + 
+                '<hr class="solid">' +
+                '<div>' +
+                    'Apans resultat' +
+                '</div>' +
+                '<div id="monkeyresults" class="flexbox column">' +
+                '</div>' + 
+            '</div>'));
 
     //Visa loader...
     $("#monkeyresultswrapper i").css("display", "inline-block");
@@ -1091,6 +1101,21 @@
 GM_addStyle(`
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css");
 
+::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 10px;
+}
+  
+::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background-color: rgba(0,0,0,.5);
+    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
+
+#monkeyresultswrapper i {
+    font-size: 40px;
+}
+
 #wosapiButtonjq i,
 #monkeyresultswrapper i {
     display: none;
@@ -1113,13 +1138,24 @@ GM_addStyle(`
     background: #ffffff
 }
 
-#monkeyresults {
-    padding: 0px 10px 10px 0px;
+#monkeyupdates {
+    height: 150px;
+    overflow: auto;
+}
+
+#monkeyresults ,
+#monkeyupdates {
+    padding: 10px;
     font-size: 10px;
+    margin-bottom: 10px;
 }
 
 #monkeyresults a, #ldapoverlay a {
     font-size: 0.8rem !important;
+}
+
+hr.solid {
+    border-top: 3px solid #bbb;
 }
 
 .inforecord span {
