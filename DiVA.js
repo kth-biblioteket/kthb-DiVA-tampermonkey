@@ -214,6 +214,7 @@
         console.error(`Error ${response.status}!  ${response.statusText}`);
         $("#monkeyresultswrapper i").css("display", "none");
         $('#monkeyresults').html('<p>' + response.statusText + '</p>');
+        $('.monkeytalk').html('Nu blev det fel!');
     }
 
     /**
@@ -340,7 +341,8 @@
 
         ///////////////////////////////////////////////////////////
         //
-        //Skapa en knapp vid titelfältet för böcker, att ändra versaler till gemener förutom första bokstaven
+        // Skapa en knapp vid titelfältet för böcker, 
+        // att ändra versaler till gemener förutom första bokstaven
         //
         ///////////////////////////////////////////////////////////
         $('#booktitlecaseButtonjq').remove();
@@ -429,7 +431,7 @@
 
         //////////////////////////////////////////////////
         //
-        //Knapp för dblp vid konferensfältet
+        // Knapp för dblp vid konferensfältet
         //
         //////////////////////////////////////////////////
         $('#dblpButtonjq').remove();
@@ -438,11 +440,11 @@
         dblpButtonjq.on("click", function() {
             getDblp($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
         })
-        $("div.diva2addtextchoicecol:contains('Konferens') , div.diva2addtextchoicecol:contains('Conference') ").after(dblpButtonjq);
+        $("div.diva2addtextchoicecol:contains('Konferens') , div.diva2addtextchoicecol:contains('Conference') ").parent().before(dblpButtonjq);
 
         /////////////////////////////////////////////////////
         //
-        //Knapp och länk till hjälpsida i Confluence
+        // Knapp och länk till hjälpsida i Confluence
         //
         /////////////////////////////////////////////////////
         $('#helpButtonjq').remove();
@@ -459,7 +461,7 @@
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         //
-        //Knapp och länk till extern sökning i KTH webb-DiVA för att se eventuella dubbletter
+        // Knapp och länk till extern sökning i KTH webb-DiVA för att se eventuella dubbletter
         //
         ///////////////////////////////////////////////////////////////////////////////////////////////
         $('#dubblettButtonjq').remove();
@@ -478,7 +480,7 @@
 
         /////////////////////////////////
         //
-        //QC och X + QC
+        // QC och X + QC
         //
         /////////////////////////////////
         var d = new Date();
@@ -511,8 +513,8 @@
 
         ///////////////////////////////////////////////////////////////////////////////////
         //
-        //Funktion för att skapa en knapp vid "Annan organisation" för varje författare, 
-        //för att sedan kunna radera detta fält när vi kopplat en KTH-person
+        // Funktion för att skapa en knapp vid "Annan organisation" för varje författare, 
+        // för att sedan kunna radera detta fält när vi kopplat en KTH-person
         //
         ///////////////////////////////////////////////////////////////////////////////////
         var otherorg = $('#' + diva_id + '\\:authorSerie');
@@ -520,12 +522,13 @@
         $(otherorg).find("div.diva2addtextchoicecol:contains('Annan organisation') , div.diva2addtextchoicecol:contains('Other organisation')").each(function() {
             var thiz = this;
             //CLEAR ORG
-            var clearorgButtonjq = $('<button id="clearorgButtonjq' + j + '" type="button">X</button>');
+            var clearorgButtonjq = $('<button class="clearbutton" id="clearorgButtonjq' + j + '" type="button">X</button>');
             //bind en clickfunktion som skall rensa fältet för "Annan organisation"
             clearorgButtonjq.on("click", function() {
                 $(thiz).next().find('input').val("");
             })
-            $(this).parent().after(clearorgButtonjq);
+            console.log($(this).closest('input'))
+            $(this).next().find('input').after(clearorgButtonjq);
             j++;
         });
 
@@ -602,7 +605,7 @@
 
     function getOrcid(fnamn, enamn) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $("#monkeyresults").html("Apan pratar med ORCiD...");
+        $(".monkeytalk").html("Jag pratar med ORCiD...");
         var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
         var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
 
@@ -660,6 +663,7 @@
                 html += '</div>'
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyresults').html(html);
+                $(".monkeytalk").html("");
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -676,7 +680,7 @@
      */
     function getLDAP(fnamn, enamn) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $("#monkeyresults").html("Apan pratar med LDAP...");
+        $(".monkeytalk").html("Jag pratar med LDAP...");
         var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
         var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
         var url = ldap_apiurl + 'users/' +
@@ -712,6 +716,7 @@
                 html += '</div>'
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyresults').html(html);
+                $(".monkeytalk").html("");
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -728,7 +733,7 @@
      */
     function getLeta(fnamn, enamn) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $("#monkeyresults").html("Apan pratar med Leta anställda...");
+        $(".monkeytalk").html("Jag pratar med Leta anställda...");
         var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
         var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
         var url = letaanstallda_apiurl + "users?fname=" +
@@ -761,6 +766,7 @@
                 html += '</div>'
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyresults').html(html);
+                $(".monkeytalk").html("");
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -781,7 +787,7 @@
             return;
         }
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $("#monkeyresults").html("Apan pratar med Scopus...");
+        $(".monkeytalk").html("Jag pratar med Scopus...");
         var url = scopus_apiurl +
             doi +
             '?apiKey=' + scopus_apikey;
@@ -826,6 +832,7 @@
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyupdates').html(html + $('#monkeyupdates').html());
                 $("#monkeyresults").html("");
+                $(".monkeytalk").html("");
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -841,7 +848,7 @@
      */
     function getWoS(doi) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $("#monkeyresults").html("Apan pratar med Web of Science...");
+        $(".monkeytalk").html("Jag pratar med Web of Science...");
         var url = wos_apiurl + doi;
         axios.get(url)
             .then(function (response) {
@@ -877,6 +884,7 @@
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyupdates').html(html + $('#monkeyupdates').html());
                 $("#monkeyresults").html("");
+                $(".monkeytalk").html("");
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -893,7 +901,7 @@
      */
     function getDiVA(titleAll, format) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $("#monkeyresults").html("Apan pratar med DiVA...");
+        $(".monkeytalk").html("Jag pratar med DiVA...");
         var url = diva_searchurl + '?format=' + format + '&addFilename=true&aq=[[{"titleAll":"' +
             titleAll + '"}]]&aqe=[]&aq2=[[]]&onlyFullText=false&noOfRows=50&sortOrder=title_sort_asc&sortOrder2=title_sort_asc';
         axios.get(url)
@@ -935,6 +943,7 @@
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
+            $(".monkeytalk").html("");
         })
         .catch(function (error) {
             api_error(error.response);
@@ -955,7 +964,7 @@
             return;
         }
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $("#monkeyresults").html("Apan pratar med DBLP...");
+        $(".monkeytalk").html("Jag pratar med DBLP...");
         var url = dblp_apiurl1 + doi;
         axios.get(url)
             .then(function (response) {
@@ -982,6 +991,7 @@
                 html += '</div>'
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyresults').html(html);
+                $(".monkeytalk").html("");
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -1057,8 +1067,15 @@
     //DIV för att visa Apans resultat till vänster på sidan
     $('body.diva2margin')
     .append($('<div id="monkeyresultswrapper">' + 
-                '<h2>Apans Arbete <i class="fa fa-spinner fa-spin"></i></h2>' + 
-                '' + 
+                '<div>' +
+                    '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' + 
+                    '<img class="monkeytalkbubble" src="https://apps.lib.kth.se/divaapan/monkeytalk.png">' +
+                    '<i class="fa fa-spinner fa-spin"></i>' +
+                    '<span class="monkeytalk"></span>' + 
+                '</div>' +
+                '<div class="monkeyheader">' +
+                    '<span>DiVA-Apan</span>' + 
+                '</div>' +
                 '<div>' +
                     'Apans uppdateringar' +
                 '</div>' +
@@ -1074,7 +1091,7 @@
 
     //Visa loader...
     $("#monkeyresultswrapper i").css("display", "inline-block");
-    $("#monkeyresults").html("Apan gör sig redo...");
+    $(".monkeytalk").html("Jag gör mig redo...");
 
     // Vilket DiVA-läge (edit, publish, review eller import)
     if (window.location.href.indexOf("editForm.jsf") !== -1) {
@@ -1112,8 +1129,35 @@ GM_addStyle(`
     -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
 }
 
+.logo {
+    width: 80px;
+}
+
+.monkeytalkbubble {
+    width: 200px;
+    height: 65px;
+    position: absolute;
+}
+
+.monkeytalk {
+    position: absolute;
+    top: 12px;
+    left: 160px;
+    font-size: 10px;
+    width: 110px;
+}
+
+.monkeyheader {
+    font-weight: bold;
+    font-size: 1.06em;
+    padding-bottom: 10px;
+}
+
 #monkeyresultswrapper i {
-    font-size: 40px;
+    font-size: 32px;
+    position: absolute;
+    top: 12px;
+    left: 124px;
 }
 
 #wosapiButtonjq i,
@@ -1198,7 +1242,14 @@ button {
 }
 
 button.link {
-    background-color: #0089ff;
+    background-color: #007fae;
+}
+
+.clearbutton {
+    line-height: 1;
+    height: 17px;
+    padding: 0px 10px;
+    font-size: 11px;
 }
 
 #ldapoverlay {
