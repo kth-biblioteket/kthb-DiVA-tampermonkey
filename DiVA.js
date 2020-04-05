@@ -221,7 +221,7 @@
      * Funktion för att initiera Apan
      *
      */
-    function init() {
+    async function init() {
         ///////////////////////////////////////////////////////////
         //
         // Skapa en DiVA-knapp överst
@@ -599,8 +599,10 @@
         // T ex från Scopus, WoS
         //
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
-        getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
-        getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+        getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
+        .then( function(result) {
+            getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+        });
     }
 
     function getOrcid(fnamn, enamn) {
@@ -780,18 +782,18 @@
      * 
      * @param {*} doi 
      */
-    function getScopus(doi) {
+    async function getScopus(doi) {
         if(doi == ""){
             $('#monkeyresults').html('Scopus: Ingen DOI finns!');
             $("#monkeyresultswrapper i").css("display", "none");
-            return;
+            return 0;
         }
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $(".monkeytalk").html("Jag pratar med Scopus...");
         var url = scopus_apiurl +
             doi +
             '?apiKey=' + scopus_apikey;
-        axios.get(url)
+        await axios.get(url)
             .then(function (response) {
                 var html = '<div><h2>Data uppdaterad från Scopus</h2>';
                 if (response.status == 201) {
@@ -833,6 +835,7 @@
                 $('#monkeyupdates').html(html + $('#monkeyupdates').html());
                 $("#monkeyresults").html("");
                 $(".monkeytalk").html("");
+                return 1;
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -846,7 +849,7 @@
      * 
      * @param {*} doi 
      */
-    function getWoS(doi) {
+    async function getWoS(doi) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $(".monkeytalk").html("Jag pratar med Web of Science...");
         var url = wos_apiurl + doi;
