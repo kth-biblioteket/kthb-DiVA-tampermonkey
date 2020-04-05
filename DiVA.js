@@ -248,6 +248,12 @@
                                             '</a>' +
                                         '</span>' +
                                     '</div>'
+                            html += '<div>' + 
+                                    '<span class="fieldtitle">ORCiD: </span>' + 
+                                    '<span>' +
+                                        json[key]['orcid-identifier'].path +
+                                    '</span>' +
+                                '</div>'
                             if (json[key]["activities-summary"].employments["affiliation-group"].length > 0) {
                                 $.each(json[key]["activities-summary"].employments["affiliation-group"], function(empkey, empvalue) {
                                     html += '<div>' + 
