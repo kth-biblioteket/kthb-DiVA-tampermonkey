@@ -218,6 +218,437 @@
     }
 
     /**
+     * Hämta info från ORCiD
+     * 
+     * @param {*} fnamn 
+     * @param {*} enamn 
+     */
+    function getOrcid(fnamn, enamn) {
+        $("#monkeyresultswrapper i").css("display", "inline-block");
+        $(".monkeytalk").html("Jag pratar med ORCiD...");
+        var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
+        var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
+
+        var url = orcid_apiurl + enamn2 + "/" + fnamn2 + "/?token=" + orcid_apikey;
+        axios.get(url)
+            .then(function (response) {
+                var html = '<div><h2>Information från ORCiD</h2>';
+                if (response.data) {
+                    var json = response.data
+                    if (response.status == 201) {
+                        html += "<p>Inga användare hittades</p>";
+                    } else {                            
+                        $.each(json, function(key, value) {
+                            html += '<div class="inforecord flexbox column">';
+                            html += '<div>' + 
+                                        '<span class="fieldtitle">Namn: </span>' + 
+                                        '<span>' + 
+                                            '<a target="_new" href="' + json[key]['orcid-identifier'].uri + '">' + 
+                                                json[key].person.name['family-name'].value + " " + json[key].person.name['given-names'].value + 
+                                            '</a>' +
+                                        '</span>' +
+                                    '</div>'
+                            if (json[key]["activities-summary"].employments["affiliation-group"].length > 0) {
+                                $.each(json[key]["activities-summary"].employments["affiliation-group"], function(empkey, empvalue) {
+                                    html += '<div>' + 
+                                                '<span class="fieldtitle">Org: </span>' + 
+                                                '<span>' + 
+                                                    json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"].organization.name +
+                                                '</span>' + 
+                                            '</div>'
+                                    var date;
+                                    if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"]) {
+                                        if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year) {
+                                            date = json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year.value
+                                        }
+                                        if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month) {
+                                            date += '-' + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month.value 
+                                        }
+                                        if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day) {
+                                            date += '-' + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day.value 
+                                        }
+                                        html += '<div>' + 
+                                                    '<span class="fieldtitle">Datum: </span>' + 
+                                                    '<span>' + 
+                                                        date +
+                                                    '</span>' + 
+                                                '</div>'
+                                    }
+                                })
+                            }
+                            html += '</div>'
+                        });
+                    }
+                }
+                html += '</div>'
+                $("#monkeyresultswrapper i").css("display", "none");
+                $('#monkeyresults').html(html);
+                $(".monkeytalk").html("");
+            })
+            .catch(function (error) {
+                api_error(error.response);
+            })
+            .then(function () {
+            });
+    }
+
+    /**
+     * Hämta info från LDAP
+     * 
+     * @param {*} fnamn 
+     * @param {*} enamn
+     * @param {*} kthid
+     */
+    function getLDAP(fnamn, enamn, kthid) {
+        $("#monkeyresultswrapper i").css("display", "inline-block");
+        $(".monkeytalk").html("Jag pratar med LDAP...");
+        var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
+        var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
+        var url = ldap_apiurl + 'users/' +
+                    fnamn2 +
+                    '* ' +
+                    enamn2 +
+                    ' *' +
+                    '?token=' + ldap_apikey;
+        if (kthid!= "") {
+            var url = ldap_apiurl + 'kthid/' +
+                    kthid +
+                    '?token=' + ldap_apikey;
+        }
+        
+        axios.get(url)
+            .then(function (response) {
+                var html = '<div><h2>Information från KTH UG(LDAP)</h2>';
+                if (response.data) {
+                    var json = response.data
+                    if (response.status == 201) {
+                        html += "<p>Inga användare hittades</p>";
+                    } else {
+                        //gå igenom alla users och lägg till i html
+                        //Sortering
+                        json.ugusers = sortByAttribute(json.ugusers, 'sn', 'givenName')
+                        $.each(json.ugusers, function(key, value) {
+                            html += '<div class="inforecord flexbox column">';
+                            html += '<div><span class="fieldtitle">Efternamn: </span><span>' + json.ugusers[key].sn + '</span></div>' +
+                            '<div><span class="fieldtitle">Förnamn: </span><span>' + json.ugusers[key].givenName + '</span></div>' +
+                            '<div><span class="fieldtitle">Kthid: </span><span>' + json.ugusers[key].ugKthid + '</span></div>' +
+                            '<div><span class="fieldtitle">Titel: </span><span>' + json.ugusers[key].title + '</span></div>' +
+                            '<div><span class="fieldtitle">Skola/org: </span><span>' + json.ugusers[key].kthPAGroupMembership + '</span></div>'
+                            html += '</div>';
+                        });
+                        
+                    }
+                }
+                
+                html += '</div>'
+                $("#monkeyresultswrapper i").css("display", "none");
+                $('#monkeyresults').html(html);
+                $(".monkeytalk").html("");
+            })
+            .catch(function (error) {
+                api_error(error.response);
+            })
+            .then(function () {
+            });
+    }
+
+    /**
+     * Hämta info från Leta anställda
+     * 
+     * @param {*} fnamn 
+     * @param {*} enamn 
+     */
+    function getLeta(fnamn, enamn) {
+        $("#monkeyresultswrapper i").css("display", "inline-block");
+        $(".monkeytalk").html("Jag pratar med Leta anställda...");
+        var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
+        var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
+        var url = letaanstallda_apiurl + "users?fname=" +
+                    fnamn2 +
+                    "%&ename=" +
+                    enamn2 +
+                    "%" +
+                    "&api_key=" + letaanstallda_apikey;
+        axios.get(url)
+            .then(function (response) {
+                var html = '<div><h2>Information från Leta anställda</h2>';
+                if (response.data) {
+                    var json = response.data
+                    if (response.status == 201) {
+                        html += "<p>Inga användare hittades</p>";
+                    } else {
+                        //gå igenom alla users och lägg till i html
+                        $.each(json, function(key, value) {
+                            html += "<p>" + json[key].Fnamn + " " + json[key].Enamn + ", " +
+                                json[key].KTH_id + ", " +
+                                json[key].ORCIDid + ", " +
+                                json[key].Orgnamn + ", " +
+                                json[key].skola + ", " +
+                                json[key].datum +
+                                "</p>"
+                        });
+                    }
+                }
+            
+                html += '</div>'
+                $("#monkeyresultswrapper i").css("display", "none");
+                $('#monkeyresults').html(html);
+                $(".monkeytalk").html("");
+            })
+            .catch(function (error) {
+                api_error(error.response);
+            })
+            .then(function () {
+            });
+    }
+
+    /**
+     * Hämta info från Scopus
+     * 
+     * @param {*} doi 
+     */
+    async function getScopus(doi) {
+        if(doi == ""){
+            $('#monkeytalk').html('Scopus: Ingen DOI finns!');
+            $("#monkeyresultswrapper i").css("display", "none");
+            return 0;
+        }
+        $("#monkeyresultswrapper i").css("display", "inline-block");
+        $(".monkeytalk").html("Jag pratar med Scopus...");
+        var url = scopus_apiurl +
+            doi +
+            '?apiKey=' + scopus_apikey;
+        await axios.get(url)
+            .then(function (response) {
+                var html = '<div><h2>Data uppdaterad från Scopus</h2>';
+                if (response.status == 201) {
+                    html += "<p>Hittade inget i Scopus</p>";
+                } else {
+                    //hitta ScopusId
+                    var eid = response.data['abstracts-retrieval-response']['coredata']['eid']; //plocka värdet för ScopusId (eid)
+                    if(eid == "" 
+                        || typeof eid === 'undefined' 
+                        || eid == 'undefined') {
+                        html += '<p>PubMedID hittades inte</p>';
+                    } else {
+                        html += '<p>Uppdaterat ScopusID: ' + eid + '</p>';
+                        $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
+                    }
+                    
+                    var pmid = response.data['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
+                    if(pmid == "" 
+                        || typeof pmid === 'undefined' 
+                        || pmid == 'undefined') {
+                        html += '<p>PubMedID hittades inte</p>';
+                    } else {
+                        html += '<p>Uppdaterat PubMedID: ' + pmid + '</p>';
+                        $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
+                    }
+                    
+                    var oa = response.data['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
+                    if (oa == 'true') { //sen jag bytte till absract search funkar detta som str men inte som boolean, varför?
+                        document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
+                    } else {
+                        document.getElementById(diva_id + ":doiFree").checked = false; // checka inte boxen... eller avchecka den
+                    }
+                    $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                    $(window).scrollTop(0);
+                    
+                };
+                $("#monkeyresultswrapper i").css("display", "none");
+                $('#monkeyupdates').html(html + $('#monkeyupdates').html());
+                $(".monkeytalk").html("");
+                return 1;
+            })
+            .catch(function (error) {
+                api_error(error.response);
+            })
+            .then(function () {
+            });
+    }
+
+    /**
+     * Hämta info från Web of Science
+     * 
+     * @param {*} doi 
+     */
+    async function getWoS(doi) {
+        $("#monkeyresultswrapper i").css("display", "inline-block");
+        $(".monkeytalk").html("Jag pratar med Web of Science...");
+        var url = wos_apiurl + doi;
+        axios.get(url)
+            .then(function (response) {
+                var html = '<div><h2>Data uppdaterad från Web of Science</h2>';
+                if (response.status == 201) {
+                    html += "<p>Hittade inget i Web of Science</p>";
+                } else {
+                    var isi = response.data.wos.ut; //plocka värdet för ScopusId (eid)
+                    if(isi == "" 
+                        || typeof isi === 'undefined' 
+                        || isi == 'undefined') {
+                        html += '<p>ISI hittades inte</p>';
+                    } else {
+                        html += '<p>Uppdaterat ISI: ' + isi + '</p>';
+                        $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val(isi); // skriv in värdet för ISI/UT i fältet för ISI
+                    }
+                   
+                    var pmid = response.data.wos.pmid; //plocka värdet för PubMedID (PMID
+                    if(pmid == "" 
+                        || typeof pmid === 'undefined' 
+                        || pmid == 'undefined') {
+                        html += '<p>PubMedID hittades inte</p>';
+                    } else {
+                        html += '<p>Uppdaterat PubMedID: ' + pmid + '</p>';
+                        $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
+                    }
+                    $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                    //$(window).scrollTop(0);
+                    
+                };
+                $("#monkeyresultswrapper i").css("display", "none");
+                $('#monkeyupdates').html(html + $('#monkeyupdates').html());
+                $(".monkeytalk").html("");
+            })
+            .catch(function (error) {
+                api_error(error.response);
+            })
+            .then(function () {
+            });
+    }
+
+     /**
+     * Funktion för att anropa DiVA och hämta information via "search"
+     *
+     * @param {string} titleAll
+     * @param {string} format (csl_json=json, mods=xml)
+     */
+    function getDiVA(titleAll, format) {
+        $("#monkeyresultswrapper i").css("display", "inline-block");
+        $(".monkeytalk").html("Jag pratar med DiVA...");
+        var url = diva_searchurl + '?format=' + format + '&addFilename=true&aq=[[{"titleAll":"' +
+            titleAll + '"}]]&aqe=[]&aq2=[[]]&onlyFullText=false&noOfRows=50&sortOrder=title_sort_asc&sortOrder2=title_sort_asc';
+        axios.get(url)
+        .then(function (response) {
+            var html = '<div><h2>Information från DiVA, Söktext: ' + titleAll + '</h2>';
+            if (response.data) {
+                var json = response.data
+                if (response.status == 201) {
+                    html += "<p>Inga användare hittades</p>";
+                } else {
+                    $(response.data).find('mods').each(function(i, j) {
+                        html += '<div class="inforecord flexbox column">';
+                        html += '<div><span class="fieldtitle">Status: </span><span>' + $(j).find('note[type="publicationStatus"]').text() + '</span></div>' +
+                            '<div><span class="fieldtitle">ID: </span><span>' + $(j).find('recordIdentifier').text() + '</span></div>' +
+                            '<div><span class="fieldtitle">Note: </span><span>' + $(j).find('note[type!="publicationStatus"]').text() + '</span></div>' +
+                            '<div><span class="fieldtitle">DOI: </span><span>' + $(j).find('identifier[type="doi"]').text() + '</span></div>' +
+                            '<div><span class="fieldtitle">ScopusID: </span><span>' + $(j).find('identifier[type="scopus"]').text() + '</span></div>' +
+                            '<div><span class="fieldtitle">Created: </span><span>' + $(j).find('recordCreationDate').text() + '</span></div>' +
+                            '<div><span class="fieldtitle">Changed: </span><span>' + $(j).find('recordChangeDate').text() + '</span></div>' +
+                            '<div><span class="fieldtitle">Origin: </span><span>' + $(j).find('recordOrigin').text() + '</span></div>' +
+                            '<div><span class="fieldtitle">Source: </span><span>' + $(j).find('recordContentSource').text() + '</span></div>'
+                        html += '</div>';
+                    });
+                    /*
+                    $.each(response.data, function(key, value) {
+                        html += '<p>Status: ' + response.data[key].status + '</p>' +
+                            '<p>ID: ' + response.data[key].id + '</p>' +
+                            '<p>Note: ' + response.data[key].note + '</p>' +
+                            '<p>DOI: ' + response.data[key].DOI + '</p>' +
+                            '<p>ScopusId: ' + response.data[key].ScopusId + '</p>' +
+                            '<p>Created: ' + response.data[key].created[0].raw + '</p>' +
+                            '<p>Updated: ' + response.data[key].updated[0].raw + '</p>' +
+                            '</br>'
+                    });
+                    */
+                }
+            }
+        
+            html += '</div>'
+            $("#monkeyresultswrapper i").css("display", "none");
+            $('#monkeyresults').html(html);
+            $(".monkeytalk").html("");
+        })
+        .catch(function (error) {
+            api_error(error.response);
+        })
+        .then(function () {
+        });
+    }
+
+    /**
+     * Funktion för att anropa DBLP och hämta information via DOI
+     * 
+     * @param {string} doi 
+     */
+    function getDblp(doi) {
+        if(doi == ""){
+            $('#monkeyresults').html('DBLP: Ingen DOI finns!');
+            $("#monkeyresultswrapper i").css("display", "none");
+            return;
+        }
+        $("#monkeyresultswrapper i").css("display", "inline-block");
+        $(".monkeytalk").html("Jag pratar med DBLP...");
+        var url = dblp_apiurl1 + doi;
+        axios.get(url)
+            .then(function (response) {
+                var html = '<div><h2>Information från dblp, DOI: ' + doi + '</h2>';
+                if ($(response.data).find("crossref").text()) {
+                    var url = dblp_apiurl2 + $(response.data).find("crossref").text();
+                    axios.get(url)
+                        .then(function (response) {
+                            html += '<div class="inforecord flexbox column">';
+                            html += '<div><span class="fieldtitle">Title: </span><span>' + $(response.data).find("title").text() + '</span></div>' +
+                                    '<div><span class="fieldtitle">Series: </span><span>' + $(response.data).find("series").text() + '</span></div>' +
+                                    '<div><span class="fieldtitle">Volume: </span><span>' + $(response.data).find("volume").text() + '</span></div>'
+                            html += '</div>';
+                        })
+                        .catch(function (error) {
+                            api_error(error.response);
+                        })
+                        .then(function () {
+                        });
+                } else {
+                    html += "<p>Inga info hittades</p>";
+                }
+                
+                html += '</div>'
+                $("#monkeyresultswrapper i").css("display", "none");
+                $('#monkeyresults').html(html);
+                $(".monkeytalk").html("");
+            })
+            .catch(function (error) {
+                api_error(error.response);
+            })
+            .then(function () {
+            });
+    }
+
+    //////////////////////////////////////////////////////////
+    //
+    // Bevaka uppdateringar i noden som författarna ligger i
+    // Sker t ex efter "Koppla personpost"
+    // Initiera apan på nytt.
+    //
+    ///////////////////////////////////////////////////////////
+    function mutationCallback(mutations) {
+        mutations.forEach(function(mutation) {
+            var newNodes = mutation.addedNodes;
+            if (newNodes !== null) {
+                init();
+                var $nodes = $(newNodes);
+                $nodes.each(function() {
+                    var $node = $(this);
+                    if ($node.prop("id") == diva_id + ':authorSerie') {
+                        console.log('author uppdaterad')
+                    }
+                });
+            }
+        });
+    };
+
+    /**
      * Funktion för att initiera Apan
      *
      */
@@ -527,7 +958,6 @@
             clearorgButtonjq.on("click", function() {
                 $(thiz).next().find('input').val("");
             })
-            console.log($(this).closest('input'))
             $(this).next().find('input').after(clearorgButtonjq);
             j++;
         });
@@ -545,7 +975,7 @@
             //LDAP/UG
             var ldapButtonjq = $('<button id="ldapButtonjq' + i + '" type="button">LDAP-info</button>');
             ldapButtonjq.on("click", function() {
-                getLDAP($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val());
+                getLDAP($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val(),'');
             })
             $(this).before(ldapButtonjq)
 
@@ -603,428 +1033,11 @@
         .then( function(result) {
             getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
         });
-    }
-
-    function getOrcid(fnamn, enamn) {
-        $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med ORCiD...");
-        var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
-        var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
-
-        var url = orcid_apiurl + enamn2 + "/" + fnamn2 + "/?token=" + orcid_apikey;
-        axios.get(url)
-            .then(function (response) {
-                var html = '<div><h2>Information från ORCiD</h2>';
-                if (response.data) {
-                    var json = response.data
-                    if (response.status == 201) {
-                        html += "<p>Inga användare hittades</p>";
-                    } else {                            
-                        $.each(json, function(key, value) {
-                            html += '<div class="inforecord flexbox column">';
-                            html += '<div>' + 
-                                        '<span class="fieldtitle">Namn: </span>' + 
-                                        '<span>' + 
-                                            '<a target="_new" href="' + json[key]['orcid-identifier'].uri + '">' + 
-                                                json[key].person.name['family-name'].value + " " + json[key].person.name['given-names'].value + 
-                                            '</a>' +
-                                        '</span>' +
-                                    '</div>'
-                            if (json[key]["activities-summary"].employments["affiliation-group"].length > 0) {
-                                $.each(json[key]["activities-summary"].employments["affiliation-group"], function(empkey, empvalue) {
-                                    html += '<div>' + 
-                                                '<span class="fieldtitle">Org: </span>' + 
-                                                '<span>' + 
-                                                    json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"].organization.name +
-                                                '</span>' + 
-                                            '</div>'
-                                    var date;
-                                    if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"]) {
-                                        if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year) {
-                                            date = json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year.value
-                                        }
-                                        if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month) {
-                                            date += '-' + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month.value 
-                                        }
-                                        if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day) {
-                                            date += '-' + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day.value 
-                                        }
-                                        html += '<div>' + 
-                                                    '<span class="fieldtitle">Datum: </span>' + 
-                                                    '<span>' + 
-                                                        date +
-                                                    '</span>' + 
-                                                '</div>'
-                                    }
-                                })
-                            }
-                            html += '</div>'
-                        });
-                    }
-                }
-                html += '</div>'
-                $("#monkeyresultswrapper i").css("display", "none");
-                $('#monkeyresults').html(html);
-                $(".monkeytalk").html("");
-            })
-            .catch(function (error) {
-                api_error(error.response);
-            })
-            .then(function () {
-            });
-    }
-
-    /**
-     * Hämta info från LDAP
-     * 
-     * @param {*} fnamn 
-     * @param {*} enamn 
-     */
-    function getLDAP(fnamn, enamn) {
-        $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med LDAP...");
-        var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
-        var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
-        var url = ldap_apiurl + 'users/' +
-                    fnamn2 +
-                    '* ' +
-                    enamn2 +
-                    ' *' +
-                    '?token=' + ldap_apikey;
-        axios.get(url)
-            .then(function (response) {
-                var html = '<div><h2>Information från KTH UG(LDAP)</h2>';
-                if (response.data) {
-                    var json = response.data
-                    if (response.status == 201) {
-                        html += "<p>Inga användare hittades</p>";
-                    } else {
-                        //gå igenom alla users och lägg till i html
-                        //Sortering
-                        json.ugusers = sortByAttribute(json.ugusers, 'sn', 'givenName')
-                        $.each(json.ugusers, function(key, value) {
-                            html += '<div class="inforecord flexbox column">';
-                            html += '<div><span class="fieldtitle">Efternamn: </span><span>' + json.ugusers[key].sn + '</span></div>' +
-                            '<div><span class="fieldtitle">Förnamn: </span><span>' + json.ugusers[key].givenName + '</span></div>' +
-                            '<div><span class="fieldtitle">Kthid: </span><span>' + json.ugusers[key].ugKthid + '</span></div>' +
-                            '<div><span class="fieldtitle">Titel: </span><span>' + json.ugusers[key].title + '</span></div>' +
-                            '<div><span class="fieldtitle">Skola/org: </span><span>' + json.ugusers[key].kthPAGroupMembership + '</span></div>'
-                            html += '</div>';
-                        });
-                        
-                    }
-                }
-                
-                html += '</div>'
-                $("#monkeyresultswrapper i").css("display", "none");
-                $('#monkeyresults').html(html);
-                $(".monkeytalk").html("");
-            })
-            .catch(function (error) {
-                api_error(error.response);
-            })
-            .then(function () {
-            });
-    }
-
-    /**
-     * Hämta info från Leta anställda
-     * 
-     * @param {*} fnamn 
-     * @param {*} enamn 
-     */
-    function getLeta(fnamn, enamn) {
-        $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med Leta anställda...");
-        var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
-        var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
-        var url = letaanstallda_apiurl + "users?fname=" +
-                    fnamn2 +
-                    "%&ename=" +
-                    enamn2 +
-                    "%" +
-                    "&api_key=" + letaanstallda_apikey;
-        axios.get(url)
-            .then(function (response) {
-                var html = '<div><h2>Information från Leta anställda</h2>';
-                if (response.data) {
-                    var json = response.data
-                    if (response.status == 201) {
-                        html += "<p>Inga användare hittades</p>";
-                    } else {
-                        //gå igenom alla users och lägg till i html
-                        $.each(json, function(key, value) {
-                            html += "<p>" + json[key].Fnamn + " " + json[key].Enamn + ", " +
-                                json[key].KTH_id + ", " +
-                                json[key].ORCIDid + ", " +
-                                json[key].Orgnamn + ", " +
-                                json[key].skola + ", " +
-                                json[key].datum +
-                                "</p>"
-                        });
-                    }
-                }
-            
-                html += '</div>'
-                $("#monkeyresultswrapper i").css("display", "none");
-                $('#monkeyresults').html(html);
-                $(".monkeytalk").html("");
-            })
-            .catch(function (error) {
-                api_error(error.response);
-            })
-            .then(function () {
-            });
-    }
-
-    /**
-     * Hämta info från Scopus
-     * 
-     * @param {*} doi 
-     */
-    async function getScopus(doi) {
-        if(doi == ""){
-            $('#monkeyresults').html('Scopus: Ingen DOI finns!');
-            $("#monkeyresultswrapper i").css("display", "none");
-            return 0;
-        }
-        $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med Scopus...");
-        var url = scopus_apiurl +
-            doi +
-            '?apiKey=' + scopus_apikey;
-        await axios.get(url)
-            .then(function (response) {
-                var html = '<div><h2>Data uppdaterad från Scopus</h2>';
-                if (response.status == 201) {
-                    html += "<p>Hittade inget i Scopus</p>";
-                } else {
-                    //hitta ScopusId
-                    var eid = response.data['abstracts-retrieval-response']['coredata']['eid']; //plocka värdet för ScopusId (eid)
-                    if(eid == "" 
-                        || typeof eid === 'undefined' 
-                        || eid == 'undefined') {
-                        html += '<p>PubMedID hittades inte</p>';
-                    } else {
-                        html += '<p>Uppdaterat ScopusID: ' + eid + '</p>';
-                        $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
-                    }
-                    
-                    var pmid = response.data['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
-                    if(pmid == "" 
-                        || typeof pmid === 'undefined' 
-                        || pmid == 'undefined') {
-                        html += '<p>PubMedID hittades inte</p>';
-                    } else {
-                        html += '<p>Uppdaterat PubMedID: ' + pmid + '</p>';
-                        $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
-                    }
-                    
-                    var oa = response.data['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
-                    if (oa == 'true') { //sen jag bytte till absract search funkar detta som str men inte som boolean, varför?
-                        document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
-                    } else {
-                        document.getElementById(diva_id + ":doiFree").checked = false; // checka inte boxen... eller avchecka den
-                    }
-                    $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                    $(window).scrollTop(0);
-                    
-                };
-                $("#monkeyresultswrapper i").css("display", "none");
-                $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-                $("#monkeyresults").html("");
-                $(".monkeytalk").html("");
-                return 1;
-            })
-            .catch(function (error) {
-                api_error(error.response);
-            })
-            .then(function () {
-            });
-    }
-
-    /**
-     * Hämta info från Web of Science
-     * 
-     * @param {*} doi 
-     */
-    async function getWoS(doi) {
-        $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med Web of Science...");
-        var url = wos_apiurl + doi;
-        axios.get(url)
-            .then(function (response) {
-                var html = '<div><h2>Data uppdaterad från Web of Science</h2>';
-                if (response.status == 201) {
-                    html += "<p>Hittade inget i Web of Science</p>";
-                } else {
-                    console.log(response.data)
-                    var isi = response.data.wos.ut; //plocka värdet för ScopusId (eid)
-                    if(isi == "" 
-                        || typeof isi === 'undefined' 
-                        || isi == 'undefined') {
-                        html += '<p>ISI hittades inte</p>';
-                    } else {
-                        html += '<p>Uppdaterat ISI: ' + isi + '</p>';
-                        $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val(isi); // skriv in värdet för ISI/UT i fältet för ISI
-                    }
-                   
-                    var pmid = response.data.wos.pmid; //plocka värdet för PubMedID (PMID
-                    if(pmid == "" 
-                        || typeof pmid === 'undefined' 
-                        || pmid == 'undefined') {
-                        html += '<p>PubMedID hittades inte</p>';
-                    } else {
-                        html += '<p>Uppdaterat PubMedID: ' + pmid + '</p>';
-                        $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
-                    }
-                    $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                    //$(window).scrollTop(0);
-                    
-                };
-                $("#monkeyresultswrapper i").css("display", "none");
-                $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-                $("#monkeyresults").html("");
-                $(".monkeytalk").html("");
-            })
-            .catch(function (error) {
-                api_error(error.response);
-            })
-            .then(function () {
-            });
-    }
-
-     /**
-     * Funktion för att anropa DiVA och hämta information via "search"
-     *
-     * @param {string} titleAll
-     * @param {string} format (csl_json=json, mods=xml)
-     */
-    function getDiVA(titleAll, format) {
-        $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med DiVA...");
-        var url = diva_searchurl + '?format=' + format + '&addFilename=true&aq=[[{"titleAll":"' +
-            titleAll + '"}]]&aqe=[]&aq2=[[]]&onlyFullText=false&noOfRows=50&sortOrder=title_sort_asc&sortOrder2=title_sort_asc';
-        axios.get(url)
-        .then(function (response) {
-            var html = '<div><h2>Information från DiVA, Söktext: ' + titleAll + '</h2>';
-            if (response.data) {
-                var json = response.data
-                if (response.status == 201) {
-                    html += "<p>Inga användare hittades</p>";
-                } else {
-                    $(response.data).find('mods').each(function(i, j) {
-                        html += '<div class="inforecord flexbox column">';
-                        html += '<div><span class="fieldtitle">Status: </span><span>' + $(j).find('note[type="publicationStatus"]').text() + '</span></div>' +
-                            '<div><span class="fieldtitle">ID: </span><span>' + $(j).find('recordIdentifier').text() + '</span></div>' +
-                            '<div><span class="fieldtitle">Note: </span><span>' + $(j).find('note[type!="publicationStatus"]').text() + '</span></div>' +
-                            '<div><span class="fieldtitle">DOI: </span><span>' + $(j).find('identifier[type="doi"]').text() + '</span></div>' +
-                            '<div><span class="fieldtitle">ScopusID: </span><span>' + $(j).find('identifier[type="scopus"]').text() + '</span></div>' +
-                            '<div><span class="fieldtitle">Created: </span><span>' + $(j).find('recordCreationDate').text() + '</span></div>' +
-                            '<div><span class="fieldtitle">Changed: </span><span>' + $(j).find('recordChangeDate').text() + '</span></div>' +
-                            '<div><span class="fieldtitle">Origin: </span><span>' + $(j).find('recordOrigin').text() + '</span></div>' +
-                            '<div><span class="fieldtitle">Source: </span><span>' + $(j).find('recordContentSource').text() + '</span></div>'
-                        html += '</div>';
-                    });
-                    /*
-                    $.each(response.data, function(key, value) {
-                        html += '<p>Status: ' + response.data[key].status + '</p>' +
-                            '<p>ID: ' + response.data[key].id + '</p>' +
-                            '<p>Note: ' + response.data[key].note + '</p>' +
-                            '<p>DOI: ' + response.data[key].DOI + '</p>' +
-                            '<p>ScopusId: ' + response.data[key].ScopusId + '</p>' +
-                            '<p>Created: ' + response.data[key].created[0].raw + '</p>' +
-                            '<p>Updated: ' + response.data[key].updated[0].raw + '</p>' +
-                            '</br>'
-                    });
-                    */
-                }
-            }
         
-            html += '</div>'
-            $("#monkeyresultswrapper i").css("display", "none");
-            $('#monkeyresults').html(html);
-            $(".monkeytalk").html("");
-        })
-        .catch(function (error) {
-            api_error(error.response);
-        })
-        .then(function () {
-        });
-    }
+        getLDAP('', '', $('.diva2identifier:eq(2)').html())
+    
 
-    /**
-     * Funktion för att anropa DBLP och hämta information via DOI
-     * 
-     * @param {string} doi 
-     */
-    function getDblp(doi) {
-        if(doi == ""){
-            $('#monkeyresults').html('DBLP: Ingen DOI finns!');
-            $("#monkeyresultswrapper i").css("display", "none");
-            return;
-        }
-        $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med DBLP...");
-        var url = dblp_apiurl1 + doi;
-        axios.get(url)
-            .then(function (response) {
-                var html = '<div><h2>Information från dblp, DOI: ' + doi + '</h2>';
-                if ($(response.data).find("crossref").text()) {
-                    var url = dblp_apiurl2 + $(response.data).find("crossref").text();
-                    axios.get(url)
-                        .then(function (response) {
-                            html += '<div class="inforecord flexbox column">';
-                            html += '<div><span class="fieldtitle">Title: </span><span>' + $(response.data).find("title").text() + '</span></div>' +
-                                    '<div><span class="fieldtitle">Series: </span><span>' + $(response.data).find("series").text() + '</span></div>' +
-                                    '<div><span class="fieldtitle">Volume: </span><span>' + $(response.data).find("volume").text() + '</span></div>'
-                            html += '</div>';
-                        })
-                        .catch(function (error) {
-                            api_error(error.response);
-                        })
-                        .then(function () {
-                        });
-                } else {
-                    html += "<p>Inga info hittades</p>";
-                }
-                
-                html += '</div>'
-                $("#monkeyresultswrapper i").css("display", "none");
-                $('#monkeyresults').html(html);
-                $(".monkeytalk").html("");
-            })
-            .catch(function (error) {
-                api_error(error.response);
-            })
-            .then(function () {
-            });
     }
-
-    //////////////////////////////////////////////////////////
-    //
-    // Bevaka uppdateringar i noden som författarna ligger i
-    // Sker t ex efter "Koppla personpost"
-    // Initiera apan på nytt.
-    //
-    ///////////////////////////////////////////////////////////
-    function mutationCallback(mutations) {
-        mutations.forEach(function(mutation) {
-            var newNodes = mutation.addedNodes;
-            if (newNodes !== null) {
-                init();
-                var $nodes = $(newNodes);
-                $nodes.each(function() {
-                    var $node = $(this);
-                    if ($node.prop("id") == diva_id + ':authorSerie') {
-                        console.log('author uppdaterad')
-                    }
-                });
-            }
-        });
-    };
 
     /**
      * Funktion som startar Apan beroende på läge(edit, import etc)
