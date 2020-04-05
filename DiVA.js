@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.0.15
+// @version      1.1.1
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -619,7 +619,7 @@
                         html += "<p>Inga användare hittades</p>";
                     } else {                            
                         $.each(json, function(key, value) {
-                            html += '<div class="inforecord flexbox column" style="padding-bottom: 5px;padding-top: 5px;border-bottom: 1px solid">';
+                            html += '<div class="inforecord flexbox column">';
                             html += '<div>' + 
                                         '<span class="fieldtitle">Namn: </span>' + 
                                         '<span>' + 
@@ -701,7 +701,7 @@
                         //Sortering
                         json.ugusers = sortByAttribute(json.ugusers, 'sn', 'givenName')
                         $.each(json.ugusers, function(key, value) {
-                            html += '<div class="inforecord flexbox column" style="padding-bottom: 5px;padding-top: 5px;border-bottom: 1px solid">';
+                            html += '<div class="inforecord flexbox column">';
                             html += '<div><span class="fieldtitle">Efternamn: </span><span>' + json.ugusers[key].sn + '</span></div>' +
                             '<div><span class="fieldtitle">Förnamn: </span><span>' + json.ugusers[key].givenName + '</span></div>' +
                             '<div><span class="fieldtitle">Kthid: </span><span>' + json.ugusers[key].ugKthid + '</span></div>' +
@@ -913,7 +913,7 @@
                     html += "<p>Inga användare hittades</p>";
                 } else {
                     $(response.data).find('mods').each(function(i, j) {
-                        html += '<div class="inforecord flexbox column" style="padding-bottom: 5px;padding-top: 5px;border-bottom: 1px solid">';
+                        html += '<div class="inforecord flexbox column">';
                         html += '<div><span class="fieldtitle">Status: </span><span>' + $(j).find('note[type="publicationStatus"]').text() + '</span></div>' +
                             '<div><span class="fieldtitle">ID: </span><span>' + $(j).find('recordIdentifier').text() + '</span></div>' +
                             '<div><span class="fieldtitle">Note: </span><span>' + $(j).find('note[type!="publicationStatus"]').text() + '</span></div>' +
@@ -973,7 +973,7 @@
                     var url = dblp_apiurl2 + $(response.data).find("crossref").text();
                     axios.get(url)
                         .then(function (response) {
-                            html += '<div class="inforecord flexbox column" style="padding-bottom: 5px;padding-top: 5px;border-bottom: 1px solid">';
+                            html += '<div class="inforecord flexbox column">';
                             html += '<div><span class="fieldtitle">Title: </span><span>' + $(response.data).find("title").text() + '</span></div>' +
                                     '<div><span class="fieldtitle">Series: </span><span>' + $(response.data).find("series").text() + '</span></div>' +
                                     '<div><span class="fieldtitle">Volume: </span><span>' + $(response.data).find("volume").text() + '</span></div>'
@@ -1069,21 +1069,23 @@
     .append($('<div id="monkeyresultswrapper">' + 
                 '<div>' +
                     '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' + 
-                    '<img class="monkeytalkbubble" src="https://apps.lib.kth.se/divaapan/monkeytalk.png">' +
-                    '<i class="fa fa-spinner fa-spin"></i>' +
-                    '<span class="monkeytalk"></span>' + 
+                    '<!--img class="monkeytalkbubble" src="https://apps.lib.kth.se/divaapan/monkeytalk.png"-->' +
+                    '<div class="bubble">' +
+                        '<i class="fa fa-spinner fa-spin"></i>' +
+                        '<div class="monkeytalk"></div>' +
+                    '</div>' + 
                 '</div>' +
                 '<div class="monkeyheader">' +
                     '<span>DiVA-Apan</span>' + 
                 '</div>' +
                 '<div>' +
-                    'Apans uppdateringar' +
+                    'Uppdateringar' +
                 '</div>' +
                 '<div id="monkeyupdates" class="flexbox column">' +
                 '</div>' + 
                 '<hr class="solid">' +
                 '<div>' +
-                    'Apans resultat' +
+                    'Resultat' +
                 '</div>' +
                 '<div id="monkeyresults" class="flexbox column">' +
                 '</div>' + 
@@ -1133,18 +1135,8 @@ GM_addStyle(`
     width: 80px;
 }
 
-.monkeytalkbubble {
-    width: 200px;
-    height: 65px;
-    position: absolute;
-}
-
 .monkeytalk {
-    position: absolute;
-    top: 12px;
-    left: 160px;
-    font-size: 10px;
-    width: 110px;
+    width: 150px;
 }
 
 .monkeyheader {
@@ -1156,8 +1148,9 @@ GM_addStyle(`
 #monkeyresultswrapper i {
     font-size: 32px;
     position: absolute;
-    top: 12px;
-    left: 124px;
+    top: 18px;
+    left: 170px;
+    z-index: 1;
 }
 
 #wosapiButtonjq i,
@@ -1202,8 +1195,33 @@ hr.solid {
     border-top: 3px solid #bbb;
 }
 
+.inforecord {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.inforecord>div {
+    display: flex;
+    border-top: 1px solid;
+    border-left: 1px solid;
+    border-right: 1px solid
+}
+
+.inforecord>div>span:first-child {
+    border-right: 1px solid
+}
+
+.inforecord>div:last-child {
+    border-bottom: 1px solid;
+}
+
 .inforecord span {
     word-break: break-all;
+    flex: 1;
+    padding: 2px;
+}
+
+.inforecord span {
 }
 
 .fieldtitle {
@@ -1283,5 +1301,35 @@ button.link {
     right: 10px;
     cursor: pointer;
     color: #000;
+}
+
+.bubble
+{
+    position: absolute;
+    width: 200px;
+    height: 60px;
+    padding: 5px;
+    background: #e8e2e2;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 12px;
+    top: 5px;
+}
+
+.bubble:after
+{
+    content: '';
+    position: absolute;
+    border-style: solid;
+    border-width: 10px 10px 10px 0;
+    border-color: transparent #e8e2e2;
+    display: block;
+    width: 0;
+    z-index: 1;
+    left: -10px;
+    top: 35px;
 }
 `);
