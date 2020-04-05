@@ -959,6 +959,7 @@
         $(otherorg).find("div.diva2addtextchoicecol:contains('Annan organisation') , div.diva2addtextchoicecol:contains('Other organisation')").each(function() {
             var thiz = this;
             //CLEAR ORG
+            $('#clearorgButtonjq' + j).remove();
             var clearorgButtonjq = $('<button class="clearbutton" id="clearorgButtonjq' + j + '" type="button">X</button>');
             //bind en clickfunktion som skall rensa fältet för "Annan organisation"
             clearorgButtonjq.on("click", function() {
@@ -979,6 +980,7 @@
             var thiz = this;
 
             //LDAP/UG
+            $('#ldapButtonjq' + i).remove();
             var ldapButtonjq = $('<button id="ldapButtonjq' + i + '" type="button">LDAP-info</button>');
             ldapButtonjq.on("click", function() {
                 getLDAP($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val(),'');
@@ -986,6 +988,7 @@
             $(this).before(ldapButtonjq)
 
             //Leta KTH-anställda
+            $('#letaButtonjq' + i).remove();
             var letaButtonjq = $('<button id="letaButtonjq' + i + '" type="button">Leta anställda</button>');
             letaButtonjq.on("click", function() {
                 getLeta($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val());
@@ -993,6 +996,7 @@
             $(this).before(letaButtonjq)
 
             //Sök i ORCiD
+            $('#orcidButtonjq' + i).remove();
             var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök ORCiD</button>');
             orcidButtonjq.on("click", function() {
                 getOrcid($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val());
@@ -1000,6 +1004,7 @@
             $(this).before(orcidButtonjq);
 
             //KTH Intranät förnamn efternamn
+            $('#kthintraButtonjq' + i).remove();
             var kthintraButtonjq = $('<button class="link" id="kthintraButtonjq' + i + '" type="button">KTH Intra</button>');
             kthintraButtonjq.on("click", function() {
                 var url = "https://www.kth.se/search?q=" +
@@ -1014,6 +1019,7 @@
             $(this).before(kthintraButtonjq)
 
             //Google.com förnamn + efternamn + KTH
+            $('#googleButtonjq' + i).remove();
             var googleButtonjq = $('<button class="link" id="googleButtonjq' + i + '" type="button">Google</button>');
             googleButtonjq.on("click", function() {
                 var url = "https://www.google.com/search?q=KTH+" +
