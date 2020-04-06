@@ -1083,7 +1083,8 @@
     //$('body.diva2margin').append($('<div id="ldapoverlay"></div>'));
 
     //DIV för att visa Apans resultat till vänster på sidan
-    var monkeyresultswrapper = ($('<div style="" id="monkeyresultswrapper">' + 
+    var monkeyresultswrapper = 
+        ($('<div style="" id="monkeyresultswrapper">' + 
                 '<div>' +
                     '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' + 
                     '<!--img class="monkeytalkbubble" src="https://apps.lib.kth.se/divaapan/monkeytalk.png"-->' +
@@ -1118,6 +1119,7 @@
                 '</div>' + 
             '</div>'));
     $('body.diva2margin').prepend(monkeyresultswrapper);
+
     // Vilket DiVA-läge (edit, publish, review eller import)
     if (window.location.href.indexOf("editForm.jsf") !== -1) {
         diva_observer_selector = '.diva2editmainer .diva2addtextbotmargin';
