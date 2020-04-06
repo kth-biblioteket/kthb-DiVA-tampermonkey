@@ -498,7 +498,7 @@
                     }
                     $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                     $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                    //$(window).scrollTop(0);
+                    $(window).scrollTop(0);
                     
                 };
                 $("#monkeyresultswrapper i").css("display", "none");
@@ -1052,7 +1052,6 @@
                 observer.observe(authortarget, observer_config);
             });
             waitForKeyElements('#' + diva_id + '\\:notes_ifr', function() {
-                $("#monkeyresultswrapper").css("display", "block");
                 //Kolla om användartoken finns och verifera i så fall, annars inloggning
                 if (Cookies.get('token')) {
                     if (typeof Cookies.get('token') === 'undefined' ||
@@ -1063,10 +1062,12 @@
                         $("#monkeyresultswrapper i").css("display", "inline-block");
                         $(".monkeytalk").html("Jag gör mig redo...");
                         verifytoken(Cookies.get('token'));
+                        $("#monkeyresultswrapper").css("display", "block");
                         return
                     }
                 } else {
                     Cookies.remove('token');
+                    $("#monkeyresultswrapper").css("display", "block");
                     $("#monkeylogin").css("display", "block");
                     monkeylogin();
                 }
@@ -1085,7 +1086,7 @@
 
     //DIV för att visa Apans resultat till vänster på sidan
     var monkeyresultswrapper = 
-        ($('<div style="" id="monkeyresultswrapper">' + 
+        ($('<div style="display:none" id="monkeyresultswrapper">' +
                 '<div>' +
                     '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' + 
                     '<!--img class="monkeytalkbubble" src="https://apps.lib.kth.se/divaapan/monkeytalk.png"-->' +
@@ -1199,7 +1200,6 @@ function styles() {
         overflow: auto;
         padding-left: 10px;
         background: #ffffff;
-        display: none;
     }
 
     #monkeyupdates {
