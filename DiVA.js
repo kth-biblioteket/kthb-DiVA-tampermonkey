@@ -1193,12 +1193,12 @@ GM_addStyle(`
 }
 
 #monkeyresultswrapper {
-    position:fixed; 
-    top:0px; 
-    left:0; 
-    width:300px; 
-    height:100%; 
-    overflow:auto;
+    position: fixed; 
+    top: 20px; 
+    left: 0; 
+    width: 300px; 
+    height: 100%; 
+    overflow: auto;
     padding-left: 10px;
     background: #ffffff
 }
