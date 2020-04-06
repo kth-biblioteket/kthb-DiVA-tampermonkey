@@ -1067,6 +1067,7 @@
                     }
                 } else {
                     Cookies.remove('token');
+                    $("#monkeylogin").css("display", "block");
                     monkeylogin();
                 }
             });
