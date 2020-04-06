@@ -23,11 +23,11 @@
 // @connect  google.com
 // @connect  kth.diva-portal.org
 // @connect  ws.isiknowledge.com
+// @noframes
 // ==/UserScript==
 /* global $ */
 /* eslint-disable no-multi-spaces, curly */
 (function() {
-
     ///////////////////////////////
     //
     // Variabler
@@ -1052,10 +1052,8 @@
                 observer.observe(authortarget, observer_config);
             });
             waitForKeyElements('#' + diva_id + '\\:notes_ifr', function() {
-                monkeylogin();
-                $('body.diva2margin').append(monkeyresultswrapper);
                 $("#monkeyresultswrapper").css("display", "block");
-                //Kolla om användartoken finns och verifera i så fall, annars visa inloggning
+                //Kolla om användartoken finns och verifera i så fall, annars inloggning
                 if (Cookies.get('token')) {
                     if (typeof Cookies.get('token') === 'undefined' ||
                         Cookies.get('token') == 'undefined' ||
@@ -1069,7 +1067,7 @@
                     }
                 } else {
                     Cookies.remove('token');
-                    $('#monkeylogin').css("display", "block");
+                    monkeylogin();
                 }
             });
         });
@@ -1082,10 +1080,10 @@
     ///////////////////////////////////////////////////////////////////////////////////
     styles();
     //Overlay för att visa "popup" på sidan
-    $('body.diva2margin').append($('<div id="ldapoverlay"></div>'));
+    //$('body.diva2margin').append($('<div id="ldapoverlay"></div>'));
 
     //DIV för att visa Apans resultat till vänster på sidan
-    var monkeyresultswrapper = ($('<div id="monkeyresultswrapper">' + 
+    var monkeyresultswrapper = ($('<div style="" id="monkeyresultswrapper">' + 
                 '<div>' +
                     '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' + 
                     '<!--img class="monkeytalkbubble" src="https://apps.lib.kth.se/divaapan/monkeytalk.png"-->' +
@@ -1119,7 +1117,7 @@
                 '<div id="monkeyresults" class="flexbox column">' +
                 '</div>' + 
             '</div>'));
-
+    $('body.diva2margin').prepend(monkeyresultswrapper);
     // Vilket DiVA-läge (edit, publish, review eller import)
     if (window.location.href.indexOf("editForm.jsf") !== -1) {
         diva_observer_selector = '.diva2editmainer .diva2addtextbotmargin';
