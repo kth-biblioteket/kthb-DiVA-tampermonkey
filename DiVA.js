@@ -120,23 +120,10 @@
 
     /**
      *
-     * Funktion som skapar ett loginformulär
+     * Funktion för att logga in
      *
      */
     function monkeylogin() {
-        var html =
-            '<div id="monkeylogin">' +
-                '<form id="monkeyloginform">' +
-                    '<div>Logga in till Apan</div>' +
-                    '<div class = "flexbox column rowpadding">' +
-                        '<input class="rowmargin" id="username" name="username" placeholder="kthid" type="text">' +
-                        '<input class="rowmargin" id="password" name="password" placeholder="password" type="password">' +
-                    '</div>' +
-                '</form>' +
-                '<button id="login">Login</button>' +
-            '</div>'
-        $('body').append(html);
-
         var loginButton = $('#login');
         loginButton.click(function() {
             var username = $('#username').val() + "@ug.kth.se";
@@ -1066,6 +1053,8 @@
             });
             waitForKeyElements('#' + diva_id + '\\:notes_ifr', function() {
                 monkeylogin();
+                $('body.diva2margin').append(monkeyresultswrapper);
+                $("#monkeyresultswrapper").css("display", "block");
                 //Kolla om användartoken finns och verifera i så fall, annars visa inloggning
                 if (Cookies.get('token')) {
                     if (typeof Cookies.get('token') === 'undefined' ||
@@ -1073,6 +1062,8 @@
                         Cookies.get('token') == '') {
                         Cookies.remove('token');
                     } else {
+                        $("#monkeyresultswrapper i").css("display", "inline-block");
+                        $(".monkeytalk").html("Jag gör mig redo...");
                         verifytoken(Cookies.get('token'));
                         return
                     }
@@ -1089,12 +1080,12 @@
     // Huvudkod
     //
     ///////////////////////////////////////////////////////////////////////////////////
+    styles();
     //Overlay för att visa "popup" på sidan
     $('body.diva2margin').append($('<div id="ldapoverlay"></div>'));
 
     //DIV för att visa Apans resultat till vänster på sidan
-    $('body.diva2margin')
-    .append($('<div id="monkeyresultswrapper">' + 
+    var monkeyresultswrapper = ($('<div id="monkeyresultswrapper">' + 
                 '<div>' +
                     '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' + 
                     '<!--img class="monkeytalkbubble" src="https://apps.lib.kth.se/divaapan/monkeytalk.png"-->' +
@@ -1105,6 +1096,16 @@
                 '</div>' +
                 '<div class="monkeyheader">' +
                     '<span>DiVA-Apan</span>' + 
+                '</div>' +
+                '<div id="monkeylogin">' +
+                    '<form id="monkeyloginform">' +
+                        '<div>Logga in till Apan</div>' +
+                        '<div class = "flexbox column rowpadding">' +
+                            '<input class="rowmargin" id="username" name="username" placeholder="kthid" type="text">' +
+                            '<input class="rowmargin" id="password" name="password" placeholder="password" type="password">' +
+                        '</div>' +
+                    '</form>' +
+                    '<button id="login">Login</button>' +
                 '</div>' +
                 '<div>' +
                     'Uppdateringar' +
@@ -1118,10 +1119,6 @@
                 '<div id="monkeyresults" class="flexbox column">' +
                 '</div>' + 
             '</div>'));
-
-    //Visa loader...
-    $("#monkeyresultswrapper i").css("display", "inline-block");
-    $(".monkeytalk").html("Jag gör mig redo...");
 
     // Vilket DiVA-läge (edit, publish, review eller import)
     if (window.location.href.indexOf("editForm.jsf") !== -1) {
@@ -1144,220 +1141,222 @@
     
 })();
 
-//--CSS:
-GM_addStyle(`
-@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css");
+function styles() {
+    GM_addStyle(`
+    @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css");
 
-::-webkit-scrollbar {
-    -webkit-appearance: none;
-    width: 10px;
-}
-  
-::-webkit-scrollbar-thumb {
-    border-radius: 5px;
-    background-color: rgba(0,0,0,.5);
-    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
-}
+    ::-webkit-scrollbar {
+        -webkit-appearance: none;
+        width: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+        background-color: rgba(0,0,0,.5);
+        -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+    }
 
-.logo {
-    width: 80px;
-}
+    .logo {
+        width: 80px;
+    }
 
-.monkeytalk {
-    width: 150px;
-}
+    .monkeytalk {
+        width: 150px;
+    }
 
-.monkeyheader {
-    font-weight: bold;
-    font-size: 1.06em;
-    padding-bottom: 10px;
-}
+    .monkeyheader {
+        font-weight: bold;
+        font-size: 1.06em;
+        padding-bottom: 10px;
+    }
 
-#monkeyresultswrapper i {
-    font-size: 32px;
-    position: absolute;
-    top: 18px;
-    left: 170px;
-    z-index: 1;
-}
+    #monkeyresultswrapper i {
+        font-size: 32px;
+        position: absolute;
+        top: 18px;
+        left: 170px;
+        z-index: 1;
+    }
 
-#wosapiButtonjq i,
-#monkeyresultswrapper i {
-    display: none;
-}
+    #wosapiButtonjq i,
+    #monkeyresultswrapper i {
+        display: none;
+    }
 
-#monkeylogin {
-    display: none;
-    overflow: hidden;
-    padding: 5px;
-}
+    #monkeylogin {
+        display: none;
+        overflow: hidden;
+        padding: 5px;
+    }
 
-#monkeyresultswrapper {
-    position: fixed; 
-    top: 20px; 
-    left: 0; 
-    width: 300px; 
-    height: 100%; 
-    overflow: auto;
-    padding-left: 10px;
-    background: #ffffff
-}
+    #monkeyresultswrapper {
+        position: fixed; 
+        top: 20px; 
+        left: 0; 
+        width: 300px; 
+        height: 100%; 
+        overflow: auto;
+        padding-left: 10px;
+        background: #ffffff;
+        display: none;
+    }
 
-#monkeyupdates {
-    height: 150px;
-    overflow: auto;
-}
+    #monkeyupdates {
+        height: 150px;
+        overflow: auto;
+    }
 
-#monkeyresults ,
-#monkeyupdates {
-    padding: 10px;
-    font-size: 10px;
-    margin-bottom: 10px;
-}
+    #monkeyresults ,
+    #monkeyupdates {
+        padding: 10px;
+        font-size: 10px;
+        margin-bottom: 10px;
+    }
 
-#monkeyresults a, #ldapoverlay a {
-    font-size: 0.8rem !important;
-}
+    #monkeyresults a, #ldapoverlay a {
+        font-size: 0.8rem !important;
+    }
 
-hr.solid {
-    border-top: 3px solid #bbb;
-}
+    hr.solid {
+        border-top: 3px solid #bbb;
+    }
 
-.inforecord {
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
+    .inforecord {
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
 
-.inforecord>div {
-    display: flex;
-    border-top: 1px solid;
-    border-left: 1px solid;
-    border-right: 1px solid
-}
+    .inforecord>div {
+        display: flex;
+        border-top: 1px solid;
+        border-left: 1px solid;
+        border-right: 1px solid
+    }
 
-.inforecord>div>span:first-child {
-    border-right: 1px solid
-}
+    .inforecord>div>span:first-child {
+        border-right: 1px solid
+    }
 
-.inforecord>div:last-child {
-    border-bottom: 1px solid;
-}
+    .inforecord>div:last-child {
+        border-bottom: 1px solid;
+    }
 
-.inforecord span {
-    word-break: break-all;
-    flex: 1;
-    padding: 2px;
-}
+    .inforecord span {
+        word-break: break-all;
+        flex: 1;
+        padding: 2px;
+    }
 
-.inforecord span {
-}
+    .inforecord span {
+    }
 
-.fieldtitle {
-    font-weight: bold;
-}
+    .fieldtitle {
+        font-weight: bold;
+    }
 
-.flexbox {
-    display: flex;
-}
+    .flexbox {
+        display: flex;
+    }
 
-.column {
-    flex-direction: column;
-}
+    .column {
+        flex-direction: column;
+    }
 
-.rowpadding {
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
+    .rowpadding {
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
 
-.rowmargin {
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
+    .rowmargin {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
 
-button {
-    background-color: #d85497;
-    color: #fff;
-    border-color: #d85497;
-    border: 1px solid transparent;
-    padding: .375rem .75rem;
-    font-size: 0.8rem;
-    line-height: 1;
-    border-radius: .25rem;
-    outline: none;
-    margin: 1px;
-}
+    button {
+        background-color: #d85497;
+        color: #fff;
+        border-color: #d85497;
+        border: 1px solid transparent;
+        padding: .375rem .75rem;
+        font-size: 0.8rem;
+        line-height: 1;
+        border-radius: .25rem;
+        outline: none;
+        margin: 1px;
+    }
 
-button.link {
-    background-color: #007fae;
-}
+    button.link {
+        background-color: #007fae;
+    }
 
-.clearbutton {
-    line-height: 1;
-    height: 17px;
-    padding: 0px 10px;
-    font-size: 11px;
-}
+    .clearbutton {
+        line-height: 1;
+        height: 17px;
+        padding: 0px 10px;
+        font-size: 11px;
+    }
 
-#ldapoverlay {
-    position: fixed;
-    height: 100%;
-    width: 100%;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(0,0,0,0.8);
-    display: none;
-    font-size: 0.8rem
-}
+    #ldapoverlay {
+        position: fixed;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(0,0,0,0.8);
+        display: none;
+        font-size: 0.8rem
+    }
 
-#popup {
-    max-width: 1200px;
-    width: 80%;
-    max-height: 1000px;
-    overflow: scroll;
-    height: 80%;
-    padding: 20px;
-    position: relative;
-    background: #fff;
-    margin: 20px auto;
-}
+    #popup {
+        max-width: 1200px;
+        width: 80%;
+        max-height: 1000px;
+        overflow: scroll;
+        height: 80%;
+        padding: 20px;
+        position: relative;
+        background: #fff;
+        margin: 20px auto;
+    }
 
-#close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
-    color: #000;
-}
+    #close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        color: #000;
+    }
 
-.bubble
-{
-    position: absolute;
-    width: 200px;
-    height: 60px;
-    padding: 5px;
-    background: #e8e2e2;
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    border-radius: 10px;
-    display: inline-block;
-    margin-left: 10px;
-    font-size: 12px;
-    top: 5px;
-}
+    .bubble
+    {
+        position: absolute;
+        width: 200px;
+        height: 60px;
+        padding: 5px;
+        background: #e8e2e2;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+        display: inline-block;
+        margin-left: 10px;
+        font-size: 12px;
+        top: 5px;
+    }
 
-.bubble:after
-{
-    content: '';
-    position: absolute;
-    border-style: solid;
-    border-width: 10px 10px 10px 0;
-    border-color: transparent #e8e2e2;
-    display: block;
-    width: 0;
-    z-index: 1;
-    left: -10px;
-    top: 35px;
+    .bubble:after
+    {
+        content: '';
+        position: absolute;
+        border-style: solid;
+        border-width: 10px 10px 10px 0;
+        border-color: transparent #e8e2e2;
+        display: block;
+        width: 0;
+        z-index: 1;
+        left: -10px;
+        top: 35px;
+    }
+    `);
 }
-`);
