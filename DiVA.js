@@ -304,7 +304,7 @@
                     ' *' +
                     '?token=' + ldap_apikey;
         if (kthid!= "") {
-            var url = ldap_apiurl + 'kthid/' +
+            url = ldap_apiurl + 'kthid/' +
                     kthid +
                     '?token=' + ldap_apikey;
         }
@@ -402,7 +402,7 @@
      */
     async function getScopus(doi) {
         if(doi == ""){
-            $('#monkeytalk').html('Scopus: Ingen DOI finns!');
+            $('.monkeytalk').html('Ojojoj, ingen DOI!');
             $("#monkeyresultswrapper i").css("display", "none");
             return 0;
         }
@@ -468,6 +468,11 @@
      * @param {*} doi 
      */
     async function getWoS(doi) {
+        if(doi == ""){
+            $('.monkeytalk').html('Ojojoj, ingen DOI!');
+            $("#monkeyresultswrapper i").css("display", "none");
+            return 0;
+        }
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $(".monkeytalk").html("Jag pratar med Web of Science...");
         var url = wos_apiurl + doi;
@@ -1284,6 +1289,11 @@ function styles() {
         border-radius: .25rem;
         outline: none;
         margin: 1px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        opacity: 0.7;
     }
 
     button.link {
