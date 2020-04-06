@@ -457,6 +457,7 @@
                     } else {
                         document.getElementById(diva_id + ":doiFree").checked = false; // checka inte boxen... eller avchecka den
                     }
+                    html += '<p>Uppdaterat Free full-text: ' + response.data['abstracts-retrieval-response']['coredata']['openaccessFlag'] + '</p>';
                     $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                     $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                     $(window).scrollTop(0);
