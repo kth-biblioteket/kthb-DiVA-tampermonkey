@@ -1043,12 +1043,11 @@
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
         getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
         .then( function(result) {
-            getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+            getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
+            .then( function(result) {
+                getLDAP('', '', $('.diva2identifier:eq(2)').html())
+            });
         });
-        
-        getLDAP('', '', $('.diva2identifier:eq(2)').html())
-    
-
     }
 
     /**
