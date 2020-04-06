@@ -1280,8 +1280,8 @@ button {
     border-color: #d85497;
     border: 1px solid transparent;
     padding: .375rem .75rem;
-    font-size: 1rem;
-    line-height: 1.5;
+    font-size: 0.8rem;
+    line-height: 1;
     border-radius: .25rem;
     outline: none;
     margin: 1px;
