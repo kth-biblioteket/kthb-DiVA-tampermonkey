@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.1.2
+// @version      1.1.3
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -447,7 +447,7 @@
                     html += '<p>Uppdaterat Free full-text: ' + response.data['abstracts-retrieval-response']['coredata']['openaccessFlag'] + '</p>';
                     $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                     $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                    $(window).scrollTop(0);
+                    $('html, body').animate({scrollTop:0},'slow');
                     
                 };
                 $("#monkeyresultswrapper i").css("display", "none");
@@ -503,7 +503,7 @@
                     }
                     $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                     $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                    $(window).scrollTop(0);
+                    $('html, body').animate({scrollTop:0},'slow');
                     
                 };
                 $("#monkeyresultswrapper i").css("display", "none");
