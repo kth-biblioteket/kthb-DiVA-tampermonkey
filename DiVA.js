@@ -624,13 +624,13 @@
             });
     }
 
-    //////////////////////////////////////////////////////////
-    //
-    // Bevaka uppdateringar i noden som författarna ligger i
-    // Sker t ex efter "Koppla personpost"
-    // Initiera apan på nytt.
-    //
-    ///////////////////////////////////////////////////////////
+    /**
+     * 
+     * Funktion för att bevaka uppdateringar i noden som författarna ligger i
+     * Sker t ex efter "Koppla personpost"
+     * Initiera apan på nytt.
+     * @param {*} mutations 
+     */
     function mutationCallback(mutations) {
         mutations.forEach(function(mutation) {
             var newNodes = mutation.addedNodes;
