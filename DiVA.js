@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.1.3
+// @version      1.1.4
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -98,7 +98,7 @@
                         //Spara token i en cookie (som gäller lång hur tid?)
                         Cookies.set('token', response.token)
                         setapikeys(response)
-                        init();
+                        init(false);
                     } else {
                         Cookies.remove('token')
                         $('#monkeylogin').css("display", "block");
@@ -292,7 +292,7 @@
      * @param {*} enamn
      * @param {*} kthid
      */
-    function getLDAP(fnamn, enamn, kthid) {
+    async function getLDAP(fnamn, enamn, kthid) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $(".monkeytalk").html("Jag pratar med LDAP...");
         var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
@@ -635,7 +635,7 @@
         mutations.forEach(function(mutation) {
             var newNodes = mutation.addedNodes;
             if (newNodes !== null) {
-                init();
+                init(true);
                 var $nodes = $(newNodes);
                 $nodes.each(function() {
                     var $node = $(this);
@@ -651,7 +651,7 @@
      * Funktion för att initiera Apan
      *
      */
-    async function init() {
+    async function init(re_init) {
         ///////////////////////////////////////////////////////////
         //
         // Skapa en DiVA-knapp överst
@@ -1033,14 +1033,17 @@
         //
         // T ex från Scopus, WoS
         //
+        // Kör inte om det är en re_init t ex koppla personpost
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
-        getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
-        .then( function(result) {
-            getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
+        if (re_init!=true) {
+            getLDAP('', '', $('.diva2identifier:eq(2)').html())
             .then( function(result) {
-                getLDAP('', '', $('.diva2identifier:eq(2)').html())
+                getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())    
+                .then( function(result) {
+                    getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())    
+                });
             });
-        });
+        }
     }
 
     /**
