@@ -148,8 +148,8 @@
 
     /**
      * Hjälpfunktion för att skapa datum
-     * 
-     * @param {*} i 
+     *
+     * @param {*} i
      */
     function addZero(i) {
         if (i < 10) {
@@ -160,10 +160,10 @@
 
     /**
      * Sorterar en array(exvis json response)
-     * 
-     * @param {*} array 
-     * @param  {...any} attrs 
-     * 
+     *
+     * @param {*} array
+     * @param  {...any} attrs
+     *
      */
     function sortByAttribute(array, ...attrs) {
         let predicates = attrs.map(pred => {
@@ -206,9 +206,9 @@
 
     /**
      * Hämta info från ORCiD
-     * 
-     * @param {*} fnamn 
-     * @param {*} enamn 
+     *
+     * @param {*} fnamn
+     * @param {*} enamn
      */
     function getOrcid(fnamn, enamn) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
@@ -224,30 +224,30 @@
                     var json = response.data
                     if (response.status == 201) {
                         html += "<p>Inga användare hittades</p>";
-                    } else {                            
+                    } else {
                         $.each(json, function(key, value) {
                             html += '<div class="inforecord flexbox column">';
-                            html += '<div>' + 
-                                        '<span class="fieldtitle">Namn: </span>' + 
-                                        '<span>' + 
-                                            '<a target="_new" href="' + json[key]['orcid-identifier'].uri + '">' + 
-                                                json[key].person.name['family-name'].value + " " + json[key].person.name['given-names'].value + 
+                            html += '<div>' +
+                                        '<span class="fieldtitle">Namn: </span>' +
+                                        '<span>' +
+                                            '<a target="_new" href="' + json[key]['orcid-identifier'].uri + '">' +
+                                                json[key].person.name['family-name'].value + " " + json[key].person.name['given-names'].value +
                                             '</a>' +
                                         '</span>' +
                                     '</div>'
-                            html += '<div>' + 
-                                    '<span class="fieldtitle">ORCiD: </span>' + 
+                            html += '<div>' +
+                                    '<span class="fieldtitle">ORCiD: </span>' +
                                     '<span>' +
                                         json[key]['orcid-identifier'].path +
                                     '</span>' +
                                 '</div>'
                             if (json[key]["activities-summary"].employments["affiliation-group"].length > 0) {
                                 $.each(json[key]["activities-summary"].employments["affiliation-group"], function(empkey, empvalue) {
-                                    html += '<div>' + 
-                                                '<span class="fieldtitle">Org: </span>' + 
-                                                '<span>' + 
+                                    html += '<div>' +
+                                                '<span class="fieldtitle">Org: </span>' +
+                                                '<span>' +
                                                     json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"].organization.name +
-                                                '</span>' + 
+                                                '</span>' +
                                             '</div>'
                                     var date;
                                     if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"]) {
@@ -255,16 +255,16 @@
                                             date = json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year.value
                                         }
                                         if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month) {
-                                            date += '-' + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month.value 
+                                            date += '-' + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month.value
                                         }
                                         if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day) {
-                                            date += '-' + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day.value 
+                                            date += '-' + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day.value
                                         }
-                                        html += '<div>' + 
-                                                    '<span class="fieldtitle">Datum: </span>' + 
-                                                    '<span>' + 
+                                        html += '<div>' +
+                                                    '<span class="fieldtitle">Datum: </span>' +
+                                                    '<span>' +
                                                         date +
-                                                    '</span>' + 
+                                                    '</span>' +
                                                 '</div>'
                                     }
                                 })
@@ -276,7 +276,7 @@
                 html += '</div>'
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyresults').html(html);
-                $(".monkeytalk").html("ORCiD svarade");
+                $(".monkeytalk").html("ORCiD svarade... se svaret här nedanför");
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -287,8 +287,8 @@
 
     /**
      * Hämta info från LDAP
-     * 
-     * @param {*} fnamn 
+     *
+     * @param {*} fnamn
      * @param {*} enamn
      * @param {*} kthid
      */
@@ -308,7 +308,7 @@
                     kthid +
                     '?token=' + ldap_apikey;
         }
-        
+
         await axios.get(url)
             .then(function (response) {
                 var html = '<div><div class="resultsheader">Information från KTH UG(LDAP)</div>';
@@ -330,14 +330,14 @@
                             '<div><span class="fieldtitle">Skola/org: </span><span>' + json.ugusers[key].kthPAGroupMembership + '</span></div>'
                             html += '</div>';
                         });
-                        
+
                     }
                 }
-                
+
                 html += '</div>'
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyresults').html(html);
-                $(".monkeytalk").html("LDAP svarade");
+                $(".monkeytalk").html("LDAP svarade... se svaret här nedanför");
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -348,9 +348,9 @@
 
     /**
      * Hämta info från Leta anställda
-     * 
-     * @param {*} fnamn 
-     * @param {*} enamn 
+     *
+     * @param {*} fnamn
+     * @param {*} enamn
      */
     function getLeta(fnamn, enamn) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
@@ -383,11 +383,11 @@
                         });
                     }
                 }
-            
+
                 html += '</div>'
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyresults').html(html);
-                $(".monkeytalk").html("Leta Anställda svarade");
+                $(".monkeytalk").html("Leta KTH-anställda svarade... se svaret här nedanför");
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -398,8 +398,8 @@
 
     /**
      * Hämta info från Scopus
-     * 
-     * @param {*} doi 
+     *
+     * @param {*} doi
      */
     async function getScopus(doi) {
         if(doi == ""){
@@ -420,25 +420,25 @@
                 } else {
                     //hitta ScopusId
                     var eid = response.data['abstracts-retrieval-response']['coredata']['eid']; //plocka värdet för ScopusId (eid)
-                    if(eid == "" 
-                        || typeof eid === 'undefined' 
+                    if(eid == ""
+                        || typeof eid === 'undefined'
                         || eid == 'undefined') {
                         html += '<p>PubMedID hittades inte</p>';
                     } else {
                         html += '<p>Uppdaterat ScopusID: ' + eid + '</p>';
                         $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
                     }
-                    
+
                     var pmid = response.data['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
-                    if(pmid == "" 
-                        || typeof pmid === 'undefined' 
+                    if(pmid == ""
+                        || typeof pmid === 'undefined'
                         || pmid == 'undefined') {
                         html += '<p>PubMedID hittades inte</p>';
                     } else {
                         html += '<p>Uppdaterat PubMedID: ' + pmid + '</p>';
                         $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
                     }
-                    
+
                     var oa = response.data['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
                     if (oa == 'true') { //sen jag bytte till absract search funkar detta som str men inte som boolean, varför?
                         document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
@@ -448,16 +448,16 @@
                     html += '<p>Uppdaterat Free full-text: ' + response.data['abstracts-retrieval-response']['coredata']['openaccessFlag'] + '</p>';
                     $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                     $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                    
+
                 };
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-                $(".monkeytalk").html("Scopus svarade");
+                $(".monkeytalk").html("Scopus har uppdaterat posten, se svaret här nedanför");
                 return 1;
             })
             .catch(function (error) {
                 $("#monkeyresultswrapper i").css("display", "none");
-                $(".monkeytalk").html("Hittade inget hos Scopus");
+                $(".monkeytalk").html("Hittade inget i Scopus");
             })
             .then(function () {
             });
@@ -465,8 +465,8 @@
 
     /**
      * Hämta info från Web of Science
-     * 
-     * @param {*} doi 
+     *
+     * @param {*} doi
      */
     async function getWoS(doi) {
         if(doi == ""){
@@ -484,18 +484,18 @@
                     html += "<p>Hittade inget i Web of Science</p>";
                 } else {
                     var isi = response.data.wos.ut; //plocka värdet för ScopusId (eid)
-                    if(isi == "" 
-                        || typeof isi === 'undefined' 
+                    if(isi == ""
+                        || typeof isi === 'undefined'
                         || isi == 'undefined') {
                         html += '<p>ISI hittades inte</p>';
                     } else {
                         html += '<p>Uppdaterat ISI: ' + isi + '</p>';
                         $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val(isi); // skriv in värdet för ISI/UT i fältet för ISI
                     }
-                   
+
                     var pmid = response.data.wos.pmid; //plocka värdet för PubMedID (PMID
-                    if(pmid == "" 
-                        || typeof pmid === 'undefined' 
+                    if(pmid == ""
+                        || typeof pmid === 'undefined'
                         || pmid == 'undefined') {
                         html += '<p>PubMedID hittades inte</p>';
                     } else {
@@ -503,15 +503,15 @@
                         $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
                     }
                     $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna! 
+                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                 };
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-                $(".monkeytalk").html("Web of Science svarade");
+                $(".monkeytalk").html("Web of Science har uppdaterat posten, se svaret här nedanför");
             })
             .catch(function (error) {
                 $("#monkeyresultswrapper i").css("display", "none");
-                $(".monkeytalk").html("Hittade inget hos Web of Science");
+                $(".monkeytalk").html("Hittade inget i Web of Science");
             })
             .then(function () {
             });
@@ -566,11 +566,11 @@
                     */
                 }
             }
-        
+
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
-            $(".monkeytalk").html("DiVA svarade");
+            $(".monkeytalk").html("DiVA svarade... se svaret här nedanför");
         })
         .catch(function (error) {
             $("#monkeyresultswrapper i").css("display", "none");
@@ -582,8 +582,8 @@
 
     /**
      * Funktion för att anropa DBLP och hämta information via DOI
-     * 
-     * @param {string} doi 
+     *
+     * @param {string} doi
      */
     function getDblp(doi) {
         if(doi == ""){
@@ -613,13 +613,13 @@
                         .then(function () {
                         });
                 } else {
-                    html += "<p>Hittade inget hos dblp</p>";
+                    html += "<p>Hittade inget i dblp</p>";
                 }
-                
+
                 html += '</div>'
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyresults').html(html);
-                $(".monkeytalk").html("dblp svarade");
+                $(".monkeytalk").html("dblp svarade... se svaret här nedanför");
             })
             .catch(function (error) {
                 $('#monkeyresults').html('');
@@ -631,11 +631,11 @@
     }
 
     /**
-     * 
+     *
      * Funktion för att bevaka uppdateringar i noden som författarna ligger i
      * Sker t ex efter "Koppla personpost"
      * Initiera apan på nytt.
-     * @param {*} mutations 
+     * @param {*} mutations
      */
     function mutationCallback(mutations) {
         mutations.forEach(function(mutation) {
@@ -677,7 +677,7 @@
 
         ///////////////////////////////////////////////////////////
         //
-        // Skapa en knapp vid titelfältet för att splitta 
+        // Skapa en knapp vid titelfältet för att splitta
         // titel i huvud- och undertitel vid kolon :
         //
         ///////////////////////////////////////////////////////////
@@ -698,7 +698,7 @@
 
         ///////////////////////////////////////////////////////////
         //
-        // Skapa en knapp vid titelfältet för att ändra versaler 
+        // Skapa en knapp vid titelfältet för att ändra versaler
         // till gemener förutom första bokstaven
         //
         ///////////////////////////////////////////////////////////
@@ -719,7 +719,7 @@
 
         ///////////////////////////////////////////////////////////
         //
-        // Skapa en knapp vid titelfältet för proceedings, 
+        // Skapa en knapp vid titelfältet för proceedings,
         // att splitta titel i huvud- och undertitel vid kolon :
         //
         ///////////////////////////////////////////////////////////
@@ -736,10 +736,10 @@
             $procsubtitleiframe.contents().find("body").html(procsubtitle);
         })
         $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding'), div.diva2addtextchoice2:contains('Part of proceedings')").parent().before(proctitlesplitButtonjq)
-        
+
         ///////////////////////////////////////////////////////////
         //
-        // Skapa en knapp vid titelfältet för proceedings, 
+        // Skapa en knapp vid titelfältet för proceedings,
         // att ändra versaler till gemener förutom första bokstaven
         //
         ///////////////////////////////////////////////////////////
@@ -747,7 +747,7 @@
         var proctitlecaseButtonjq = $('<button id="proctitlecaseButtonjq" type="button">A->a</button>');
         proctitlecaseButtonjq.on("click", function() {
             var procmaintitle = $procmaintitleiframe.contents().find("body").html();
-            var procsubtitle = $procsubtitleiframe.contents().find("body").html();   
+            var procsubtitle = $procsubtitleiframe.contents().find("body").html();
             var changedprocmaintitle = procmaintitle.charAt(0) + procmaintitle.substring(1).toLowerCase();
             var changedprocsubtitle = procsubtitle.charAt(0) + procsubtitle.substring(1).toLowerCase();
             $procmaintitleiframe.contents().find("body").html(changedprocmaintitle);
@@ -757,7 +757,7 @@
 
         ///////////////////////////////////////////////////////////
         //
-        // Skapa en knapp vid titelfältet för böcker, 
+        // Skapa en knapp vid titelfältet för böcker,
         // att splitta titel i huvud- och undertitel vid kolon :
         //
         ///////////////////////////////////////////////////////////
@@ -777,7 +777,7 @@
 
         ///////////////////////////////////////////////////////////
         //
-        // Skapa en knapp vid titelfältet för böcker, 
+        // Skapa en knapp vid titelfältet för böcker,
         // att ändra versaler till gemener förutom första bokstaven
         //
         ///////////////////////////////////////////////////////////
@@ -795,7 +795,7 @@
 
         ///////////////////////////////////////////////////////////
         //
-        // Skapa en knapp vid alternativtitelfältet, 
+        // Skapa en knapp vid alternativtitelfältet,
         // att splitta titel i huvud- och undertitel vid kolon :
         //
         ///////////////////////////////////////////////////////////
@@ -815,7 +815,7 @@
 
         ///////////////////////////////////////////////////////////////
         //
-        // Skapa en knapp vid alternativtitelfältet, 
+        // Skapa en knapp vid alternativtitelfältet,
         // att ändra versaler till gemener förutom första bokstaven
         //
         ///////////////////////////////////////////////////////////////
@@ -847,7 +847,7 @@
         $("div.diva2addtextchoicecol:contains('ISI')").before(WoSButtonjq)
 
         $('#wosapiButtonjq').remove();
-        var wosapiButtonjq = $('<button id="wosapiButtonjq" type="button" class="buttonload"><i class="fa fa-spinner fa-spin"></i>Sök WoS</button>');
+        var wosapiButtonjq = $('<button id="wosapiButtonjq" type="button" class="buttonload"><i class="fa fa-spinner fa-spin"></i>Uppdatera från WoS</button>');
         wosapiButtonjq.on("click", function() {
             getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
         })
@@ -859,7 +859,7 @@
         //
         ////////////////////////////////////
         $('#scopusButtonjq').remove();
-        var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Scopus</button>');
+        var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Uppdatera från Scopus</button>');
         scopusButtonjq.on("click", function() {
             getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
         })
@@ -949,7 +949,7 @@
 
         ///////////////////////////////////////////////////////////////////////////////////
         //
-        // Funktion för att skapa en knapp vid "Annan organisation" för varje författare, 
+        // Funktion för att skapa en knapp vid "Annan organisation" för varje författare,
         // för att sedan kunna radera detta fält när vi kopplat en KTH-person
         //
         ///////////////////////////////////////////////////////////////////////////////////
@@ -988,7 +988,7 @@
 
             //Leta KTH-anställda
             $('#letaButtonjq' + i).remove();
-            var letaButtonjq = $('<button id="letaButtonjq' + i + '" type="button">Leta anställda</button>');
+            var letaButtonjq = $('<button id="letaButtonjq' + i + '" type="button">Leta KTH-anställda</button>');
             letaButtonjq.on("click", function() {
                 getLeta($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val());
             })
@@ -996,7 +996,7 @@
 
             //Sök i ORCiD
             $('#orcidButtonjq' + i).remove();
-            var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök ORCiD</button>');
+            var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök i ORCiD</button>');
             orcidButtonjq.on("click", function() {
                 getOrcid($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val());
             })
@@ -1044,12 +1044,12 @@
         if (re_init!=true) {
             getLDAP('', '', $('.diva2identifier:eq(2)').html())
             .then( function(result) {
-                getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val()) 
+                getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
                 .then( function(result) {
                     getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
                     .then( function(result) {
-                        $('html, body').animate({scrollTop:0},'slow'); 
-                    }); 
+                        $('html, body').animate({scrollTop:0},'slow');
+                    });
                 });
             });
         }
@@ -1057,8 +1057,8 @@
 
     /**
      * Funktion som startar Apan beroende på läge(edit, import etc)
-     * 
-     * @param {*} selector 
+     *
+     * @param {*} selector
      */
     function startMonkey() {
         waitForKeyElements(diva_id_selector, function() {
@@ -1102,18 +1102,18 @@
     //$('body.diva2margin').append($('<div id="ldapoverlay"></div>'));
 
     //DIV för att visa Apans resultat till vänster på sidan
-    var monkeyresultswrapper = 
+    var monkeyresultswrapper =
         ($('<div style="display:none" id="monkeyresultswrapper">' +
                 '<div>' +
-                    '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' + 
+                    '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' +
                     '<!--img class="monkeytalkbubble" src="https://apps.lib.kth.se/divaapan/monkeytalk.png"-->' +
                     '<div class="bubble">' +
                         '<i class="fa fa-spinner fa-spin"></i>' +
                         '<div class="monkeytalk"></div>' +
-                    '</div>' + 
+                    '</div>' +
                 '</div>' +
                 '<div class="monkeyheader">' +
-                    '<h1>DiVA-Apan</h1>' + 
+                    '<h1>DiVA-Apan</h1>' +
                 '</div>' +
                 '<div id="monkeylogin">' +
                     '<form id="monkeyloginform">' +
@@ -1129,13 +1129,13 @@
                     'Uppdateringar' +
                 '</h2>' +
                 '<div id="monkeyupdates" class="flexbox column">' +
-                '</div>' + 
+                '</div>' +
                 '<hr class="solid">' +
                 '<h2>' +
                     'Resultat' +
                 '</h2>' +
                 '<div id="monkeyresults" class="flexbox column">' +
-                '</div>' + 
+                '</div>' +
             '</div>'));
     $('body.diva2margin').prepend(monkeyresultswrapper);
 
@@ -1157,7 +1157,7 @@
     }
 
     startMonkey()
-    
+
 })();
 
 function styles() {
@@ -1168,7 +1168,7 @@ function styles() {
         -webkit-appearance: none;
         width: 10px;
     }
-    
+
     ::-webkit-scrollbar-thumb {
         border-radius: 5px;
         background-color: rgba(0,0,0,.5);
@@ -1209,11 +1209,11 @@ function styles() {
     }
 
     #monkeyresultswrapper {
-        position: fixed; 
-        top: 20px; 
-        left: 0; 
-        width: 320px; 
-        height: 100%; 
+        position: fixed;
+        top: 20px;
+        left: 0;
+        width: 320px;
+        height: 100%;
         overflow: auto;
         padding-left: 10px;
         background: #ffffff;
