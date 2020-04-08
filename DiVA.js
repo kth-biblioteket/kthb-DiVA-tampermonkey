@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.1.4
+// @version      1.1.5
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -96,7 +96,7 @@
                     //Om behörig bibblananvändare
                     if (response.apikeys) {
                         //Spara token i en cookie (som gäller lång hur tid?)
-                        Cookies.set('token', response.token)
+                        Cookies.set('token', response.token, { expires: 30 })
                         setapikeys(response)
                         init(false);
                     } else {
@@ -276,7 +276,7 @@
                 html += '</div>'
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyresults').html(html);
-                $(".monkeytalk").html("");
+                $(".monkeytalk").html("ORCiD svarade");
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -309,9 +309,9 @@
                     '?token=' + ldap_apikey;
         }
         
-        axios.get(url)
+        await axios.get(url)
             .then(function (response) {
-                var html = '<div><h2>Information från KTH UG(LDAP)</h2>';
+                var html = '<div><div class="resultsheader">Information från KTH UG(LDAP)</div>';
                 if (response.data) {
                     var json = response.data
                     if (response.status == 201) {
@@ -322,9 +322,10 @@
                         json.ugusers = sortByAttribute(json.ugusers, 'sn', 'givenName')
                         $.each(json.ugusers, function(key, value) {
                             html += '<div class="inforecord flexbox column">';
+                            html += '<h2>kthid: ' + json.ugusers[key].ugKthid +'</h2>';
                             html += '<div><span class="fieldtitle">Efternamn: </span><span>' + json.ugusers[key].sn + '</span></div>' +
                             '<div><span class="fieldtitle">Förnamn: </span><span>' + json.ugusers[key].givenName + '</span></div>' +
-                            '<div><span class="fieldtitle">Kthid: </span><span>' + json.ugusers[key].ugKthid + '</span></div>' +
+                            //'<div><span class="fieldtitle">Kthid: </span><span>' + json.ugusers[key].ugKthid + '</span></div>' +
                             '<div><span class="fieldtitle">Titel: </span><span>' + json.ugusers[key].title + '</span></div>' +
                             '<div><span class="fieldtitle">Skola/org: </span><span>' + json.ugusers[key].kthPAGroupMembership + '</span></div>'
                             html += '</div>';
@@ -336,7 +337,7 @@
                 html += '</div>'
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyresults').html(html);
-                $(".monkeytalk").html("");
+                $(".monkeytalk").html("LDAP svarade");
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -386,7 +387,7 @@
                 html += '</div>'
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyresults').html(html);
-                $(".monkeytalk").html("");
+                $(".monkeytalk").html("Leta Anställda svarade");
             })
             .catch(function (error) {
                 api_error(error.response);
@@ -413,7 +414,7 @@
             '?apiKey=' + scopus_apikey;
         await axios.get(url)
             .then(function (response) {
-                var html = '<div><h2>Data uppdaterad från Scopus</h2>';
+                var html = '<div><div class="updateheader">Data uppdaterad från Scopus</div>';
                 if (response.status == 201) {
                     html += "<p>Hittade inget i Scopus</p>";
                 } else {
@@ -447,16 +448,16 @@
                     html += '<p>Uppdaterat Free full-text: ' + response.data['abstracts-retrieval-response']['coredata']['openaccessFlag'] + '</p>';
                     $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                     $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                    $('html, body').animate({scrollTop:0},'slow');
                     
                 };
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-                $(".monkeytalk").html("");
+                $(".monkeytalk").html("Scopus svarade");
                 return 1;
             })
             .catch(function (error) {
-                api_error(error.response);
+                $("#monkeyresultswrapper i").css("display", "none");
+                $(".monkeytalk").html("Hittade inget hos Scopus");
             })
             .then(function () {
             });
@@ -476,9 +477,9 @@
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $(".monkeytalk").html("Jag pratar med Web of Science...");
         var url = wos_apiurl + doi;
-        axios.get(url)
+        await axios.get(url)
             .then(function (response) {
-                var html = '<div><h2>Data uppdaterad från Web of Science</h2>';
+                var html = '<div><div class="updateheader">Data uppdaterad från Web of Science</div>';
                 if (response.status == 201) {
                     html += "<p>Hittade inget i Web of Science</p>";
                 } else {
@@ -502,16 +503,15 @@
                         $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
                     }
                     $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                    $('html, body').animate({scrollTop:0},'slow');
-                    
+                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna! 
                 };
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-                $(".monkeytalk").html("");
+                $(".monkeytalk").html("Web of Science svarade");
             })
             .catch(function (error) {
-                api_error(error.response);
+                $("#monkeyresultswrapper i").css("display", "none");
+                $(".monkeytalk").html("Hittade inget hos Web of Science");
             })
             .then(function () {
             });
@@ -530,18 +530,21 @@
             titleAll + '"}]]&aqe=[]&aq2=[[]]&onlyFullText=false&noOfRows=50&sortOrder=title_sort_asc&sortOrder2=title_sort_asc';
         axios.get(url)
         .then(function (response) {
-            var html = '<div><h2>Information från DiVA, Söktext: ' + titleAll + '</h2>';
+            var html = '<div><div class="resultsheader">Information från DiVA, Söktext: ' + titleAll + '</div>';
             if (response.data) {
                 var json = response.data
-                if (response.status == 201) {
-                    html += "<p>Inga användare hittades</p>";
+                console.log($(response.data).find('mods'))
+                if ($(response.data).find('mods').length == 0) {
+                    var html = '<div><div class="resultsheader">Hittade inget i DiVA, Söktext: ' + titleAll + '</div>';
                 } else {
                     $(response.data).find('mods').each(function(i, j) {
                         html += '<div class="inforecord flexbox column">';
+                        html += '<h2>ID: ' + $(j).find('recordIdentifier').text() +'</h2>';
                         html += '<div><span class="fieldtitle">Status: </span><span>' + $(j).find('note[type="publicationStatus"]').text() + '</span></div>' +
-                            '<div><span class="fieldtitle">ID: </span><span>' + $(j).find('recordIdentifier').text() + '</span></div>' +
+                            '<div><span class="fieldtitle">URI: </span><span><a href="' + $(j).find('identifier[type="uri"]').text() + '" target="_new">' + $(j).find('identifier[type="uri"]').text() + '</a></span></div>' +
                             '<div><span class="fieldtitle">Note: </span><span>' + $(j).find('note[type!="publicationStatus"]').text() + '</span></div>' +
                             '<div><span class="fieldtitle">DOI: </span><span>' + $(j).find('identifier[type="doi"]').text() + '</span></div>' +
+                            '<div><span class="fieldtitle">ISI: </span><span>' + $(j).find('identifier[type="isi"]').text() + '</span></div>' +
                             '<div><span class="fieldtitle">ScopusID: </span><span>' + $(j).find('identifier[type="scopus"]').text() + '</span></div>' +
                             '<div><span class="fieldtitle">Created: </span><span>' + $(j).find('recordCreationDate').text() + '</span></div>' +
                             '<div><span class="fieldtitle">Changed: </span><span>' + $(j).find('recordChangeDate').text() + '</span></div>' +
@@ -567,10 +570,11 @@
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
-            $(".monkeytalk").html("");
+            $(".monkeytalk").html("DiVA svarade");
         })
         .catch(function (error) {
-            api_error(error.response);
+            $("#monkeyresultswrapper i").css("display", "none");
+            $(".monkeytalk").html("Hittade inget i DiVA");
         })
         .then(function () {
         });
@@ -592,7 +596,7 @@
         var url = dblp_apiurl1 + doi;
         axios.get(url)
             .then(function (response) {
-                var html = '<div><h2>Information från dblp, DOI: ' + doi + '</h2>';
+                var html = '<div><div class="resultsheader">Information från dblp, DOI: ' + doi + '</div>';
                 if ($(response.data).find("crossref").text()) {
                     var url = dblp_apiurl2 + $(response.data).find("crossref").text();
                     axios.get(url)
@@ -609,16 +613,18 @@
                         .then(function () {
                         });
                 } else {
-                    html += "<p>Inga info hittades</p>";
+                    html += "<p>Hittade inget hos dblp</p>";
                 }
                 
                 html += '</div>'
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyresults').html(html);
-                $(".monkeytalk").html("");
+                $(".monkeytalk").html("dblp svarade");
             })
             .catch(function (error) {
-                api_error(error.response);
+                $('#monkeyresults').html('');
+                $("#monkeyresultswrapper i").css("display", "none");
+                $(".monkeytalk").html("Hittade inget hos dblp");
             })
             .then(function () {
             });
@@ -1038,9 +1044,12 @@
         if (re_init!=true) {
             getLDAP('', '', $('.diva2identifier:eq(2)').html())
             .then( function(result) {
-                getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())    
+                getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val()) 
                 .then( function(result) {
-                    getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())    
+                    getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
+                    .then( function(result) {
+                        $('html, body').animate({scrollTop:0},'slow'); 
+                    }); 
                 });
             });
         }
@@ -1104,7 +1113,7 @@
                     '</div>' + 
                 '</div>' +
                 '<div class="monkeyheader">' +
-                    '<span>DiVA-Apan</span>' + 
+                    '<h1>DiVA-Apan</h1>' + 
                 '</div>' +
                 '<div id="monkeylogin">' +
                     '<form id="monkeyloginform">' +
@@ -1116,15 +1125,15 @@
                     '</form>' +
                     '<button id="login">Login</button>' +
                 '</div>' +
-                '<div>' +
+                '<h2>' +
                     'Uppdateringar' +
-                '</div>' +
+                '</h2>' +
                 '<div id="monkeyupdates" class="flexbox column">' +
                 '</div>' + 
                 '<hr class="solid">' +
-                '<div>' +
+                '<h2>' +
                     'Resultat' +
-                '</div>' +
+                '</h2>' +
                 '<div id="monkeyresults" class="flexbox column">' +
                 '</div>' + 
             '</div>'));
@@ -1177,7 +1186,7 @@ function styles() {
     .monkeyheader {
         font-weight: bold;
         font-size: 1.06em;
-        padding-bottom: 10px;
+        padding-bottom: 0px;
     }
 
     #monkeyresultswrapper i {
@@ -1203,7 +1212,7 @@ function styles() {
         position: fixed; 
         top: 20px; 
         left: 0; 
-        width: 300px; 
+        width: 320px; 
         height: 100%; 
         overflow: auto;
         padding-left: 10px;
@@ -1217,11 +1226,15 @@ function styles() {
 
     #monkeyresults ,
     #monkeyupdates {
-        padding: 10px;
-        font-size: 10px;
-        margin-bottom: 10px;
+        padding: 0px;
+        font-size: 12px;
+        margin-bottom: 20px;
+        width: 300px
     }
 
+    .updateheader, .resultsheader {
+        font-weight: bold;
+    }
     #monkeyresults a, #ldapoverlay a {
         font-size: 0.8rem !important;
     }
@@ -1296,11 +1309,15 @@ function styles() {
     }
 
     button:hover {
-        opacity: 0.7;
+        background-color: #dd2f87;
     }
 
     button.link {
         background-color: #007fae;
+    }
+
+    button.link:hover {
+        background-color: #005cae;
     }
 
     .clearbutton {
