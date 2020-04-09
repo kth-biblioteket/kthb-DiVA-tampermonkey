@@ -414,7 +414,7 @@
             '?apiKey=' + scopus_apikey;
         await axios.get(url)
             .then(function (response) {
-                var html = '<div><div class="updateheader">Data uppdaterad från Scopus. Glad Påsk!</div>';
+                var html = '<div><div class="updateheader">Data uppdaterad från Scopus.</div>';
                 if (response.status == 201) {
                     html += "<p>Hittade inget i Scopus</p>";
                 } else {
@@ -452,7 +452,7 @@
                 };
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-                $(".monkeytalk").html("Scopus har uppdaterat posten, se svaret här nedanför");
+                $(".monkeytalk").html("Glad Påsk! Scopus har uppdaterat posten, se svaret här nedanför");
                 return 1;
             })
             .catch(function (error) {
@@ -479,7 +479,7 @@
         var url = wos_apiurl + doi;
         await axios.get(url)
             .then(function (response) {
-                var html = '<div><div class="updateheader">Data uppdaterad från Web of Science. Glad Påsk!</div>';
+                var html = '<div><div class="updateheader">Data uppdaterad från Web of Science. </div>';
                 if (response.status == 201) {
                     html += "<p>Hittade inget i Web of Science</p>";
                 } else {
@@ -507,7 +507,7 @@
                 };
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-                $(".monkeytalk").html("Web of Science har uppdaterat posten, se svaret här nedanför");
+                $(".monkeytalk").html("Glad Påsk! Web of Science har uppdaterat posten, se svaret här nedanför");
             })
             .catch(function (error) {
                 $("#monkeyresultswrapper i").css("display", "none");
@@ -570,11 +570,11 @@
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
-            $(".monkeytalk").html("DiVA svarade... se svaret här nedanför");
+            $(".monkeytalk").html("Glad Påsk! DiVA svarade... se svaret här nedanför");
         })
         .catch(function (error) {
             $("#monkeyresultswrapper i").css("display", "none");
-            $(".monkeytalk").html("Hittade inget i DiVA");
+            $(".monkeytalk").html("Glad Påsk! Hittade inget i DiVA");
         })
         .then(function () {
         });
