@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.1.6
+// @version      1.1.7
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -414,7 +414,7 @@
             '?apiKey=' + scopus_apikey;
         await axios.get(url)
             .then(function (response) {
-                var html = '<div><div class="updateheader">Data uppdaterad från Scopus</div>';
+                var html = '<div><div class="updateheader">Data uppdaterad från Scopus. Glad Påsk!</div>';
                 if (response.status == 201) {
                     html += "<p>Hittade inget i Scopus</p>";
                 } else {
@@ -479,7 +479,7 @@
         var url = wos_apiurl + doi;
         await axios.get(url)
             .then(function (response) {
-                var html = '<div><div class="updateheader">Data uppdaterad från Web of Science</div>';
+                var html = '<div><div class="updateheader">Data uppdaterad från Web of Science. Glad Påsk!</div>';
                 if (response.status == 201) {
                     html += "<p>Hittade inget i Web of Science</p>";
                 } else {
