@@ -212,7 +212,7 @@
      */
     function getOrcid(fnamn, enamn) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med ORCiD...");
+        $(".monkeytalk").html("Jag pratar med ORCiD. Det kan ta lite tid...");
         var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
         var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
 
@@ -276,7 +276,7 @@
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
-            $(".monkeytalk").html("ORCiD svarade... se svaret här nedanför");
+            $(".monkeytalk").html("ORCiD svarade... se resultatet här nedanför");
         })
             .catch(function (error) {
             api_error(error.response);
@@ -337,7 +337,7 @@
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
-            $(".monkeytalk").html("LDAP svarade... se svaret här nedanför");
+            $(".monkeytalk").html("LDAP svarade... se resultatet här nedanför");
         })
             .catch(function (error) {
             api_error(error.response);
@@ -387,7 +387,7 @@
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
-            $(".monkeytalk").html("Leta KTH-anställda svarade... se svaret här nedanför");
+            $(".monkeytalk").html("Leta KTH-anställda svarade... se resultatet här nedanför");
         })
             .catch(function (error) {
             api_error(error.response);
@@ -452,12 +452,12 @@
             };
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-            $(".monkeytalk").html("Goda nyheter! Scopus har uppdaterat posten, se svaret här nedanför");
+            $(".monkeytalk").html("Goda nyheter! Scopus har uppdaterat posten, se resultatet här nedanför");
             return 1;
         })
             .catch(function (error) {
             $("#monkeyresultswrapper i").css("display", "none");
-            $(".monkeytalk").html("Hittade inget i Scopus");
+            $(".monkeytalk").html("Jag hittade inget i Scopus");
         })
             .then(function () {
         });
@@ -507,11 +507,11 @@
             };
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-            $(".monkeytalk").html("Goda Nyheter! Web of Science har uppdaterat posten, se svaret här nedanför");
+            $(".monkeytalk").html("Goda Nyheter! Web of Science har uppdaterat posten, se resultatet här nedanför");
         })
             .catch(function (error) {
             $("#monkeyresultswrapper i").css("display", "none");
-            $(".monkeytalk").html("Hittade inget i Web of Science");
+            $(".monkeytalk").html("Jag hittade inget i Web of Science");
         })
             .then(function () {
         });
@@ -570,11 +570,11 @@
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
-            $(".monkeytalk").html("Goda nyheter! DiVA svarade... se svaret här nedanför");
+            $(".monkeytalk").html("Goda nyheter! DiVA svarade... se resultatet här nedanför");
         })
             .catch(function (error) {
             $("#monkeyresultswrapper i").css("display", "none");
-            $(".monkeytalk").html("Hittade inget i DiVA");
+            $(".monkeytalk").html("Jag hittade inget i DiVA");
         })
             .then(function () {
         });
@@ -613,18 +613,18 @@
                     .then(function () {
                 });
             } else {
-                html += "<p>Nej, jag hittade inget i dblp. Det kanske inte är Computer Science?</p>";
+                html += "<p>Hittade inget hos dblp</p>";
             }
 
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
-            $(".monkeytalk").html("dblp svarade... se svaret här nedanför");
+            $(".monkeytalk").html("dblp svarade... se resultatet här nedanför");
         })
             .catch(function (error) {
             $('#monkeyresults').html('');
             $("#monkeyresultswrapper i").css("display", "none");
-            $(".monkeytalk").html("Hittade inget hos dblp");
+            $(".monkeytalk").html("Nej, jag hittade inget i dblp. Det kanske inte är Computer Science?");
         })
             .then(function () {
         });
@@ -1219,32 +1219,26 @@
 function styles() {
     GM_addStyle(`
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css");
-
 ::-webkit-scrollbar {
 -webkit-appearance: none;
 width: 10px;
 }
-
 ::-webkit-scrollbar-thumb {
 border-radius: 5px;
 background-color: rgba(0,0,0,.5);
 -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
 }
-
 .logo {
 width: 80px;
 }
-
 .monkeytalk {
 width: 150px;
 }
-
 .monkeyheader {
 font-weight: bold;
 font-size: 1.06em;
 padding-bottom: 0px;
 }
-
 #monkeyresultswrapper i {
 font-size: 32px;
 position: absolute;
@@ -1252,18 +1246,15 @@ top: 18px;
 left: 170px;
 z-index: 1;
 }
-
 #wosapiButtonjq i,
 #monkeyresultswrapper i {
 display: none;
 }
-
 #monkeylogin {
 display: none;
 overflow: hidden;
 padding: 5px;
 }
-
 #monkeyresultswrapper {
 position: fixed;
 top: 20px;
@@ -1274,12 +1265,10 @@ overflow: auto;
 padding-left: 10px;
 background: #ffffff;
 }
-
 #monkeyupdates {
 height: 150px;
 overflow: auto;
 }
-
 #monkeyresults ,
 #monkeyupdates {
 padding: 0px;
@@ -1287,69 +1276,55 @@ font-size: 12px;
 margin-bottom: 20px;
 width: 300px
 }
-
 .updateheader, .resultsheader {
 font-weight: bold;
 }
 #monkeyresults a, #ldapoverlay a {
 font-size: 0.8rem !important;
 }
-
 hr.solid {
 border-top: 3px solid #bbb;
 }
-
 .inforecord {
 padding-top: 5px;
 padding-bottom: 5px;
 }
-
 .inforecord>div {
 display: flex;
 border-top: 1px solid;
 border-left: 1px solid;
 border-right: 1px solid
 }
-
 .inforecord>div>span:first-child {
 border-right: 1px solid
 }
-
 .inforecord>div:last-child {
 border-bottom: 1px solid;
 }
-
 .inforecord span {
 word-break: break-all;
 flex: 1;
 padding: 2px;
 }
-
 .inforecord span {
 }
-
 .fieldtitle {
 font-weight: bold;
 }
-
 .flexbox {
 display: flex;
 }
-
 .column {
 flex-direction: column;
 }
-
 .rowpadding {
 padding-top: 5px;
 padding-bottom: 5px;
 }
-
 .rowmargin {
 margin-top: 5px;
 margin-bottom: 5px;
 }
-
 button {
 background-color: #d85497;
 color: #fff;
@@ -1363,26 +1338,21 @@ outline: none;
 margin: 1px;
 cursor: pointer;
 }
-
 button:hover {
 background-color: #dd2f87;
 }
-
 button.link {
 background-color: #007fae;
 }
-
 button.link:hover {
 background-color: #005cae;
 }
-
 .clearbutton {
 line-height: 1;
 height: 17px;
 padding: 0px 10px;
 font-size: 11px;
 }
-
 #ldapoverlay {
 position: fixed;
 height: 100%;
@@ -1395,7 +1365,6 @@ background: rgba(0,0,0,0.8);
 display: none;
 font-size: 0.8rem
 }
-
 #popup {
 max-width: 1200px;
 width: 80%;
@@ -1407,7 +1376,6 @@ position: relative;
 background: #fff;
 margin: 20px auto;
 }
-
 #close {
 position: absolute;
 top: 10px;
@@ -1415,7 +1383,6 @@ right: 10px;
 cursor: pointer;
 color: #000;
 }
-
 .bubble
 {
 position: absolute;
@@ -1431,7 +1398,6 @@ margin-left: 10px;
 font-size: 12px;
 top: 5px;
 }
-
 .bubble:after
 {
 content: '';
