@@ -452,7 +452,7 @@
             };
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-            $(".monkeytalk").html("Glad Påsk! Scopus har uppdaterat posten, se svaret här nedanför");
+            $(".monkeytalk").html("Goda nyheter! Scopus har uppdaterat posten, se svaret här nedanför");
             return 1;
         })
             .catch(function (error) {
@@ -507,7 +507,7 @@
             };
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-            $(".monkeytalk").html("Glad Påsk! Web of Science har uppdaterat posten, se svaret här nedanför");
+            $(".monkeytalk").html("Goda Nyheter! Web of Science har uppdaterat posten, se svaret här nedanför");
         })
             .catch(function (error) {
             $("#monkeyresultswrapper i").css("display", "none");
@@ -570,11 +570,11 @@
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
-            $(".monkeytalk").html("Glad Påsk! DiVA svarade... se svaret här nedanför");
+            $(".monkeytalk").html("Goda nyheter! DiVA svarade... se svaret här nedanför");
         })
             .catch(function (error) {
             $("#monkeyresultswrapper i").css("display", "none");
-            $(".monkeytalk").html("Glad Påsk! Hittade inget i DiVA");
+            $(".monkeytalk").html("Hittade inget i DiVA");
         })
             .then(function () {
         });
@@ -613,7 +613,7 @@
                     .then(function () {
                 });
             } else {
-                html += "<p>Hittade inget i dblp</p>";
+                html += "<p>Nej, jag hittade inget i dblp. Det kanske inte är Computer Science?</p>";
             }
 
             html += '</div>'
