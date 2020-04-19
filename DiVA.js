@@ -414,50 +414,53 @@
             '?apiKey=' + scopus_apikey;
         await axios.get(url)
             .then(function (response) {
-            var html = '<div><div class="updateheader">Data uppdaterad från Scopus.</div>';
+            var html = '<div><div class="updateheader"></div>';
             if (response.status == 201) {
-                html += "<p>Hittade inget i Scopus</p>";
+                html += "<p>Hittade inget i Scopus!</p>";
             } else {
                 //hitta ScopusId
                 var eid = response.data['abstracts-retrieval-response']['coredata']['eid']; //plocka värdet för ScopusId (eid)
                 if(eid == ""
                    || typeof eid === 'undefined'
                    || eid == 'undefined') {
-                    html += '<p>PubMedID hittades inte</p>';
+//                 html += '<p>ScopusID hittades inte</p>';
                 } else {
+                    if($("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val() == "") {
                     html += '<p>Uppdaterat ScopusID: ' + eid + '</p>';
+                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                     $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
-                }
+                }}
 
                 var pmid = response.data['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
                 if(pmid == ""
                    || typeof pmid === 'undefined'
                    || pmid == 'undefined') {
-                    html += '<p>PubMedID hittades inte</p>';
+//                 html += '<p>PubMedID hittades inte i Scopus</p>';
                 } else {
+                    if($("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val() == "") {
                     html += '<p>Uppdaterat PubMedID: ' + pmid + '</p>';
                     $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
-                }
+                }}
 
                 var oa = response.data['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
-                if (oa == 'true') { //sen jag bytte till absract search funkar detta som str men inte som boolean, varför?
+                if (oa == 'true') { // kolla om artikeln är OA
                     document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
+                    html += '<p>Uppdaterat Free full-text: ' + response.data['abstracts-retrieval-response']['coredata']['openaccessFlag'] + '</p>'; // visa bara uppdatering om Free full-text = 'true'
                 } else {
-                    document.getElementById(diva_id + ":doiFree").checked = false; // checka inte boxen... eller avchecka den
+                     ""; // checka inte boxen
                 }
-                html += '<p>Uppdaterat Free full-text: ' + response.data['abstracts-retrieval-response']['coredata']['openaccessFlag'] + '</p>';
                 $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                 $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
 
-            };
+                };
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-            $(".monkeytalk").html("Goda nyheter! Scopus har uppdaterat posten, se resultatet här nedanför");
+            $(".monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
             return 1;
         })
             .catch(function (error) {
             $("#monkeyresultswrapper i").css("display", "none");
-            $(".monkeytalk").html("Jag hittade inget i Scopus");
+            $(".monkeytalk").html("Jag hittade inget i Scopus!");
         })
             .then(function () {
         });
@@ -470,7 +473,7 @@
      */
     async function getWoS(doi) {
         if(doi == ""){
-            $('.monkeytalk').html('Ojojoj, ingen DOI!');
+            $('.monkeytalk').html('Ojojoj, ingen DOI! Jag behöver en DOI för att kunna uppdatera från databaserna.');
             $("#monkeyresultswrapper i").css("display", "none");
             return 0;
         }
@@ -479,7 +482,7 @@
         var url = wos_apiurl + doi;
         await axios.get(url)
             .then(function (response) {
-            var html = '<div><div class="updateheader">Data uppdaterad från Web of Science. </div>';
+            var html = '<div><div class="updateheader"></div>';
             if (response.status == 201) {
                 html += "<p>Hittade inget i Web of Science</p>";
             } else {
@@ -487,27 +490,29 @@
                 if(isi == ""
                    || typeof isi === 'undefined'
                    || isi == 'undefined') {
-                    html += '<p>ISI hittades inte</p>';
+//                 html += '<p>ISI hittades inte</p>';
                 } else {
+                    if($("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val() == "") {
                     html += '<p>Uppdaterat ISI: ' + isi + '</p>';
                     $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val(isi); // skriv in värdet för ISI/UT i fältet för ISI
-                }
+                }}
 
                 var pmid = response.data.wos.pmid; //plocka värdet för PubMedID (PMID
                 if(pmid == ""
                    || typeof pmid === 'undefined'
                    || pmid == 'undefined') {
-                    html += '<p>PubMedID hittades inte</p>';
+//                  html += '<p>PubMedID hittades inte i Web of Science</p>';
                 } else {
+                    if($("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val() == "") {
                     html += '<p>Uppdaterat PubMedID: ' + pmid + '</p>';
                     $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
-                }
+                }}
                 $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                 $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
             };
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-            $(".monkeytalk").html("Goda nyheter! Web of Science har uppdaterat posten, se resultatet här nedanför");
+            $(".monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
         })
             .catch(function (error) {
             $("#monkeyresultswrapper i").css("display", "none");
@@ -570,7 +575,7 @@
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
-            $(".monkeytalk").html("Goda nyheter! DiVA svarade... se resultatet här nedanför");
+            $(".monkeytalk").html("DiVA svarade... se resultatet här nedanför");
         })
             .catch(function (error) {
             $("#monkeyresultswrapper i").css("display", "none");
@@ -619,12 +624,12 @@
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
-            $(".monkeytalk").html("dblp svarade... se resultatet här nedanför");
+            $(".monkeytalk").html("dblp svarade... se resultatet här nedanför!");
         })
             .catch(function (error) {
             $('#monkeyresults').html('');
             $("#monkeyresultswrapper i").css("display", "none");
-            $(".monkeytalk").html("Nej, jag hittade inget i dblp. Det kanske inte är Computer Science?");
+            $(".monkeytalk").html("Nej, jag hittade inget i dblp. Det kanske inte är ett konferensbidrag i Computer Science?");
         })
             .then(function () {
         });
@@ -833,8 +838,7 @@
 
         ///////////////////////////////////////////////////////////////
         //
-        // Skapa en knapp vid ISBN-fältet, att ta bort bindestreck (-)
-        // på fel ställe så att posten går att spara
+        // Knapp vid ISBN-fältet, ta bort bindestreck på fel ställen så att posten går att spara utan felmeddelande
         //
         ///////////////////////////////////////////////////////////////
         $('#isbnHyphenButtonjq').remove();
@@ -849,7 +853,7 @@
 
         ////////////////////////////////////
         //
-        // Knapp vid ISBN-fältet - öppna i WorldCat
+        // Knapp vid ISBN-fältet, öppna post i WorldCat
         //
         ////////////////////////////////////
         $('openWorldCatButtonjq').remove();
@@ -864,7 +868,7 @@
 
         ////////////////////////////////////////
         //
-        // WoS och "Clarivate" knappar vid ISI
+        // WoS-knappar vid ISI-fältet
         //
         ////////////////////////////////////////
         $('#WoSButtonjq').remove();
@@ -886,11 +890,11 @@
 
         ////////////////////////////////////
         //
-        // Scopus knapp vid "Scopus-fältet"
+        // Scopus knappar vid "Scopus-fältet"
         //
         ////////////////////////////////////
         $('openScopusButtonjq').remove();
-        var openScopusButtonjq = $('<button class="link" id="openScopusButtonjq" type="button">Öppna Scopus</button>');
+        var openScopusButtonjq = $('<button class="link" id="openScopusButtonjq" type="button">Öppna i Scopus</button>');
         openScopusButtonjq.on("click", function() {
             var url = "https://focus.lib.kth.se/login?url=http://www.scopus.com/record/display.url?origin=inward&partnerID=40&eid=" +
                 $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val() +
