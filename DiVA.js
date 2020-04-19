@@ -507,7 +507,7 @@
             };
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-            $(".monkeytalk").html("Goda Nyheter! Web of Science har uppdaterat posten, se resultatet här nedanför");
+            $(".monkeytalk").html("Goda nyheter! Web of Science har uppdaterat posten, se resultatet här nedanför");
         })
             .catch(function (error) {
             $("#monkeyresultswrapper i").css("display", "none");
@@ -853,7 +853,7 @@
         //
         ////////////////////////////////////
         $('openWorldCatButtonjq').remove();
-        var openWorldCatButtonjq = $('<button class="link" id="openWorldCatButtonjq" type="button">Öppna WorldCat</button>');
+        var openWorldCatButtonjq = $('<button class="link" id="openWorldCatButtonjq" type="button">Öppna i WorldCat</button>');
         openWorldCatButtonjq.on("click", function() {
             var url = "http://www.worldcat.org/isbn/" +
                 $("div.diva2addtextchoicecol:contains('ISBN')").parent().find('input').val() +
@@ -868,7 +868,7 @@
         //
         ////////////////////////////////////////
         $('#WoSButtonjq').remove();
-        var WoSButtonjq = $('<button class="link" id="WoSButtonjq" type="button">Öppna WoS</button>');
+        var WoSButtonjq = $('<button class="link" id="WoSButtonjq" type="button">Öppna i WoS</button>');
         WoSButtonjq.on("click", function() {
             var url = "https://focus.lib.kth.se/login?url=http://gateway.isiknowledge.com/gateway/Gateway.cgi?SrcApp=sfx&KeyUT=" +
                 $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val() +
@@ -912,7 +912,7 @@
         //
         ////////////////////////////////////
         $('openPubMedButtonjq').remove();
-        var openPubMedButtonjq = $('<button class="link" id="openPubMedButtonjq" type="button">Öppna PubMed</button>');
+        var openPubMedButtonjq = $('<button class="link" id="openPubMedButtonjq" type="button">Öppna i PubMed</button>');
         openPubMedButtonjq.on("click", function() {
             var url = "https://www.ncbi.nlm.nih.gov/pubmed/" +
                 $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val() +
