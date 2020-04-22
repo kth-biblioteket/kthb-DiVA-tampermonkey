@@ -965,11 +965,11 @@
         })
         $("div.diva2addtextchoicecol:contains('PubMedID')").before(openPubMedButtonjq)
 
-        ///////////////////////////////////////////////////
+        //////////////////////////////////////////////////
         //
         // Knapp för dblp vid konferensfältet
         //
-        ///////////////////////////////////////////////////
+        //////////////////////////////////////////////////
         $('#dblpButtonjq').remove();
         var dblpButtonjq = $('<button id="dblpButtonjq" type="button">dblp</button>');
         //bind en clickfunktion som anropar API med värdet i DOI-fältet
