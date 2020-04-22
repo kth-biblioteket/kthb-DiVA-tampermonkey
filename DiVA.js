@@ -58,6 +58,7 @@
     var authortarget
     var diva_id_selector;
     var diva_observer_selector;
+    var i = 0;
 
     /**
      * Funktion för att sätta apinycklar
@@ -425,36 +426,36 @@
                 if(eid == ""
                    || typeof eid === 'undefined'
                    || eid == 'undefined') {
-                    //                 html += '<p>ScopusID hittades inte</p>';
+//                 html += '<p>ScopusID hittades inte</p>';
                 } else {
                     if($("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val() == "") {
-                        html += '<p>Uppdaterat ScopusID: ' + eid + '</p>';
-                        $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                        $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
-                    }}
+                    html += '<p>Uppdaterat ScopusID: ' + eid + '</p>';
+                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
+                }}
 
                 var pmid = response.data['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
                 if(pmid == ""
                    || typeof pmid === 'undefined'
                    || pmid == 'undefined') {
-                    //                 html += '<p>PubMedID hittades inte i Scopus</p>';
+//                 html += '<p>PubMedID hittades inte i Scopus</p>';
                 } else {
                     if($("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val() == "") {
-                        html += '<p>Uppdaterat PubMedID: ' + pmid + '</p>';
-                        $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
-                    }}
+                    html += '<p>Uppdaterat PubMedID: ' + pmid + '</p>';
+                    $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
+                }}
 
                 var oa = response.data['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
                 if (oa == 'true') { // kolla om artikeln är OA
                     document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
                     html += '<p>Uppdaterat Free full-text: ' + response.data['abstracts-retrieval-response']['coredata']['openaccessFlag'] + '</p>'; // visa bara uppdatering om Free full-text = 'true'
                 } else {
-                    ""; // checka inte boxen
+                     ""; // checka inte boxen
                 }
                 $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                 $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
 
-            };
+                };
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyupdates').html(html + $('#monkeyupdates').html());
             $(".monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
@@ -492,23 +493,23 @@
                 if(isi == ""
                    || typeof isi === 'undefined'
                    || isi == 'undefined') {
-                    //                 html += '<p>ISI hittades inte</p>';
+//                 html += '<p>ISI hittades inte</p>';
                 } else {
                     if($("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val() == "") {
-                        html += '<p>Uppdaterat ISI: ' + isi + '</p>';
-                        $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val(isi); // skriv in värdet för ISI/UT i fältet för ISI
-                    }}
+                    html += '<p>Uppdaterat ISI: ' + isi + '</p>';
+                    $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val(isi); // skriv in värdet för ISI/UT i fältet för ISI
+                }}
 
                 var pmid = response.data.wos.pmid; //plocka värdet för PubMedID (PMID
                 if(pmid == ""
                    || typeof pmid === 'undefined'
                    || pmid == 'undefined') {
-                    //                  html += '<p>PubMedID hittades inte i Web of Science</p>';
+//                  html += '<p>PubMedID hittades inte i Web of Science</p>';
                 } else {
                     if($("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val() == "") {
-                        html += '<p>Uppdaterat PubMedID: ' + pmid + '</p>';
-                        $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
-                    }}
+                    html += '<p>Uppdaterat PubMedID: ' + pmid + '</p>';
+                    $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
+                }}
                 $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                 $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
             };
@@ -542,8 +543,7 @@
                 var json = response.data
                 console.log($(response.data).find('mods'))
                 if ($(response.data).find('mods').length == 0) {
-                    //                   var html = '<div><div class="resultsheader">Hittade inget i DiVA, Söktext: ' + titleAll + '</div>';
-                } else {
+                 } else {
                     $(response.data).find('mods').each(function(i, j) {
                         html += '<div class="inforecord flexbox column">';
                         html += '<h2>ID: ' + $(j).find('recordIdentifier').text() +'</h2>';
@@ -556,8 +556,8 @@
                             '<div><span class="fieldtitle">Created: </span><span>' + $(j).find('recordCreationDate').text() + '</span></div>' +
                             '<div><span class="fieldtitle">Changed: </span><span>' + $(j).find('recordChangeDate').text() + '</span></div>' +
                             '<div><span class="fieldtitle">Origin: </span><span>' + $(j).find('recordOrigin').text() + '</span></div>' +
-                            '<div><span class="fieldtitle">Source: </span><span>' + $(j).find('recordContentSource').text() + '</span></div>'
-                        //                          '<div><span class="fieldtitle">Year: </span><span>' + $(j).find('issued').text() + '</span></div>'
+                            '<div><span class="fieldtitle">Source: </span><span>' + $(j).find('recordContentSource').text() + '</span></div>' +
+                            '<div><span class="fieldtitle">Year: </span><span>' + $(j).find('dateIssued').text() + '</span></div>'
                         html += '</div>';
                     });
                     /*
@@ -839,22 +839,6 @@
         })
         $("div.diva2addtextchoice2:contains('Alternativ'), div.diva2addtextchoice2:contains('Alternative')").parent().before(alttitlecaseButtonjq)
 
-        ///////////////////////////////////////////////////////////////
-        //
-        // Knapp vid ISBN-fältet, ta bort bindestreck på fel ställen så att posten går att spara utan felmeddelande
-        //
-        ///////////////////////////////////////////////////////////////
-        $('#isbnHyphenButtonjq').remove();
-        var isbnHyphenButtonjq = $('<button id="isbnHyphenButtonjq" type="button">X -</button>');
-        isbnHyphenButtonjq.on("click", function() {
-            var isbn = $("div.diva2addtextchoicecol:contains('ISBN')").parent().find('input').val();
-            var altisbn = isbn.replace(/-/g, "");
-            $("div.diva2addtextchoicecol:contains('ISBN')").parent().find('input').val(altisbn);
-            $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').focus(); // hoppa till DOI-fältet och sen till ISBN för att ISBN skall "fastna"
-            $("div.diva2addtextchoicecol:contains('ISBN')").parent().find('input').focus(); // för att ISBN-infon skall "fastna!
-        })
-        $("div.diva2addtextchoicecol:contains('ISBN')").before(isbnHyphenButtonjq)
-
         ////////////////////////////////////
         //
         // Knappar vid "Annan serie"/"Other series" - ISSN
@@ -866,10 +850,9 @@
             var url = "https://portal.issn.org/api/search?search[]=MUST=default=" +
                 $("div.diva2addtextchoicecol:contains('ISSN')").parent().find('input').eq(0).val() +
                 "";
-            console.log(url);
             window.open(url, '_blank');
         })
-        $("div.diva2addtextchoicecol:contains('Title of series:')").before(issnTitleButtonjq)
+        $("div.diva2addtextchoicecol:contains('Title of series:'), div.diva2addtextchoicecol:contains('Seriens namn:')").before(issnTitleButtonjq)
 
         $('#issnButtonjq').remove();
         var issnButtonjq = $('<button class="link" id="issnButtonjq" type="button">Öppna i ISSN Portal på ISSN</button>');
@@ -878,25 +861,50 @@
                 $("div.diva2addtextchoicecol:contains('ISSN')").parent().find('input').eq(1).val() + "%22" +
                 "&search[]=SHOULD=allissnbis=%22" + $("div.diva2addtextchoicecol:contains('ISSN')").parent().find('input').eq(2).val() +
                 "%22";
-            console.log(url);
             window.open(url, '_blank');
         })
         $("div.diva2addtextchoicecol:contains('ISSN')").parent().find('input').eq(0).after(issnButtonjq)
 
-        ////////////////////////////////////
+		///////////////////////////////////////////////////////////////
         //
-        // Knapp vid ISBN-fältet, öppna post i WorldCat
+        // Knappar vid ISBN-fälten
+        // Ta bort bindestreck på fel ställen så att posten
+        // går att spara utan felmeddelande
         //
-        ////////////////////////////////////
-        $('#openWorldCatButtonjq').remove();
-        var openWorldCatButtonjq = $('<button class="link" id="openWorldCatButtonjq" type="button">Öppna i WorldCat</button>');
-        openWorldCatButtonjq.on("click", function() {
-            var url = "http://www.worldcat.org/isbn/" +
-                $("div.diva2addtextchoicecol:contains('ISBN')").parent().find('input').val() +
-                "";
-            window.open(url, '_blank');
-        })
-        $("div.diva2addtextchoicecol:contains('ISBN')").before(openWorldCatButtonjq)
+        // öppna post i WorldCat
+        //
+        ///////////////////////////////////////////////////////////////
+        i = 0;
+        $("div.diva2addtextchoicecol:contains('ISBN')").each(function() {
+            var thiz = this;
+
+            $('#isbnHyphenButtonjq' + i).remove();
+            var isbnHyphenButtonjq = $('<button id="isbnHyphenButtonjq' + i + '" type="button">X -</button>');
+            isbnHyphenButtonjq.on("click", function() {
+                var isbn = $(thiz).next().find('input').val();
+                var altisbn = isbn.replace(/-/g, "");
+                $(thiz).next().find('input').val(altisbn);
+                $(thiz).next().find('input').focus();
+                $(this).focus();
+            })
+
+            $('#openWorldCatButtonjq' + i).remove();
+            var openWorldCatButtonjq = $('<button class="link" id="openWorldCatButtonjq' + i + '" type="button">Öppna i WorldCat</button>');
+            openWorldCatButtonjq.on("click", function() {
+                var url = "http://www.worldcat.org/isbn/" +
+                    $(thiz).next().find('input').val() +
+                    "";
+                window.open(url, '_blank');
+            })
+
+            //wrapper för layout.
+            var html = $('<div id="monkeyisbn' + i + '" style="width: 100%;float: left"></div>');
+            html.append(isbnHyphenButtonjq)
+            html.append(openWorldCatButtonjq)
+            $(this).before(html)
+
+            i++;
+        });
 
         ////////////////////////////////////////
         //
@@ -1046,18 +1054,18 @@
         //
         ///////////////////////////////////////////////////////////////////////////////////
         var otherorg = $('#' + diva_id + '\\:authorSerie');
-        var j = 0;
+        i = 0;
         $(otherorg).find("div.diva2addtextchoicecol:contains('Annan organisation') , div.diva2addtextchoicecol:contains('Other organisation')").each(function() {
             var thiz = this;
             //CLEAR ORG
-            $('#clearorgButtonjq' + j).remove();
-            var clearorgButtonjq = $('<button class="clearbutton" id="clearorgButtonjq' + j + '" type="button">X</button>');
+            $('#clearorgButtonjq' + i).remove();
+            var clearorgButtonjq = $('<button class="clearbutton" id="clearorgButtonjq' + i + '" type="button">X</button>');
             //bind en clickfunktion som skall rensa fältet för "Annan organisation"
             clearorgButtonjq.on("click", function() {
                 $(thiz).next().find('input').val("");
             })
             $(this).next().find('input').after(clearorgButtonjq);
-            j++;
+            i++;
         });
 
         //////////////////////////////////////////////////////////////////////////
@@ -1066,7 +1074,7 @@
         //
         //////////////////////////////////////////////////////////////////////////
         var authors = $('#' + diva_id + '\\:authorSerie');
-        var i = 0;
+        i = 0;
         $(authors).find('.diva2addtextarea').each(function() {
             var thiz = this;
 
@@ -1196,38 +1204,38 @@
     //DIV för att visa Apans resultat till vänster på sidan
     var monkeyresultswrapper =
         ($('<div style="display:none" id="monkeyresultswrapper">' +
-           '<div>' +
-           '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' +
-           '<!--img class="monkeytalkbubble" src="https://apps.lib.kth.se/divaapan/monkeytalk.png"-->' +
-           '<div class="bubble">' +
-           '<i class="fa fa-spinner fa-spin"></i>' +
-           '<div class="monkeytalk"></div>' +
-           '</div>' +
-           '</div>' +
-           '<div class="monkeyheader">' +
-           '<h1>DiVA-Apan</h1>' +
-           '</div>' +
-           '<div id="monkeylogin">' +
-           '<form id="monkeyloginform">' +
-           '<div>Logga in till Apan</div>' +
-           '<div class = "flexbox column rowpadding">' +
-           '<input class="rowmargin" id="username" name="username" placeholder="kthid" type="text">' +
-           '<input class="rowmargin" id="password" name="password" placeholder="password" type="password">' +
-           '</div>' +
-           '</form>' +
-           '<button id="login">Login</button>' +
-           '</div>' +
-           '<h2>' +
-           'Uppdateringar' +
-           '</h2>' +
-           '<div id="monkeyupdates" class="flexbox column">' +
-           '</div>' +
-           '<hr class="solid">' +
-           '<h2>' +
-           'Resultat' +
-           '</h2>' +
-           '<div id="monkeyresults" class="flexbox column">' +
-           '</div>' +
+            '<div>' +
+                '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' +
+                '<!--img class="monkeytalkbubble" src="https://apps.lib.kth.se/divaapan/monkeytalk.png"-->' +
+                '<div class="bubble">' +
+                    '<i class="fa fa-spinner fa-spin"></i>' +
+                    '<div class="monkeytalk"></div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="monkeyheader">' +
+                '<h1>DiVA-Apan</h1>' +
+            '</div>' +
+            '<div id="monkeylogin">' +
+                '<form id="monkeyloginform">' +
+                    '<div>Logga in till Apan</div>' +
+                    '<div class = "flexbox column rowpadding">' +
+                        '<input class="rowmargin" id="username" name="username" placeholder="kthid" type="text">' +
+                        '<input class="rowmargin" id="password" name="password" placeholder="password" type="password">' +
+                    '</div>' +
+                '</form>' +
+                '<button id="login">Login</button>' +
+            '</div>' +
+            '<h2>' +
+                'Uppdateringar' +
+            '</h2>' +
+            '<div id="monkeyupdates" class="flexbox column">' +
+            '</div>' +
+            '<hr class="solid">' +
+            '<h2>' +
+                'Resultat' +
+            '</h2>' +
+            '<div id="monkeyresults" class="flexbox column">' +
+            '</div>' +
            '</div>'));
     $('body.diva2margin').prepend(monkeyresultswrapper);
 
