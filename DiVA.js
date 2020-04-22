@@ -839,6 +839,7 @@
         })
         $("div.diva2addtextchoice2:contains('Alternativ'), div.diva2addtextchoice2:contains('Alternative')").parent().before(alttitlecaseButtonjq)
 
+<<<<<<< HEAD
         ////////////////////////////////////
         //
         // Knappar vid "Annan serie"/"Other series" - ISSN
@@ -869,6 +870,12 @@
         //
         // Knappar vid ISBN-fälten
         // Ta bort bindestreck på fel ställen så att posten
+=======
+        ///////////////////////////////////////////////////////////////
+        //
+        // Knappar vid ISBN-fälten
+        // Ta bort bindestreck på fel ställen så att posten 
+>>>>>>> 27351dee72381cd92452f83fee5c9c46cf9fc4af
         // går att spara utan felmeddelande
         //
         // öppna post i WorldCat
@@ -896,7 +903,11 @@
                     "";
                 window.open(url, '_blank');
             })
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 27351dee72381cd92452f83fee5c9c46cf9fc4af
             //wrapper för layout.
             var html = $('<div id="monkeyisbn' + i + '" style="width: 100%;float: left"></div>');
             html.append(isbnHyphenButtonjq)
