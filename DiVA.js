@@ -978,6 +978,22 @@
         })
         $("div.diva2addtextchoicecol:contains('Konferens') , div.diva2addtextchoicecol:contains('Conference') ").parent().before(dblpButtonjq);
 
+         //////////////////////////////////////////////////
+        //
+        // Knapp för google vid konferensfältet
+        //
+        //////////////////////////////////////////////////
+        $('#confGoogleButtonjq').remove();
+        var confGoogleButtonjq = $('<button class="link" id="confGoogleButtonjq" type="button">Googla på konferens</button>');
+        //bind en clickfunktion som anropar google med värdet i konferensfältet
+        confGoogleButtonjq.on("click", function() {
+            var url = "https://www.google.com/search?q=" +
+                    $("div.diva2addtextchoicecol:contains('Konferens') , div.diva2addtextchoicecol:contains('Conference') ").parent().find('textarea').val() +
+                    "";
+                window.open(url, '_blank'); // sök på konferensen i google
+        })
+        $("div.diva2addtextchoicecol:contains('Konferens') , div.diva2addtextchoicecol:contains('Conference') ").parent().before(confGoogleButtonjq);
+
         /////////////////////////////////////////////////////
         //
         // Knapp och länk till hjälpsida i Confluence
