@@ -360,10 +360,11 @@
         $(".monkeytalk").html("Jag pratar med Leta anställda...");
         var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
         var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
+        var enamn3 = enamn2.replace(/æ/g, "ae") // ersätt eventuella æ med ae i namnen före sökning. Leta KTH-anställda spricker annars
         var url = letaanstallda_apiurl + "users?fname=" +
             fnamn2 +
             "%&ename=" +
-            enamn2 +
+            enamn3 +
             "%" +
             "&api_key=" + letaanstallda_apikey;
         axios.get(url)
