@@ -25,6 +25,7 @@
 // @connect  ws.isiknowledge.com
 // @connect  portal.issn.org
 // @connect  www.worldcat.org
+// @connect  dblp.uni-trier.de
 // @noframes
 // ==/UserScript==
 /* global $ */
@@ -636,7 +637,7 @@
             .catch(function (error) {
             $('#monkeyresults').html('');
             $("#monkeyresultswrapper i").css("display", "none");
-            $(".monkeytalk").html("Nej, jag hittade inget i dblp. Det kanske inte är ett konferensbidrag i Computer Science?");
+            $(".monkeytalk").html("Nej, jag hittade inget i dblp. Det kanske inte är ett konferensbidrag inom Computer Science?");
         })
             .then(function () {
         });
@@ -1191,7 +1192,7 @@
         //
         // Hämtar diverse automatiskt när posten öppnas - det Anders kallar headless
         //
-        // T ex från Scopus, WoS
+        // T ex från Scopus, WoS, Sök i DiVA (efter potentiella dubbletter)
         //
         // Kör inte om det är en re_init t ex koppla personpost
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1206,6 +1207,15 @@
                     });
                 });
             });
+
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
+            // Öppna DiVA och kolla efter dubbletter när en post öppnas.
+            //
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
+            getDiVA($maintitleiframe.contents().find("body").html(), 'mods');
         }
     }
 
