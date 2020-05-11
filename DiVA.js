@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.1.11
+// @version      1.1.12
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -537,9 +537,9 @@
     function getDiVA(titleAll, format) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $(".monkeytalk").html("Jag pratar med DiVA...");
-        //       var newtitleALL = titleAll.replace("?", "");
+        //       var newtitleALL = titleAll.replace("?", "");  // av någon anledning fixar inte sökningen titlar som innehåller eller i alla fall slutar med ett "?"
         var url = diva_searchurl + '?format=' + format + '&addFilename=true&aq=[[{"titleAll":"' +
-            titleAll.replace("?", "") + '"}]]&aqe=[]&aq2=[[]]&onlyFullText=false&noOfRows=50&sortOrder=title_sort_asc&sortOrder2=title_sort_asc';
+            titleAll.replace("?", "") + '"}]]&aqe=[]&aq2=[[]]&onlyFullText=false&noOfRows=50&sortOrder=title_sort_asc&sortOrder2=title_sort_asc'; // av någon anledning fixar inte sökningen titlar som innehåller eller i alla fall slutar med ett "?"
         axios.get(url)
             .then(function (response) {
             var html = '<div><div class="resultsheader">Information från DiVA, Söktext: ' + '<br /><br />' + titleAll + '</div>';
@@ -552,9 +552,9 @@
                     $(response.data).find('mods').each(function(i, j) {
                         html += '<div class="inforecord flexbox column">';
                         html += '<h2><p style="color:red;">ID: ' + $(j).find('recordIdentifier').text() +'</p></h2>';
-                        html += '<div><span class="fieldtitle">Status: </span><span>' + $(j).find('note[type="publicationStatus"]').text() + '</span></div>' +
+                        html += '<div><span class="fieldtitle">Status (artiklar): </span><span>' + $(j).find('note[type="publicationStatus"]').text() + '</span></div>' +
                             '<div><span class="fieldtitle">URI: </span><span><a href="' + $(j).find('identifier[type="uri"]').text() + '" target="_new">' + $(j).find('identifier[type="uri"]').text() + '</a></span></div>' +
-                            '<div><span class="fieldtitle">Publiceringsstatus<br/>(artiklar): </span><span>' + $(j).find('note[type="publicationStatus"]').text() + '</span></div>' +
+                            //   '<div><span class="fieldtitle">Publiceringsstatus<br/>(artiklar): </span><span>' + $(j).find('note[type="publicationStatus"]').text() + '</span></div>' +
                             '<div><span class="fieldtitle">Publikationstyp: </span><span>' + $(j).find('genre[authority="diva"][type="publicationType"][lang="swe"]').text() + '</span></div>' +
                             '<div><span class="fieldtitle">DOI: </span><span>' + $(j).find('identifier[type="doi"]').text() + '</span></div>' +
                             '<div><span class="fieldtitle">ISI: </span><span>' + $(j).find('identifier[type="isi"]').text() + '</span></div>' +
@@ -564,8 +564,13 @@
                             //                            '<div><span class="fieldtitle">Changed: </span><span>' + $(j).find('recordChangeDate').text() + '</span></div>' +
                             //                            '<div><span class="fieldtitle">Origin: </span><span>' + $(j).find('recordOrigin').text() + '</span></div>' +
                             //                            '<div><span class="fieldtitle">Source: </span><span>' + $(j).find('recordContentSource').text() + '</span></div>' +
+                            '<div><span class="fieldtitle"><img class="oa" src="https://apps.lib.kth.se/divaapan/oa.png"> Publicerad version: </span><span><a href="' + $(j).find('url[displayLabel="fulltext:print"]').text() + '" target="_new">' + '<p style="color:red;">' + $(j).find('url[displayLabel="fulltext:print"]').text() + '</p>' + '</a></span></div>' +
+                            '<div><span class="fieldtitle"><img class="oa" src="https://apps.lib.kth.se/divaapan/oa.png"> Preprint: </span><span><a href="' + $(j).find('url[displayLabel="fulltext:preprint"]').text() + '" target="_new">' + '<p style="color:red;">' + $(j).find('url[displayLabel="fulltext:preprint"]').text() + '</p>' + '</a></span></div>' +
+                            '<div><span class="fieldtitle"><img class="oa" src="https://apps.lib.kth.se/divaapan/oa.png"> Postprint: </span><span><a href="' + $(j).find('url[displayLabel="fulltext:postprint"]').text() + '" target="_new">' + '<p style="color:red;">' + $(j).find('url[displayLabel="fulltext:postprint"]').text() + '</p>' + '</a></span></div>' +
+                            '<div><span class="fieldtitle"><img class="oa" src="https://apps.lib.kth.se/divaapan/oa.png"> Ospec: </span><span><a href="' + $(j).find('url[displayLabel="fulltext"]').text() + '" target="_new">' + '<p style="color:red;">' + $(j).find('url[displayLabel="fulltext"]').text() + '</p>' + '</a></span></div>' +
                             '<div><span class="fieldtitle">Förlag: </span><span>' + $(j).find('publisher').text() + '</span></div>' +
-                            '<div><span class="fieldtitle">År: </span><span>' + $(j).find('dateIssued').text() + '</span></div>'
+                            '<div><span class="fieldtitle">År: </span><span>' + $(j).find('dateIssued').text() + '</span></div>' +
+                            '<div><span class="fieldtitle">Note: </span><span>' + $(j).find('note').text() + '</span></div>'
                         html += '</div>';
                     });
                     /*
@@ -1149,6 +1154,31 @@
             i++;
         });
 
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //
+        // Byt ut Orebro, Malardalen m . fl. till Örebro, Mälardalen etc. i fältet "Annan organisation"
+        //
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        var annanorg = $('#' + diva_id + '\\:authorSerie');
+        i = 0;
+        $(annanorg).find("div.diva2addtextchoicecol:contains('Annan organisation') , div.diva2addtextchoicecol:contains('Other organisation')").each(function() {
+            var thiz = this;
+            //CLEAR ORG
+            var neworg = $(thiz).next().find('input').val();
+            var neworg2 = neworg.replace(/Bracke/g, "Bräcke").replace(/Skondal/g, "Sköndal").replace(/Hogskola/g, "Högskola").replace(/Linkoping/g, "Linköping").
+            replace(/Malardalen/g, "Mälardalen").replace(/Orebro/g, "Örebro").replace(/Vasteras/g, "Västerås").replace(/Goteborg/g, "Göteborg").replace(/Norrkoping/g, "Norrköping").
+            replace(/Vaxjo/g, "Växjö").replace(/Umea/g, "Umeå").replace(/Lulea/g, "Luleå").replace(/Ostersund/g, "Östersund").replace(/Trollhattan/g, "Trollhättan").
+            replace(/Jonkoping/g, "Jönköping").replace(/Malmo/g, "Malmö").replace(/Sodertorn/g, "Södertörn").replace(/Gavle/g, "Gävle").replace(/Skovde/g, "Skövde").
+            replace(/Boras/g, "Borås").replace(/Sodertalje/g, "Södertälje").replace(/Borlange/g, "Borlänge").replace(/Harnosand/g, "Härnösand").replace(/Skelleftea/g, "Skellefteå").
+            replace(/Sjofart/g, "Sjöfart").replace(/Molnlycke/g, "Mölnlycke").replace(/Domsjo/g, "Domsjö").replace(/Varobacka/g, "Väröbacka").replace(/Sodra Innovat/g, "Södra Innovat").
+            replace(/Nykoping/g, "Nyköping").replace(/Ornskoldsvik/g, "Örnsköldsvik").replace(/Molndal/g, "Mölndal").replace(/Upplands Vasby/g, "Upplands Väsby").
+            replace(/Lowenstromska/g, "Löwenströmska").replace(/Skarholmen/g, "Skärholmen");
+            $(thiz).next().find('input').val(neworg2);
+            $(this).next().find('input');
+            i++;
+        });
+
         //////////////////////////////////////////////////////////////////////////
         //
         //Knappar till LDAP, Leta KTH anställda, KTH Intra, Google och ORCiD
@@ -1242,6 +1272,7 @@
 
             $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
             getDiVA($maintitleiframe.contents().find("body").html(), 'mods');
+
         }
     }
 
@@ -1364,6 +1395,12 @@ background-color: rgba(0,0,0,.5);
 }
 .logo {
 width: 80px;
+}
+.monkeytalk {
+width: 150px;
+}
+.oa {
+width: 8px;
 }
 .monkeytalk {
 width: 150px;
