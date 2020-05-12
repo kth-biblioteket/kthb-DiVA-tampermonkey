@@ -1,6 +1,6 @@
 ## DiVA-apan 2020-05-12 (1.1.12)
 
-DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnittet. Det som används är insticksmodulen TamperMonkey och en specialskriven kod för KTHBs behov. Det finns en stor del av koden som utan svårighet kan anpassas till andra biblioteks behov. De KTHB-specifika delarna torde vara uppenbara, egentligen bara koppling till KTHs LDAP samt den lokala databasen över forskare. Funktioner för Web of Science och Scopus bör vara enkla att använda om API-nycklar läggs in direkt i koden istället för som hos oss, via ett lokalt API med inloggning.
+DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnittet. Det som används är insticksmodulen TamperMonkey och en specialskriven kod för KTHBs behov. Det finns en stor del av koden som utan svårighet kan anpassas till andra biblioteks behov. De KTHB-specifika delarna torde vara uppenbara, egentligen bara koppling till KTHs LDAP samt den lokala databasen över forskare. Funktioner för Web of Science och Scopus bör vara enkla att kopiera för andra bibliotek och organisationer om API-nycklar läggs in direkt i koden istället för som hos oss, via ett lokalt API med inloggning.
 
 #### Vad gör DiVA-apan?
 
