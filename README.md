@@ -24,9 +24,17 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - Sära på huvud- och undertitel vid  ":"  ifall dessa felaktigt är inskrivna i samma fält.
 - Ändra versaler till gemener förutom den första bokstaven.
 
+##### To Do
+
+- Automatiska förslag på ämnesklassificering via det kommande Swepub-APIet.
+- Hämta hem snyggare förlagsinformation från Crossref API.
+- Klistra in information som finns "till vänster" automatiskt, i rätt fält vid dubbelklick (typ KTH-id).
+- På något sätt få in finansiärsinfo från Crossref.
+
+
 ##### Vid konferensfältet finns knappar för att:
 
-- Söka upp konferensen på DOI i dblp och returnerar titel på proceedings (vilken brukar innehålla konferensnamnet på ett bra sätt). Dessutom kommer eventuell serie och volym i serie på köpet, t.ex. LNCS. dblp är en specialdatabas mest för Computer Science.
+- Söka upp konferensen på DOI i [dblp](https://dblp.uni-trier.de/) och returnerar titel på proceedings (vilken brukar innehålla konferensnamnet på ett bra sätt). Dessutom kommer eventuell serie och volym i serie på köpet, t.ex. LNCS. dblp är en specialdatabas huvudsakligen inom Computer Science.
 - Söka på konferensens namn i Google.
 
 ##### Vid fältet "Annan serie" finns knappar för att:
@@ -37,13 +45,13 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 ##### Vid fältet för ISBN finns knappar som:
 
 - Tar bort felaktigt placerade bindestreck (vilket gör att DiVA inte accepterar numret).
-- Söker på ISBN i WorldCat.
+- Söker på ISBN i [WorldCat](https://www.worldcat.org/).
 
 ##### Vid identifierarfälten (DOI, ISI/UT, ScopusId, PMID) finns knappar för att:
 
 - Uppdatera posten via Web of Science och Scopus API (samma funktion som görs automatiskt när man öppnar en post).
 - Öppna posten på identifierare i respektive databas webbgränssnitt.
-- Söka på titel i Crossref i de fall det inte finns någon DOI (ännu).
+- Söka på titel i [Crossrefs](https://search.crossref.org/) webbgränssnitt i de fall det inte finns någon DOI (ännu).
 
 ##### Vid nyckelordsfältet finns en knapp som:
 
