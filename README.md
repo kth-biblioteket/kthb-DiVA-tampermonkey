@@ -21,7 +21,7 @@ Vid varje författarpost finns det knappar för att:
 
 Vid titelfälten finns knappar för att:
 
-- Sära på huvud- och undertitel på ":" ifall dessa felaktigt är inskrivna i samma fält.
+- Sära på huvud- och undertitel vid  ":"  ifall dessa felaktigt är inskrivna i samma fält.
 - Ändra versaler till gemener förutom den första bokstaven.
 
 Vid konferensfältet finns knappar för att:
