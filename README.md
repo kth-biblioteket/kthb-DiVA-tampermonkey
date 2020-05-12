@@ -24,14 +24,6 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - Sära på huvud- och undertitel vid  ":"  ifall dessa felaktigt är inskrivna i samma fält.
 - Ändra versaler till gemener förutom den första bokstaven.
 
-##### To Do
-
-- Automatiska förslag på ämnesklassificering via det kommande Swepub-APIet.
-- Hämta hem snyggare förlagsinformation från Crossref API.
-- Klistra in information som finns "till vänster" automatiskt, i rätt fält vid dubbelklick (typ KTH-id).
-- På något sätt få in finansiärsinfo från Crossref.
-
-
 ##### Vid konferensfältet finns knappar för att:
 
 - Söka upp konferensen på DOI i [dblp](https://dblp.uni-trier.de/) och returnerar titel på proceedings (vilken brukar innehålla konferensnamnet på ett bra sätt). Dessutom kommer eventuell serie och volym i serie på köpet, t.ex. LNCS. dblp är en specialdatabas huvudsakligen inom Computer Science.
@@ -61,3 +53,11 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 
 - Klistrar in QC + dagens datum (KTHBs sätt att ange att posten är granskad)
 - Tar bort det som står i fältet samt klistrar in QC + dagensdatum (för Scopus-poster vilka kan lägga in ganska mycket skräp i anmärkningsfältet).
+
+##### To Do
+
+- Automatiska förslag på ämnesklassificering via det kommande Swepub-APIet.
+- Hämta hem snyggare förlagsinformation från Crossref API.
+- Klistra in information som finns "till vänster" automatiskt, i rätt fält vid dubbelklick (typ KTH-id).
+- På något sätt få in finansiärsinfo från Crossref.
+
