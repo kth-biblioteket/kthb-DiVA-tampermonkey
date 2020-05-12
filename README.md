@@ -34,15 +34,15 @@ Vid fältet "Annan serie" finns knappar för att:
 - Söka på titel i ISSN Portal (för att t .ex. hitta ISSN).
 - Söka på ISSN och e-ISSN i ISSN Portal (för att hitta fler ISSN eller kanske titel på serie).
 
-Vid fältet för ISBN knappar som:
+Vid fältet för ISBN finns knappar som:
 
 - Tar bort felaktigt placerade bindestreck (vilket gör att DiVA inte accepterar numret).
-- Söker på ISBN i WorldCat
+- Söker på ISBN i WorldCat.
 
 Vid identifierarfälten (DOI, ISI/UT, ScopusId, PMID) finns knappar för att:
 
 - Uppdatera posten via Web of Science och Scopus API (samma funktion som görs automatiskt när man öppnar en post).
-- Öppna posten på identifierare i respektive databas webbgränssnitt
+- Öppna posten på identifierare i respektive databas webbgränssnitt.
 - Söka på titel i Crossref i de fall det inte finns någon DOI (ännu).
 
 Vid nyckelordsfältet finns en knapp som:
@@ -52,4 +52,4 @@ Vid nyckelordsfältet finns en knapp som:
 Vid Anmärkningsfältet finns knappar som:
 
 - Klistrar in QC + dagens datum (KTHBs sätt att ange att posten är granskad)
-- Tar bort det som står i fältet samt klistrar in QC + dagensdatum (För Scopus-poster vilka kan ha ganska mycket skräp i detta fält).
+- Tar bort det som står i fältet samt klistrar in QC + dagensdatum (för Scopus-poster vilka kan lägga in ganska mycket skräp i anmärkningsfältet).
