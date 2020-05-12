@@ -31,7 +31,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 
 ##### Vid fältet "Annan serie" finns knappar för att:
 
-- Söka på titel i ISSN Portal (för att t .ex. hitta ISSN).
+- Söka på titel i [ISSN Portal](https://portal.issn.org/) (för att t .ex. hitta ISSN).
 - Söka på ISSN och e-ISSN i ISSN Portal (för att hitta fler ISSN eller kanske titel på serie).
 
 ##### Vid fältet för ISBN finns knappar som:
