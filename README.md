@@ -64,3 +64,4 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - Klistra in valfri information som finns "till vänster" automatiskt, i rätt fält vid dubbelklick (typ KTH-id).
 - På något sätt få in finansiärsinfo från Crossref.
 
+Ap-bilden by [JohnE Sturdivant](https://www.epicentrofestival.com/monkey-face-drawing-happy-monkey-face-at-clker-monkey-face-png-clipart.html)
