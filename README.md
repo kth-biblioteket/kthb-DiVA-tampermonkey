@@ -13,9 +13,9 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 
 ##### Vid varje författarpost finns det knappar för att:
 
-- Slå upp författaren i KTHs lokala LDAP
-- Slå upp författaren i ett lokalt register över aktiva forskare där institutionstillhörighet samt ev. ORCiD finns.
-- Slå upp författaren i ORCiD.
+- Slå upp författare i KTHs lokala LDAP
+- Slå upp författare i ett lokalt register över aktiva forskare där institutionstillhörighet samt ev. ORCiD finns.
+- Slå upp författare i ORCiD.
 - Söka efter författarens namn på KTHs Intranät.
 - Söka efter författaren i Google på namn + "KTH".
 
