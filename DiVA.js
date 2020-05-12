@@ -492,7 +492,7 @@
             if (response.status == 201) {
                 html += "<p>Hittade inget i Web of Science</p>";
             } else {
-                var isi = response.data.wos.ut; //plocka värdet för ScopusId (eid)
+                var isi = response.data.wos.ut; //plocka värdet för ISI/UT
                 if(isi == ""  // uppdatera bara om fältet är tomt
                    || typeof isi === 'undefined'
                    || isi == 'undefined') {
@@ -537,7 +537,6 @@
     function getDiVA(titleAll, format) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $(".monkeytalk").html("Jag pratar med DiVA...");
-        //       var newtitleALL = titleAll.replace("?", "");  // av någon anledning fixar inte sökningen titlar som innehåller eller i alla fall slutar med ett "?"
         var url = diva_searchurl + '?format=' + format + '&addFilename=true&aq=[[{"titleAll":"' +
             titleAll.replace("?", "") + '"}]]&aqe=[]&aq2=[[]]&onlyFullText=false&noOfRows=50&sortOrder=title_sort_asc&sortOrder2=title_sort_asc'; // av någon anledning fixar inte sökningen titlar som innehåller eller i alla fall slutar med ett "?"
         axios.get(url)
@@ -1164,7 +1163,7 @@
         i = 0;
         $(annanorg).find("div.diva2addtextchoicecol:contains('Annan organisation') , div.diva2addtextchoicecol:contains('Other organisation')").each(function() {
             var thiz = this;
-            //CLEAR ORG
+            var html = '<div><div class="updateheader"></div>';
             var neworg = $(thiz).next().find('input').val();
             var neworg2 = neworg.replace(/Bracke/g, "Bräcke").replace(/Skondal/g, "Sköndal").replace(/Hogskola/g, "Högskola").replace(/Linkoping/g, "Linköping").
             replace(/Malardalen/g, "Mälardalen").replace(/Orebro/g, "Örebro").replace(/Vasteras/g, "Västerås").replace(/Goteborg/g, "Göteborg").replace(/Norrkoping/g, "Norrköping").
@@ -1173,9 +1172,13 @@
             replace(/Boras/g, "Borås").replace(/Sodertalje/g, "Södertälje").replace(/Borlange/g, "Borlänge").replace(/Harnosand/g, "Härnösand").replace(/Skelleftea/g, "Skellefteå").
             replace(/Sjofart/g, "Sjöfart").replace(/Molnlycke/g, "Mölnlycke").replace(/Domsjo/g, "Domsjö").replace(/Varobacka/g, "Väröbacka").replace(/Sodra Innovat/g, "Södra Innovat").
             replace(/Nykoping/g, "Nyköping").replace(/Ornskoldsvik/g, "Örnsköldsvik").replace(/Molndal/g, "Mölndal").replace(/Upplands Vasby/g, "Upplands Väsby").
-            replace(/Lowenstromska/g, "Löwenströmska").replace(/Skarholmen/g, "Skärholmen");
+            replace(/Lowenstromska/g, "Löwenströmska").replace(/Skarholmen/g, "Skärholmen").replace(/Lantmateri/g, "Lantmäteri");
             $(thiz).next().find('input').val(neworg2);
-            $(this).next().find('input');
+            if(neworg != neworg2) {
+                html += '<div><p style="color:green;">Uppdaterat "Annan Organisation"</p></div>';
+                console.log(neworg2);
+                $('#monkeyupdates').html(html + $('#monkeyupdates').html());
+            } else {}
             i++;
         });
 
