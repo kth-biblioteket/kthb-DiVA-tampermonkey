@@ -6,7 +6,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 
 #### Vad gör DiVA-apan?
 
-##### När en post öppnas vid import eller redigering:
+##### När en post öppnas vid import eller redigering sker detta automatiskt:
 
 - Hämtar och skriver in ISI/UT respektive ScopusId från Web of Science och Scopus API:er, samt en uppdateraring av OA-status.
 - Snyggar till Linkoping till Linköping och Varobacka till Väröbacka etc.
