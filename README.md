@@ -28,7 +28,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 
 ##### Vid konferensfältet finns knappar för att:
 
-- Söka upp konferens på DOI i [dblp](https://dblp.uni-trier.de/) och returnera titel på proceedings (vilken brukar innehålla konferensnamnet på mycket tydligt sätt). Dessutom kommer eventuell serie och volym i serie på köpet, t.ex. [LNCS](https://www.springer.com/gp/computer-science/lncs). dblp är en specialdatabas huvudsakligen för Computer Science.
+- Söka upp konferens på DOI i [dblp](https://dblp.uni-trier.de/) och returnera titel på proceedings (vilken brukar innehålla konferensnamnet på ett mycket tydligt sätt). Dessutom kommer eventuell serie och volym i serie på köpet, t.ex. [LNCS](https://www.springer.com/gp/computer-science/lncs). dblp är en specialdatabas huvudsakligen för Computer Science.
 - Söka på konferensens namn i Google.
 
 ##### Vid fältet "Annan serie" finns knappar för att:
