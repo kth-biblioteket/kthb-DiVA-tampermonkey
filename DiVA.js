@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.1.12
+// @version      1.1.13
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -686,7 +686,7 @@
         var $maintitleiframe;
         $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
         DiVAButtonjq.on("click", function() {
-            getDiVA($maintitleiframe.contents().find("body").html(), 'mods');
+            getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, ""), 'mods');  // ta bort saker som innehåller "&" och "?" som sökningen inte klarar av
         })
         $(".diva2editmainer").before(DiVAButtonjq)
         $(".diva2impmainer").before(DiVAButtonjq)
@@ -1274,8 +1274,7 @@
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
-            getDiVA($maintitleiframe.contents().find("body").html(), 'mods');
-
+            getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, ""), 'mods'); // ta bort saker som innehåller "&" och "?" som sökningen inte klarar av
         }
     }
 
