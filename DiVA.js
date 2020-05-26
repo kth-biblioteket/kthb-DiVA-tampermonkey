@@ -332,7 +332,9 @@
                             '<div><span class="fieldtitle">Förnamn: </span><span>' + json.ugusers[key].givenName + '</span></div>' +
                             //'<div><span class="fieldtitle">Kthid: </span><span>' + json.ugusers[key].ugKthid + '</span></div>' +
                             '<div><span class="fieldtitle">Titel: </span><span>' + json.ugusers[key].title + '</span></div>' +
-                            '<div><span class="fieldtitle">Skola/org: </span><span>' + json.ugusers[key].kthPAGroupMembership + '</span></div>'
+                            '<div><span class="fieldtitle">Skola/org: </span><span>' + json.ugusers[key].kthPAGroupMembership + '</span></div>' +
+							'<div><span class="fieldtitle">KTH-affiliering: </span><span>' + json.ugusers[key].ugPrimaryAffiliation + '</span></div>' +
+                            '<div><span class="fieldtitle">Email: </span><span>' + json.ugusers[key].mail + '</span></div>'
                         html += '</div>';
                     });
 
@@ -1142,14 +1144,15 @@
         i = 0;
         $(otherorg).find("div.diva2addtextchoicecol:contains('Annan organisation') , div.diva2addtextchoicecol:contains('Other organisation')").each(function() {
             var thiz = this;
-            //CLEAR ORG
             $('#clearorgButtonjq' + i).remove();
             var clearorgButtonjq = $('<button class="clearbutton" id="clearorgButtonjq' + i + '" type="button">X</button>');
             //bind en clickfunktion som skall rensa fältet för "Annan organisation"
             clearorgButtonjq.on("click", function() {
                 $(thiz).next().find('input').val("");
             })
+            if(!($(thiz).next().find('input').val().includes(";"))) { // vi vill inte ta bort hela "Annan organisation"-fältet som innehåller icke-KTH-affilieringar, d.v.s. de som har ett semikolon i sig
             $(this).next().find('input').after(clearorgButtonjq);
+            }
             i++;
         });
 
