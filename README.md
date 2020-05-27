@@ -64,6 +64,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 
 ##### To Do
 
+- Crossref API, som nu endast används för förlagsinformation, öppnar oändliga möjligheter att berika data, t.ex. finansiärsinfo.
 - Automatiska förslag på ämnesklassificering via det kommande Swepub-APIet.
 - Ta bort copyright-info från abstractet. 
 - Klistra in valfri information som finns "till vänster" automatiskt, i rätt fält vid dubbelklick (typ KTH-id).
