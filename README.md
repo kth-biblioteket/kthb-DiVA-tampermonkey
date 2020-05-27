@@ -45,7 +45,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 
 ##### Vid fältet för "Annat förlag" finns en knapp som:
 
-- Hämtar hem snyggare förlagsinformation från [Crossref API](https://www.crossref.org/education/retrieve-metadata/rest-api/a-non-technical-introduction-to-our-api/), istället för de versala horrörerna som kommer från Web of Science.
+- Hämtar hem snyggare förlagsinformation från [Crossref API](https://www.crossref.org/education/retrieve-metadata/rest-api/a-non-technical-introduction-to-our-api/), istället för de versala horrörerna som kommer vid import från Web of Science.
 
 ##### Vid identifierarfälten (DOI, ISI/UT, ScopusId, PMID) finns knappar för att:
 
