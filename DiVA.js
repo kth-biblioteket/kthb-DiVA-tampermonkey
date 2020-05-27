@@ -361,6 +361,7 @@
      * @param {*} fnamn
      * @param {*} enamn
      */
+
     function getLeta(fnamn, enamn) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $(".monkeytalk").html("Jag pratar med Leta anställda...");
@@ -411,6 +412,7 @@
      *
      * @param {*} doi
      */
+
     async function getScopus(doi) {
         if(doi == ""){
             $('.monkeytalk').html('Ojojoj, ingen DOI!');
@@ -481,6 +483,7 @@
      *
      * @param {*} doi
      */
+
     async function getWoS(doi) {
         if(doi == ""){
             $('.monkeytalk').html('Ojojoj, ingen DOI! Jag behöver en DOI för att kunna uppdatera från databaserna.');
@@ -538,6 +541,7 @@
      * @param {string} titleAll
      * @param {string} format (csl_json=json, mods=xml)
      */
+
     function getDiVA(titleAll, format) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $(".monkeytalk").html("Jag pratar med DiVA...");
@@ -609,6 +613,7 @@
      *
      * @param {string} doi
      */
+
     function getDblp(doi) {
         if(doi == ""){
             $('#monkeyresults').html('DBLP: Ingen DOI finns!');
@@ -665,7 +670,7 @@
             axios.get(url)
                 .then(function (response) {
                 var publisher = $(response.data).find('crm-item[name="publisher-name"]').text(); // hämtar förlagsinformation
-                $("div.diva2addtextarea:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").parent().find('input').val(publisher);
+                $("div.diva2addtextarea:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").parent().find('input').val(publisher); // klistrar in förlagsinfo från Crossref
             })
         }
     }
@@ -677,6 +682,7 @@
      * Initiera apan på nytt.
      * @param {*} mutations
      */
+
     function mutationCallback(mutations) {
         mutations.forEach(function(mutation) {
             var newNodes = mutation.addedNodes;
@@ -698,11 +704,13 @@
      *
      */
     async function init(re_init) {
+
         ///////////////////////////////////////////////////////////
         //
         // Skapa en DiVA-knapp överst
         //
         ///////////////////////////////////////////////////////////
+
         $('#DiVAButtonjq').remove();
         var DiVAButtonjq = $('<button id="DiVAButtonjq" type="button">Sök i DiVA</button>');
         var $maintitleiframe;
@@ -721,6 +729,7 @@
         // titel i huvud- och undertitel vid kolon :
         //
         ///////////////////////////////////////////////////////////
+
         var $subtitleiframe = $("div.diva2addtextchoicecol:contains('Undertitel:') , div.diva2addtextchoicecol:contains('Subtitle:')").next().find('iframe').first();
         $('#titlesplitButtonjq').remove();
         var titlesplitButtonjq = $('<button id="titlesplitButtonjq" type="button">Split : </button>');
@@ -742,6 +751,7 @@
         // till gemener förutom första bokstaven
         //
         ///////////////////////////////////////////////////////////
+
         $('#caseButtonjq').remove();
         var caseButtonjq = $('<button id="caseButtonjq" type="button">A->a</button>');
         //bind en clickfunktion
@@ -763,6 +773,7 @@
         // att splitta titel i huvud- och undertitel vid kolon :
         //
         ///////////////////////////////////////////////////////////
+
         var $procmaintitleiframe = $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding') , div.diva2addtextchoice2:contains('Part of proceedings')").parent().next().next().find('iframe').first();
         var $procsubtitleiframe = $("div.diva2addtextchoice2:contains('Ingår i konferensmeddelande, proceeding') , div.diva2addtextchoice2:contains('Part of proceedings')").parent().next().next().next().next().find('iframe').first();
         $('#proctitlesplitButtonjq').remove();
@@ -783,6 +794,7 @@
         // att ändra versaler till gemener förutom första bokstaven
         //
         ///////////////////////////////////////////////////////////
+
         $('#proctitlecaseButtonjq').remove();
         var proctitlecaseButtonjq = $('<button id="proctitlecaseButtonjq" type="button">A->a</button>');
         proctitlecaseButtonjq.on("click", function() {
@@ -801,6 +813,7 @@
         // att splitta titel i huvud- och undertitel vid kolon :
         //
         ///////////////////////////////////////////////////////////
+
         var $bookmaintitleiframe = $("div.diva2addtextchoice2:contains('Ingår i bok') , div.diva2addtextchoice2:contains('Part of book')").parent().next().next().find('iframe').first();
         var $booksubtitleiframe = $("div.diva2addtextchoice2:contains('Ingår i bok') , div.diva2addtextchoice2:contains('Part of book')").parent().next().next().next().next().find('iframe').first();
         $('#booktitlesplitButtonjq').remove();
@@ -821,6 +834,7 @@
         // att ändra versaler till gemener förutom första bokstaven
         //
         ///////////////////////////////////////////////////////////
+
         $('#booktitlecaseButtonjq').remove();
         var booktitlecaseButtonjq = $('<button id="booktitlecaseButtonjq" type="button">A->a</button>');
         booktitlecaseButtonjq.on("click", function() {
@@ -839,6 +853,7 @@
         // att splitta titel i huvud- och undertitel vid kolon :
         //
         ///////////////////////////////////////////////////////////
+
         var $altmaintitleiframe = $("div.diva2addtextchoice2:contains('Alternativ') , div.diva2addtextchoice2:contains('Alternative')").parent().next().find('iframe').first();
         var $altsubtitleiframe = $("div.diva2addtextchoice2:contains('Alternativ') , div.diva2addtextchoice2:contains('Alternative')").parent().next().next().next().find('iframe').first();
         $('#alttitlesplitButtonjq').remove();
@@ -859,6 +874,7 @@
         // att ändra versaler till gemener förutom första bokstaven
         //
         ///////////////////////////////////////////////////////////////
+
         $('#alttitlecaseButtonjq').remove();
         var alttitlecaseButtonjq = $('<button id="alttitlecaseButtonjq" type="button">A->a</button>');
         alttitlecaseButtonjq.on("click", function() {
@@ -876,6 +892,7 @@
         // Knappar vid "Annan serie"/"Other series" - ISSN
         //
         ////////////////////////////////////
+
         if($("div.diva2addtextchoicecol:contains('ISSN')").parent().find('input').eq(0).val() != "") {    // ingen mening att visa knappar om det inte står något i fältet
             $('#issnTitleButtonjq').remove();
             var issnTitleButtonjq = $('<button class="link" id="issnTitleButtonjq" type="button">Öppna i ISSN Portal på serietitel</button>');
@@ -910,6 +927,7 @@
         // öppna post i WorldCat
         //
         ///////////////////////////////////////////////////////////////
+
         i = 0;
         $("div.diva2addtextchoicecol:contains('ISBN')").each(function() {
             var thiz = this;
@@ -947,6 +965,7 @@
         // WoS-knappar vid ISI-fältet
         //
         ////////////////////////////////////////
+
         $('#WoSButtonjq').remove();
         var WoSButtonjq = $('<button class="link" id="WoSButtonjq" type="button">Öppna i WoS</button>');
         WoSButtonjq.on("click", function() {
@@ -1017,18 +1036,21 @@
         //
         ////////////////////////////////////
 
-        $('#crossrefButtonjq').remove();
-        var crossrefButtonjq = $('<button id="crossrefButtonjq" type="button">Uppdatera från Crossref</button>');
-        crossrefButtonjq.on("click", function() {
-            getCrossref($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
-        })
-        $("div.diva2addtextarea:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").before(crossrefButtonjq);
+        if(doi != ""){  // bara om det finns en DOI, annars är det meningslöst
+            $('#crossrefButtonjq').remove();
+            var crossrefButtonjq = $('<button id="crossrefButtonjq" type="button">Uppdatera förlag från Crossref</button>');
+            crossrefButtonjq.on("click", function() {
+                getCrossref($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+            })
+            $("div.diva2addtextarea:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").before(crossrefButtonjq);
+        }
 
         ////////////////////////////////////
         //
         // Knapp vid PubMed-fältet
         //
         ////////////////////////////////////
+
         $('#openPubMedButtonjq').remove();
         var openPubMedButtonjq = $('<button class="link" id="openPubMedButtonjq" type="button">Öppna i PubMed</button>');
         openPubMedButtonjq.on("click", function() {
@@ -1044,6 +1066,7 @@
         // Knapp för dblp vid konferensfältet
         //
         //////////////////////////////////////////////////
+
         $('#dblpButtonjq').remove();
         var dblpButtonjq = $('<button id="dblpButtonjq" type="button">dblp</button>');
         //bind en clickfunktion som anropar API med värdet i DOI-fältet
@@ -1057,6 +1080,7 @@
         // Knapp för google vid konferensfältet
         //
         //////////////////////////////////////////////////
+
         $('#confGoogleButtonjq').remove();
         var confGoogleButtonjq = $('<button class="link" id="confGoogleButtonjq" type="button">Googla på konferens</button>');
         //bind en clickfunktion som anropar google med värdet i konferensfältet
@@ -1101,6 +1125,7 @@
         // Knapp och länk till hjälpsida i Confluence
         //
         /////////////////////////////////////////////////////
+
         $('#helpButtonjq').remove();
         var helpButtonjq = $('<button class="link" id="helpButtonjq" type="button">Hjälp</button>');
         //bind en clickfunktion öppnar en hjälpsida
@@ -1118,6 +1143,7 @@
         // Knapp och länk till extern sökning i KTH webb-DiVA för att se eventuella dubbletter
         //
         ///////////////////////////////////////////////////////////////////////////////////////////////
+
         $('#dubblettButtonjq').remove();
         var dubblettButtonjq = $('<button class="link" id="dubblettButtonjq" type="button">Dubblett?</button>');
         //bind en clickfunktion som anropar DiVA KTH:s webbgränssnitt och söker på titel
@@ -1139,6 +1165,7 @@
         // QC och X + QC
         //
         /////////////////////////////////
+
         var d = new Date();
         var day = addZero(d.getDate());
         var month = addZero(d.getMonth() + 1);
@@ -1173,6 +1200,7 @@
         // för att sedan kunna radera detta fält när vi kopplat en KTH-person
         //
         ///////////////////////////////////////////////////////////////////////////////////
+
         var otherorg = $('#' + diva_id + '\\:authorSerie');
         i = 0;
         $(otherorg).find("div.diva2addtextchoicecol:contains('Annan organisation') , div.diva2addtextchoicecol:contains('Other organisation')").each(function() {
@@ -1223,6 +1251,7 @@
         //Knappar till LDAP, Leta KTH anställda, KTH Intra, Google och ORCiD
         //
         //////////////////////////////////////////////////////////////////////////
+
         var authors = $('#' + diva_id + '\\:authorSerie');
         i = 0;
         $(authors).find('.diva2addtextarea').each(function() {
@@ -1291,6 +1320,7 @@
         //
         // Kör inte om det är en re_init t ex koppla personpost
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         if (re_init!=true) {
             getLDAP('', '', $('.diva2identifier:eq(2)').html())
                 .then( function(result) {
@@ -1326,6 +1356,7 @@
      *
      * @param {*} selector
      */
+
     function startMonkey() {
         waitForKeyElements(diva_id_selector, function() {
             diva_id = $(diva_id_selector).closest('form').attr('id')
@@ -1363,6 +1394,7 @@
     // Huvudkod
     //
     ///////////////////////////////////////////////////////////////////////////////////
+
     styles();
     //Overlay för att visa "popup" på sidan
     //$('body.diva2margin').append($('<div id="ldapoverlay"></div>'));
