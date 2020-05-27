@@ -20,6 +20,8 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - Slå upp författare i ORCiD.
 - Söka efter författarens för- och efternamn på KTHs Intranät.
 - Söka efter författaren i Google på för- och efternamn + "KTH".
+- Vid "Annan organisation" finns en knapp som vid ett musklick tar bort det som står i fältet.
+- Om det finns två eller flera affilieringar i fältet "Annan organisation" (det finns ett semikolon som separator) finns inte denna knapp varför redigering måste ske för hand (vi tar bort KTH-affilieringen och låter de övriga stå kvar).
 
 ##### Vid titelfälten finns knappar för att:
 
