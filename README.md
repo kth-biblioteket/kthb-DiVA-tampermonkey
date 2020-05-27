@@ -41,6 +41,10 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - Tar bort felaktigt placerade bindestreck (vilket gör att DiVA inte accepterar numret).
 - Söker på ISBN i [WorldCat](https://www.worldcat.org/) för att hitta en redigare titel.
 
+##### Vid fältet för "Annat förlag" finns en knapp som:
+
+- Hämtar hem snyggare förlagsinformation från Crossref API, istället för de versala horrörerna som kommer från Web of Science.
+
 ##### Vid identifierarfälten (DOI, ISI/UT, ScopusId, PMID) finns knappar för att:
 
 - Uppdatera posten via Web of Science och Scopus API:er (samma funktion som görs automatiskt när man öppnar en post).
@@ -60,7 +64,6 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 
 - Automatiska förslag på ämnesklassificering via det kommande Swepub-APIet.
 - Ta bort copyright-info från abstractet. 
-- Hämta hem snyggare förlagsinformation från Crossref API, istället för de versala horrörerna som kommer från Web of Science.
 - Klistra in valfri information som finns "till vänster" automatiskt, i rätt fält vid dubbelklick (typ KTH-id).
 - På något sätt få in finansiärsinfo från Crossref.
 
