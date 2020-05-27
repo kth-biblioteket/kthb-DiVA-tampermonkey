@@ -27,6 +27,7 @@
 // @connect  www.worldcat.org
 // @connect  dblp.uni-trier.de
 // @connect  search.crossref.org
+// @connect  api.crossref.org
 // @noframes
 // ==/UserScript==
 /* global $ */
@@ -49,6 +50,7 @@
     var dblp_apiurl1 = 'https://dblp.uni-trier.de/doi/xml/';
     var dblp_apiurl2 = 'https://dblp.uni-trier.de/rec/xml/';
     var diva_searchurl = 'https://kth.diva-portal.org/smash/export.jsf';
+    var doi = $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
 
     var observer_config = {
         attributes: true,
@@ -333,7 +335,7 @@
                             //'<div><span class="fieldtitle">Kthid: </span><span>' + json.ugusers[key].ugKthid + '</span></div>' +
                             '<div><span class="fieldtitle">Titel: </span><span>' + json.ugusers[key].title + '</span></div>' +
                             '<div><span class="fieldtitle">Skola/org: </span><span>' + json.ugusers[key].kthPAGroupMembership + '</span></div>' +
-							'<div><span class="fieldtitle">KTH-affiliering: </span><span>' + json.ugusers[key].ugPrimaryAffiliation + '</span></div>' +
+                            '<div><span class="fieldtitle">KTH-affiliering: </span><span>' + json.ugusers[key].ugPrimaryAffiliation + '</span></div>' +
                             '<div><span class="fieldtitle">Email: </span><span>' + json.ugusers[key].mail + '</span></div>'
                         html += '</div>';
                     });
@@ -648,6 +650,24 @@
         })
             .then(function () {
         });
+    }
+
+    /**
+     * Funktion för att anropa Crossref och hämta information via DOI
+     *
+     * @param {string} doi
+     */
+
+    function getCrossref(doi) {
+        //          var doi = $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
+        if(doi != ""){
+            var url = 'https://api.crossref.org/works/' + doi + '/transform/application/vnd.crossref.unixsd+xml';
+            axios.get(url)
+                .then(function (response) {
+                var publisher = $(response.data).find('crm-item[name="publisher-name"]').text(); // hämtar förlagsinformation
+                $("div.diva2addtextarea:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").parent().find('input').val(publisher);
+            })
+        }
     }
 
     /**
@@ -993,6 +1013,19 @@
 
         ////////////////////////////////////
         //
+        // Uppdatera förlagsfält från Crossref
+        //
+        ////////////////////////////////////
+
+        $('#crossrefButtonjq').remove();
+        var crossrefButtonjq = $('<button id="crossrefButtonjq" type="button">Uppdatera från Crossref</button>');
+        crossrefButtonjq.on("click", function() {
+            getCrossref($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+        })
+        $("div.diva2addtextarea:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").before(crossrefButtonjq);
+
+        ////////////////////////////////////
+        //
         // Knapp vid PubMed-fältet
         //
         ////////////////////////////////////
@@ -1151,7 +1184,7 @@
                 $(thiz).next().find('input').val("");
             })
             if(!($(thiz).next().find('input').val().includes(";"))) { // vi vill inte ta bort hela "Annan organisation"-fältet som innehåller icke-KTH-affilieringar, d.v.s. de som har ett semikolon i sig
-            $(this).next().find('input').after(clearorgButtonjq);
+                $(this).next().find('input').after(clearorgButtonjq);
             }
             i++;
         });
@@ -1278,6 +1311,13 @@
 
             $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
             getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, ""), 'mods'); // ta bort saker som innehåller "&" och "?" som sökningen inte klarar av
+
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
+            // Gå till Crossref API och hämta saker automatiskt - skall komma om knappen vid "Other publisher" faller användarna i smaken
+            //
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         }
     }
 
