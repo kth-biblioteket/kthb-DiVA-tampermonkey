@@ -670,7 +670,7 @@
             axios.get(url)
                 .then(function (response) {
                 var publisher = $(response.data).find('crm-item[name="publisher-name"]').text(); // hämtar förlagsinformation
-                $("div.diva2addtextarea:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").parent().find('input').val(publisher); // klistrar in förlagsinfo från Crossref
+                $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").parent().find('input').val(publisher); // klistrar in förlagsinfo från Crossref
             })
         }
     }
@@ -1042,7 +1042,7 @@
             crossrefButtonjq.on("click", function() {
                 getCrossref($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
             })
-            $("div.diva2addtextarea:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").before(crossrefButtonjq);
+            $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").before(crossrefButtonjq);
         }
 
         ////////////////////////////////////
