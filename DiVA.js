@@ -658,7 +658,7 @@
     }
 
     /**
-     * Funktion för att anropa Crossref och hämta information via DOI
+     * Funktion för att anropa Crossref och hämta förlag via DOI
      *
      * @param {string} doi
      */
@@ -671,6 +671,31 @@
                 .then(function (response) {
                 var publisher = $(response.data).find('crm-item[name="publisher-name"]').text(); // hämtar förlagsinformation
                 $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").parent().find('input').val(publisher); // klistrar in förlagsinfo från Crossref
+            })
+        }
+    }
+
+    /**
+     * Funktion för att anropa Crossref och volume/issue/pages via DOI
+     *
+     * @param {string} doi
+     */
+
+    function getCrossrefVol(doi) {
+        //          var doi = $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
+        if(doi != ""){
+            var url = 'https://api.crossref.org/works/' + doi + '/transform/application/vnd.crossref.unixsd+xml';
+            axios.get(url)
+                .then(function (response) {
+                var year = $(response.data).find('journal_issue').find('publication_date').find('year').text(); // hämtar year
+                var volume = $(response.data).find('journal_volume').find('volume').text(); // hämtar volume
+                var issue = $(response.data).find('journal_issue').find('issue').text(); // hämtar issue
+                var first_page = $(response.data).find('journal_article').find('pages').find('first_page').text(); // hämtar första sidan
+                var last_page = $(response.data).find('journal_article').find('pages').find('last_page').text(); // hämtar sista sidan
+                $("div.diva2addtextchoicecol:contains('Year:') , div.diva2addtextchoicecol:contains('År:')").next().find('input').val(year); // klistrar in år från Crossref
+                $("div.diva2addtextchoicecol:contains('Volume:') , div.diva2addtextchoicecol:contains('Volym:')").next().find('input').val(volume); // klistrar in volym från Crossref
+                $("div.diva2addtextchoicecol:contains('Number:') , div.diva2addtextchoicecol:contains('Nummer:')").next().find('input').val(issue); // klistrar in nummer från Crossref
+                // $("div.diva2addtextchoicecol:contains('Article Id:') , div.diva2addtextchoicecol:contains('Artikel-id:')").next().find('input').val(xxxxx); // klistrar in förlagsinfo från Crossref
             })
         }
     }
@@ -1019,7 +1044,7 @@
         }
         ////////////////////////////////////
         //
-        // Uppdatera fält från Scopus
+        // Knapp för att uppdatera fält från Scopus
         //
         ////////////////////////////////////
 
@@ -1032,7 +1057,7 @@
 
         ////////////////////////////////////
         //
-        // Uppdatera förlagsfält från Crossref
+        // Knapp för att uppdatera förlagsfält från Crossref
         //
         ////////////////////////////////////
 
@@ -1043,6 +1068,21 @@
                 getCrossref($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
             })
             $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").before(crossrefButtonjq);
+        }
+
+        ////////////////////////////////////
+        //
+        // Knapp för att uppdatera volume/issue/pages från Crossref
+        //
+        ////////////////////////////////////
+
+        if(doi != ""){  // bara om det finns en DOI, annars är det meningslöst
+            $('#crossrefVolButtonjq').remove();
+            var crossrefVolButtonjq = $('<button id="crossrefVolButtonjq" type="button">Uppdatera detaljer från Crossref</button>');
+            crossrefVolButtonjq.on("click", function() {
+                getCrossrefVol($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+            })
+            $("div.diva2addtextchoice2:contains('Övriga uppgifter') , div.diva2addtextchoice2:contains('Other information') ").parent().before(crossrefVolButtonjq);
         }
 
         ////////////////////////////////////
