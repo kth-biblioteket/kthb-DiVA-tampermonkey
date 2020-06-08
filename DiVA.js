@@ -695,6 +695,8 @@
                 $("div.diva2addtextchoicecol:contains('Year:') , div.diva2addtextchoicecol:contains('År:')").next().find('input').val(year); // klistrar in år från Crossref
                 $("div.diva2addtextchoicecol:contains('Volume:') , div.diva2addtextchoicecol:contains('Volym:')").next().find('input').val(volume); // klistrar in volym från Crossref
                 $("div.diva2addtextchoicecol:contains('Number:') , div.diva2addtextchoicecol:contains('Nummer:')").next().find('input').val(issue); // klistrar in nummer från Crossref
+                $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').first().val(first_page); // klistrar in första sidan från Crossref
+                $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').next().val(last_page); // klistrar in första sidan från Crossref
                 // $("div.diva2addtextchoicecol:contains('Article Id:') , div.diva2addtextchoicecol:contains('Artikel-id:')").next().find('input').val(xxxxx); // klistrar in förlagsinfo från Crossref
             })
         }
