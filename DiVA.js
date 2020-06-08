@@ -208,7 +208,7 @@
         console.error(`Error ${response.status}!  ${response.statusText}`);
         $("#monkeyresultswrapper i").css("display", "none");
         $('#monkeyresults').html('<p>' + response.statusText + '</p>');
-        $('.monkeytalk').html('Nu blev det fel!');
+        $('#monkeytalk').html('Nu blev det fel!');
     }
 
     /**
@@ -219,7 +219,7 @@
      */
     function getOrcid(fnamn, enamn) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med ORCiD. Det kan ta lite tid...");
+        $("#monkeytalk").html("Jag pratar med ORCiD. Det kan ta lite tid...");
         var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
         var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
 
@@ -283,7 +283,7 @@
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
-            $(".monkeytalk").html("ORCiD svarade... se resultatet här nedanför");
+            $("#monkeytalk").html("ORCiD svarade... se resultatet här nedanför");
         })
             .catch(function (error) {
             api_error(error.response);
@@ -300,8 +300,8 @@
      * @param {*} kthid
      */
     async function getLDAP(fnamn, enamn, kthid) {
-        $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med LDAP...");
+        $("#monkeyresultswrapper_right i").css("display", "inline-block");  // visas i högermarginalen sen version 1.1.15
+        $("#monkeytalk_right").html("Jag pratar med LDAP...");
         var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
         var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
         var url = ldap_apiurl + 'users/' +
@@ -344,9 +344,9 @@
             }
 
             html += '</div>'
-            $("#monkeyresultswrapper i").css("display", "none");
-            $('#monkeyresults').html(html);
-            $(".monkeytalk").html("LDAP svarade... se resultatet här nedanför");
+            $("#monkeyresultswrapper_right i").css("display", "none");
+            $('#monkeyresults_right').html(html);
+            $("#monkeytalk_right").html("LDAP svarade... se resultatet här nedanför");
         })
             .catch(function (error) {
             api_error(error.response);
@@ -364,7 +364,7 @@
 
     function getLeta(fnamn, enamn) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med Leta anställda...");
+        $("#monkeytalk").html("Jag pratar med Leta anställda...");
         var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
         var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
         var enamn3 = enamn2.replace(/æ/g, "ae") // ersätt eventuella æ med ae i namnen före sökning. Leta KTH-anställda spricker annars
@@ -398,7 +398,7 @@
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
-            $(".monkeytalk").html("Leta KTH-anställda svarade... se resultatet här nedanför");
+            $("#monkeytalk").html("Leta KTH-anställda svarade... se resultatet här nedanför");
         })
             .catch(function (error) {
             api_error(error.response);
@@ -415,12 +415,12 @@
 
     async function getScopus(doi) {
         if(doi == ""){
-            $('.monkeytalk').html('Ojojoj, ingen DOI!');
+            $('#monkeytalk').html('Ojojoj, ingen DOI!');
             $("#monkeyresultswrapper i").css("display", "none");
             return 0;
         }
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med Scopus...");
+        $("#monkeytalk").html("Jag pratar med Scopus...");
         var url = scopus_apiurl +
             doi +
             '?apiKey=' + scopus_apikey;
@@ -467,12 +467,12 @@
             };
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-            $(".monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
+            $("#monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
             return 1;
         })
             .catch(function (error) {
             $("#monkeyresultswrapper i").css("display", "none");
-            $(".monkeytalk").html("Jag hittade inget i Scopus!");
+            $("#monkeytalk").html("Jag hittade inget i Scopus!");
         })
             .then(function () {
         });
@@ -486,12 +486,12 @@
 
     async function getWoS(doi) {
         if(doi == ""){
-            $('.monkeytalk').html('Ojojoj, ingen DOI! Jag behöver en DOI för att kunna uppdatera från databaserna.');
+            $('#monkeytalk').html('Ojojoj, ingen DOI! Jag behöver en DOI för att kunna uppdatera från databaserna.');
             $("#monkeyresultswrapper i").css("display", "none");
             return 0;
         }
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med Web of Science...");
+        $("#monkeytalk").html("Jag pratar med Web of Science...");
         var url = wos_apiurl + doi;
         await axios.get(url)
             .then(function (response) {
@@ -525,11 +525,11 @@
             };
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-            $(".monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
+            $("#monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
         })
             .catch(function (error) {
             $("#monkeyresultswrapper i").css("display", "none");
-            $(".monkeytalk").html("Jag hittade inget i Web of Science");
+            $("#monkeytalk").html("Jag hittade inget i Web of Science");
         })
             .then(function () {
         });
@@ -542,12 +542,12 @@
      * @param {string} format (csl_json=json, mods=xml)
      */
 
-    function getDiVA(titleAll, format) {
+    async function getDiVA(titleAll, format) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med DiVA...");
+        $("#monkeytalk").html("Jag pratar med DiVA...");
         var url = diva_searchurl + '?format=' + format + '&addFilename=true&aq=[[{"titleAll":"' +
             titleAll.replace("?", "") + '"}]]&aqe=[]&aq2=[[]]&onlyFullText=false&noOfRows=50&sortOrder=title_sort_asc&sortOrder2=title_sort_asc'; // av någon anledning fixar inte sökningen titlar som innehåller eller i alla fall slutar med ett "?"
-        axios.get(url)
+        await axios.get(url)
             .then(function (response) {
             var html = '<div><div class="resultsheader">Information från DiVA, Söktext: ' + '<br /><br />' + titleAll + '</div>';
             if (response.data) {
@@ -598,11 +598,11 @@
             html += '</div>'
             $("#monkeyresultswrapper i").css("display", "none");
             $('#monkeyresults').html(html);
-            $(".monkeytalk").html("DiVA svarade... se resultatet här nedanför");
+            $("#monkeytalk").html("DiVA svarade... se resultatet här nedanför");
         })
             .catch(function (error) {
             $("#monkeyresultswrapper i").css("display", "none");
-            $(".monkeytalk").html("Jag hittade inget i DiVA");
+            $("#monkeytalk").html("Jag hittade inget i DiVA");
         })
             .then(function () {
         });
@@ -621,7 +621,7 @@
             return;
         }
         $("#monkeyresultswrapper i").css("display", "inline-block");
-        $(".monkeytalk").html("Jag pratar med DBLP...");
+        $("#monkeytalk").html("Jag pratar med DBLP...");
         var url = dblp_apiurl1 + doi;
         axios.get(url)
             .then(function (response) {
@@ -637,7 +637,7 @@
                     html += '</div>';
                     $("#monkeyresultswrapper i").css("display", "none");
                     $('#monkeyresults').html(html);
-                    $(".monkeytalk").html("dblp svarade... se resultatet här nedanför!");
+                    $("#monkeytalk").html("dblp svarade... se resultatet här nedanför!");
                 })
                     .catch(function (error) {
                     api_error(error.response);
@@ -651,14 +651,14 @@
             .catch(function (error) {
             $('#monkeyresults').html('');
             $("#monkeyresultswrapper i").css("display", "none");
-            $(".monkeytalk").html("Nej, jag hittade inget i dblp. Det kanske inte är ett konferensbidrag inom Computer Science?");
+            $("#monkeytalk").html("Nej, jag hittade inget i dblp. Det kanske inte är ett konferensbidrag inom Computer Science?");
         })
             .then(function () {
         });
     }
 
     /**
-     * Funktion för att anropa Crossref och hämta förlag via DOI
+     * Funktion för att anropa Crossref och hämta information via DOI
      *
      * @param {string} doi
      */
@@ -1044,7 +1044,7 @@
         }
         ////////////////////////////////////
         //
-        // Knapp för att uppdatera fält från Scopus
+        // Uppdatera fält från Scopus
         //
         ////////////////////////////////////
 
@@ -1057,7 +1057,7 @@
 
         ////////////////////////////////////
         //
-        // Knapp för att uppdatera förlagsfält från Crossref
+        // Uppdatera förlagsfält från Crossref
         //
         ////////////////////////////////////
 
@@ -1369,18 +1369,17 @@
                     getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
                         .then( function(result) {
                         $('html, body').animate({scrollTop:0},'slow');
+                        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        //
+                        // Öppna DiVA och kolla efter dubbletter när en post öppnas.
+                        //
+                        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
+                        getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, ""), 'mods'); // ta bort saker som innehåller "&" och "?" som sökningen inte klarar av
                     });
                 });
             });
 
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //
-            // Öppna DiVA och kolla efter dubbletter när en post öppnas.
-            //
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
-            getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, ""), 'mods'); // ta bort saker som innehåller "&" och "?" som sökningen inte klarar av
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
             //
@@ -1414,14 +1413,16 @@
                         Cookies.remove('token');
                     } else {
                         $("#monkeyresultswrapper i").css("display", "inline-block");
-                        $(".monkeytalk").html("Jag gör mig redo...");
+                        $("#monkeytalk").html("Jag gör mig redo...");
                         verifytoken(Cookies.get('token'));
                         $("#monkeyresultswrapper").css("display", "block");
+                        $("#monkeyresultswrapper_right").css("display", "block");
                         return
                     }
                 } else {
                     Cookies.remove('token');
                     $("#monkeyresultswrapper").css("display", "block");
+                    $("#monkeyresultswrapper_right").css("display", "block");
                     $("#monkeylogin").css("display", "block");
                     monkeylogin();
                 }
@@ -1442,40 +1443,66 @@
     //DIV för att visa Apans resultat till vänster på sidan
     var monkeyresultswrapper =
         ($('<div style="display:none" id="monkeyresultswrapper">' +
-           '<div>' +
-           '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' +
-           '<!--img class="monkeytalkbubble" src="https://apps.lib.kth.se/divaapan/monkeytalk.png"-->' +
-           '<div class="bubble">' +
-           '<i class="fa fa-spinner fa-spin"></i>' +
-           '<div class="monkeytalk"></div>' +
-           '</div>' +
-           '</div>' +
-           '<div class="monkeyheader">' +
-           '<h1>DiVA-Apan</h1>' +
-           '</div>' +
-           '<div id="monkeylogin">' +
-           '<form id="monkeyloginform">' +
-           '<div>Logga in till Apan</div>' +
-           '<div class = "flexbox column rowpadding">' +
-           '<input class="rowmargin" id="username" name="username" placeholder="kthid" type="text">' +
-           '<input class="rowmargin" id="password" name="password" placeholder="password" type="password">' +
-           '</div>' +
-           '</form>' +
-           '<button id="login">Login</button>' +
-           '</div>' +
-           '<h2>' +
-           'Uppdateringar' +
-           '</h2>' +
-           '<div id="monkeyupdates" class="flexbox column">' +
-           '</div>' +
-           '<hr class="solid">' +
-           '<h2>' +
-           'Resultat' +
-           '</h2>' +
-           '<div id="monkeyresults" class="flexbox column">' +
-           '</div>' +
+                '<div>' +
+                    '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' +
+                    '<div class="bubble">' +
+                        '<i class="fa fa-spinner fa-spin"></i>' +
+                        '<div id="monkeytalk"></div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="monkeyheader">' +
+                    '<h1>DiVA-Apan</h1>' +
+                '</div>' +
+                '<div id="monkeylogin">' +
+                    '<form id="monkeyloginform">' +
+                        '<div>Logga in till Apan</div>' +
+                        '<div class = "flexbox column rowpadding">' +
+                            '<input class="rowmargin" id="username" name="username" placeholder="kthid" type="text">' +
+                            '<input class="rowmargin" id="password" name="password" placeholder="password" type="password">' +
+                        '</div>' +
+                    '</form>' +
+                    '<button id="login">Login</button>' +
+                '</div>' +
+                '<h2>' +
+                    'Uppdateringar' +
+                '</h2>' +
+                '<div id="monkeyupdates" class="flexbox column">' +
+                '</div>' +
+                '<hr class="solid">' +
+                '<h2>' +
+                    'Resultat' +
+                '</h2>' +
+                '<div id="monkeyresults" class="flexbox column">' +
+                '</div>' +
            '</div>'));
     $('body.diva2margin').prepend(monkeyresultswrapper);
+
+    //DIV för att kunna visa Apresultat även till höger på sidan
+    var monkeyresultswrapper_right =
+        ($('<div style="display:none" id="monkeyresultswrapper_right">' +
+//                '<div>' +
+//                    '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' +
+//                    '<div class="bubble">' +
+//                        '<i class="fa fa-spinner fa-spin"></i>' +
+//                        '<div id="monkeytalk_right"></div>' +
+//                    '</div>' +
+//                '</div>' +
+                '<div class="monkeyheader">' +
+//                    '<h1>DiVA-Apan</h1>' +
+                '</div>' +
+                //'<h2>' +
+                    //'Uppdateringar' +
+                //'</h2>' +
+                //'<div id="monkeyupdates_right" class="flexbox column">' +
+                //'</div>' +
+                //'<hr class="solid">' +
+                '<h2>' +
+                    'Resultat' +
+                '</h2>' +
+                '<div id="monkeyresults_right" class="flexbox column">' +
+                '</div>' +
+           '</div>'));
+    $('body.diva2margin').prepend(monkeyresultswrapper_right);
 
     // Vilket DiVA-läge (edit, publish, review, import eller add)
     if (window.location.href.indexOf("editForm.jsf") !== -1) {
@@ -1501,48 +1528,58 @@
 function styles() {
     GM_addStyle(`
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css");
+
 ::-webkit-scrollbar {
 -webkit-appearance: none;
 width: 10px;
 }
+
 ::-webkit-scrollbar-thumb {
 border-radius: 5px;
 background-color: rgba(0,0,0,.5);
 -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
 }
+
 .logo {
 width: 80px;
 }
-.monkeytalk {
+
+#monkeytalk,
+#monkeytalk_right  {
 width: 150px;
 }
+
 .oa {
 width: 8px;
 }
-.monkeytalk {
-width: 150px;
-}
+
 .monkeyheader {
 font-weight: bold;
 font-size: 1.06em;
 padding-bottom: 0px;
 }
-#monkeyresultswrapper i {
+
+#monkeyresultswrapper i,
+#monkeyresultswrapper_right i {
 font-size: 32px;
 position: absolute;
 top: 18px;
 left: 170px;
 z-index: 1;
 }
+
 #wosapiButtonjq i,
-#monkeyresultswrapper i {
+#monkeyresultswrapper i,
+#monkeyresultswrapper_right i {
 display: none;
 }
+
 #monkeylogin {
 display: none;
 overflow: hidden;
 padding: 5px;
 }
+
 #monkeyresultswrapper {
 position: fixed;
 top: 20px;
@@ -1553,66 +1590,99 @@ overflow: auto;
 padding-left: 10px;
 background: #ffffff;
 }
-#monkeyupdates {
+
+#monkeyresultswrapper_right {
+position: fixed;
+top: 20px;
+right: 0;
+width: 320px;
+height: 100%;
+overflow: auto;
+padding-left: 10px;
+background: #ffffff;
+}
+
+#monkeyupdates,
+#monkeyupdates_right {
 height: 150px;
 overflow: auto;
 }
-#monkeyresults ,
-#monkeyupdates {
+
+#monkeyresults,
+#monkeyresults_right,
+#monkeyupdates,
+#monkeyupdates_right {
 padding: 0px;
 font-size: 12px;
 margin-bottom: 20px;
 width: 300px
 }
+
 .updateheader, .resultsheader {
 font-weight: bold;
 }
-#monkeyresults a, #ldapoverlay a {
+
+#monkeyresults a,
+#monkeyresults_right a,
+#ldapoverlay a {
 font-size: 0.8rem !important;
 }
+
 hr.solid {
 border-top: 3px solid #bbb;
 }
+
 .inforecord {
 padding-top: 5px;
 padding-bottom: 5px;
 }
+
 .inforecord>div {
 display: flex;
 border-top: 1px solid;
 border-left: 1px solid;
 border-right: 1px solid
 }
+
 .inforecord>div>span:first-child {
 border-right: 1px solid
 }
+
 .inforecord>div:last-child {
 border-bottom: 1px solid;
 }
+
 .inforecord span {
 word-break: break-all;
 flex: 1;
 padding: 2px;
 }
+
 .inforecord span {
 }
+
 .fieldtitle {
 font-weight: bold;
 }
+
 .flexbox {
 display: flex;
 }
+
 .column {
 flex-direction: column;
 }
+
 .rowpadding {
 padding-top: 5px;
 padding-bottom: 5px;
 }
+
 .rowmargin {
 margin-top: 5px;
 margin-bottom: 5px;
 }
+
 button {
 background-color: #d85497;
 color: #fff;
@@ -1626,21 +1696,26 @@ outline: none;
 margin: 1px;
 cursor: pointer;
 }
+
 button:hover {
 background-color: #dd2f87;
 }
+
 button.link {
 background-color: #007fae;
 }
+
 button.link:hover {
 background-color: #005cae;
 }
+
 .clearbutton {
 line-height: 1;
 height: 17px;
 padding: 0px 10px;
 font-size: 11px;
 }
+
 #ldapoverlay {
 position: fixed;
 height: 100%;
@@ -1653,6 +1728,7 @@ background: rgba(0,0,0,0.8);
 display: none;
 font-size: 0.8rem
 }
+
 #popup {
 max-width: 1200px;
 width: 80%;
@@ -1664,6 +1740,7 @@ position: relative;
 background: #fff;
 margin: 20px auto;
 }
+
 #close {
 position: absolute;
 top: 10px;
@@ -1671,6 +1748,7 @@ right: 10px;
 cursor: pointer;
 color: #000;
 }
+
 .bubble
 {
 position: absolute;
@@ -1686,6 +1764,7 @@ margin-left: 10px;
 font-size: 12px;
 top: 5px;
 }
+
 .bubble:after
 {
 content: '';
@@ -1699,5 +1778,6 @@ z-index: 1;
 left: -10px;
 top: 35px;
 }
+
 `);
 }
