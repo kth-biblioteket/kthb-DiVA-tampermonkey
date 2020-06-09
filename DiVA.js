@@ -300,21 +300,23 @@
      * @param {*} kthid
      */
     async function getLDAP(fnamn, enamn, kthid) {
-        $("#monkeyresultswrapper_right i").css("display", "inline-block");  // visas i högermarginalen sen version 1.1.15
-        $("#monkeytalk_right").html("Jag pratar med LDAP...");
-        var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
-        var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
-        var url = ldap_apiurl + 'users/' +
-            fnamn2 +
-            '* ' +
-            enamn2 +
-            ' *' +
-            '?token=' + ldap_apikey;
-        if (kthid!= "") {
-            url = ldap_apiurl + 'kthid/' +
-                kthid +
+//        if(fnamn != "" && enamn != "") {
+            $("#monkeyresultswrapper_right i").css("display", "inline-block");  // visas i högermarginalen sen version 1.1.15
+            $("#monkeytalk_right").html("Jag pratar med LDAP...");
+            var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
+            var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
+            var url = ldap_apiurl + 'users/' +
+                fnamn2 +
+                '* ' +
+                enamn2 +
+                ' *' +
                 '?token=' + ldap_apikey;
-        }
+            if (kthid!= "") {
+                url = ldap_apiurl + 'kthid/' +
+                    kthid +
+                    '?token=' + ldap_apikey;
+            }
+//        }
 
         await axios.get(url)
             .then(function (response) {
@@ -726,6 +728,23 @@
         });
     };
 
+/*
+    function mutationEditorCallback(mutations) {
+        mutations.forEach(function(mutation) {
+            var newNodes = mutation.addedNodes;
+            if (newNodes !== null) {
+                init(true);
+                var $nodes = $(newNodes);
+                $nodes.each(function() {
+                    var $node = $(this);
+                    if ($node.prop("id") == diva_id + ':editorSerie') {
+                        console.log('editor uppdaterad')
+                    }
+                });
+            }
+        });
+    };
+*/
     /**
      * Funktion för att initiera Apan
      *
@@ -1290,7 +1309,7 @@
 
         //////////////////////////////////////////////////////////////////////////
         //
-        //Knappar till LDAP, Leta KTH anställda, KTH Intra, Google och ORCiD
+        //Knappar för *författare* till LDAP, Leta KTH anställda, KTH Intra, Google och ORCiD
         //
         //////////////////////////////////////////////////////////////////////////
 
@@ -1346,6 +1365,72 @@
                     $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val() +
                     "+" +
                     $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
+                var newurl = url.replace("$$$", "") // ta bort eventuella $$$ från efternamnen före sökning
+                window.open(newurl, '_blank'); // sök på förnamn efternamn + KTH i google
+            })
+            $(this).before(googleButtonjq)
+
+            i++;
+        });
+
+         //////////////////////////////////////////////////////////////////////////
+        //
+        //Knappar för *redaktörer* till LDAP, Leta KTH anställda, KTH Intra, Google och ORCiD
+        //
+        //////////////////////////////////////////////////////////////////////////
+
+        var editors = $('#' + diva_id + '\\:editorSerie');
+        i = 0;
+        $(editors).find('.diva2addtextarea').each(function() {
+            var thiz = this;
+
+            //LDAP/UG
+            $('#ldapButtonjq' + i).remove();
+            var ldapButtonjq = $('<button id="ldapButtonjq' + i + '" type="button">LDAP-info</button>');
+            ldapButtonjq.on("click", function() {
+                getLDAP($(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val(),'');
+            })
+            $(this).before(ldapButtonjq)
+
+            //Leta KTH-anställda
+            $('#letaButtonjq' + i).remove();
+            var letaButtonjq = $('<button id="letaButtonjq' + i + '" type="button">Leta KTH-anställda</button>');
+            letaButtonjq.on("click", function() {
+                getLeta($(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val());
+            })
+            $(this).before(letaButtonjq)
+
+            //Sök i ORCiD
+            $('#orcidButtonjq' + i).remove();
+            var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök i ORCiD</button>');
+            orcidButtonjq.on("click", function() {
+                getOrcid($(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val());
+            })
+            $(this).before(orcidButtonjq);
+
+            //KTH Intranät förnamn efternamn
+            $('#kthintraButtonjq' + i).remove();
+            var kthintraButtonjq = $('<button class="link" id="kthintraButtonjq' + i + '" type="button">KTH Intra</button>');
+            kthintraButtonjq.on("click", function() {
+                var url = "https://www.kth.se/search?q=" +
+                    $(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val() +
+                    "%20" +
+                    $(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val() +
+                    "&urlFilter=https://intra.kth.se&filterLabel=KTH%20Intran%C3%A4t&entityFilter=kth-profile,kth-place,%20kth-system"
+                var newurl = url.replace("$$$", "") // ta bort eventuella $$$ från efternamnen före sökning
+                var newurl2 = newurl.replace(/[A-Z]\./g, "") // ta bort allt som ser ut som en VERSAL med en punkt efter, typ förnamn från Scopus. Verkar ge bättre resultat med bara efternamn vid sökning i KTH Intra
+                window.open(newurl2, '_blank'); // sök på förnamn efternamn på KTH Intranät
+            })
+            $(this).before(kthintraButtonjq)
+
+            //Google.com förnamn + efternamn + KTH
+            $('#googleButtonjq' + i).remove();
+            var googleButtonjq = $('<button class="link" id="googleButtonjq' + i + '" type="button">Google</button>');
+            googleButtonjq.on("click", function() {
+                var url = "https://www.google.com/search?q=KTH+" +
+                    $(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val() +
+                    "+" +
+                    $(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val()
                 var newurl = url.replace("$$$", "") // ta bort eventuella $$$ från efternamnen före sökning
                 window.open(newurl, '_blank'); // sök på förnamn efternamn + KTH i google
             })
@@ -1445,64 +1530,64 @@
     //DIV för att visa Apans resultat till vänster på sidan
     var monkeyresultswrapper =
         ($('<div style="display:none" id="monkeyresultswrapper">' +
-                '<div>' +
-                    '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' +
-                    '<div class="bubble">' +
-                        '<i class="fa fa-spinner fa-spin"></i>' +
-                        '<div id="monkeytalk"></div>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="monkeyheader">' +
-                    '<h1>DiVA-Apan</h1>' +
-                '</div>' +
-                '<div id="monkeylogin">' +
-                    '<form id="monkeyloginform">' +
-                        '<div>Logga in till Apan</div>' +
-                        '<div class = "flexbox column rowpadding">' +
-                            '<input class="rowmargin" id="username" name="username" placeholder="kthid" type="text">' +
-                            '<input class="rowmargin" id="password" name="password" placeholder="password" type="password">' +
-                        '</div>' +
-                    '</form>' +
-                    '<button id="login">Login</button>' +
-                '</div>' +
-                '<h2>' +
-                    'Uppdateringar' +
-                '</h2>' +
-                '<div id="monkeyupdates" class="flexbox column">' +
-                '</div>' +
-                '<hr class="solid">' +
-                '<h2>' +
-                    'Resultat' +
-                '</h2>' +
-                '<div id="monkeyresults" class="flexbox column">' +
-                '</div>' +
+           '<div>' +
+           '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' +
+           '<div class="bubble">' +
+           '<i class="fa fa-spinner fa-spin"></i>' +
+           '<div id="monkeytalk"></div>' +
+           '</div>' +
+           '</div>' +
+           '<div class="monkeyheader">' +
+           '<h1>DiVA-Apan</h1>' +
+           '</div>' +
+           '<div id="monkeylogin">' +
+           '<form id="monkeyloginform">' +
+           '<div>Logga in till Apan</div>' +
+           '<div class = "flexbox column rowpadding">' +
+           '<input class="rowmargin" id="username" name="username" placeholder="kthid" type="text">' +
+           '<input class="rowmargin" id="password" name="password" placeholder="password" type="password">' +
+           '</div>' +
+           '</form>' +
+           '<button id="login">Login</button>' +
+           '</div>' +
+           '<h2>' +
+           'Uppdateringar' +
+           '</h2>' +
+           '<div id="monkeyupdates" class="flexbox column">' +
+           '</div>' +
+           '<hr class="solid">' +
+           '<h2>' +
+           'Resultat' +
+           '</h2>' +
+           '<div id="monkeyresults" class="flexbox column">' +
+           '</div>' +
            '</div>'));
     $('body.diva2margin').prepend(monkeyresultswrapper);
 
     //DIV för att kunna visa Apresultat även till höger på sidan
     var monkeyresultswrapper_right =
         ($('<div style="display:none" id="monkeyresultswrapper_right">' +
-//                '<div>' +
-//                    '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' +
-//                    '<div class="bubble">' +
-//                        '<i class="fa fa-spinner fa-spin"></i>' +
-//                        '<div id="monkeytalk_right"></div>' +
-//                    '</div>' +
-//                '</div>' +
-                '<div class="monkeyheader">' +
-//                    '<h1>DiVA-Apan</h1>' +
-                '</div>' +
-                //'<h2>' +
-                    //'Uppdateringar' +
-                //'</h2>' +
-                //'<div id="monkeyupdates_right" class="flexbox column">' +
-                //'</div>' +
-                //'<hr class="solid">' +
-                '<h2>' +
-                    'Resultat' +
-                '</h2>' +
-                '<div id="monkeyresults_right" class="flexbox column">' +
-                '</div>' +
+           //                '<div>' +
+           //                    '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' +
+           //                    '<div class="bubble">' +
+           //                        '<i class="fa fa-spinner fa-spin"></i>' +
+           //                        '<div id="monkeytalk_right"></div>' +
+           //                    '</div>' +
+           //                '</div>' +
+           '<div class="monkeyheader">' +
+           //                    '<h1>DiVA-Apan</h1>' +
+           '</div>' +
+           //'<h2>' +
+           //'Uppdateringar' +
+           //'</h2>' +
+           //'<div id="monkeyupdates_right" class="flexbox column">' +
+           //'</div>' +
+           //'<hr class="solid">' +
+           '<h2>' +
+           'Resultat' +
+           '</h2>' +
+           '<div id="monkeyresults_right" class="flexbox column">' +
+           '</div>' +
            '</div>'));
     $('body.diva2margin').prepend(monkeyresultswrapper_right);
 
