@@ -389,7 +389,7 @@
                         html += "<p> Namn: " + json[key].Fnamn + " " + json[key].Enamn + "<br />" +
                             "KTH-ID: " + json[key].KTH_id + "<br />" +
                             "ORCiD: " + json[key].ORCIDid + "<br />" +
-                             json[key].Bef_ben + ", " +
+                            json[key].Bef_ben + ", " +
                             json[key].Orgnamn + ", " +
                             json[key].skola + "<br />" +
                             "Fr.o.m. " + json[key].Anst_nuv_bef + "<br />" +
@@ -698,11 +698,22 @@
                 var issue = $(response.data).find('journal_issue').find('issue').text(); // hämtar issue
                 var first_page = $(response.data).find('journal_article').find('pages').find('first_page').text(); // hämtar första sidan
                 var last_page = $(response.data).find('journal_article').find('pages').find('last_page').text(); // hämtar sista sidan
-                $("div.diva2addtextchoicecol:contains('Year:') , div.diva2addtextchoicecol:contains('År:')").next().find('input').val(year); // klistrar in år från Crossref
-                $("div.diva2addtextchoicecol:contains('Volume:') , div.diva2addtextchoicecol:contains('Volym:')").next().find('input').val(volume); // klistrar in volym från Crossref
-                $("div.diva2addtextchoicecol:contains('Number:') , div.diva2addtextchoicecol:contains('Nummer:')").next().find('input').val(issue); // klistrar in nummer från Crossref
-                $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').first().val(first_page); // klistrar in första sidan från Crossref
-                $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').next().val(last_page); // klistrar in första sidan från Crossref
+
+                if($(response.data).find('journal_issue').find('publication_date').find('year').text() != "") {  // om det inte finns några uppgifter hos Crossref klistras inget in
+                    $("div.diva2addtextchoicecol:contains('Year:') , div.diva2addtextchoicecol:contains('År:')").next().find('input').val(year); // klistrar in år från Crossref
+                }
+                if($(response.data).find('journal_volume').find('volume').text() != "") {  // om det inte finns några uppgifter hos Crossref klistras inget in
+                    $("div.diva2addtextchoicecol:contains('Volume:') , div.diva2addtextchoicecol:contains('Volym:')").next().find('input').val(volume); // klistrar in volym från Crossref
+                }
+                if($(response.data).find('journal_issue').find('issue').text() != "") {  // om det inte finns några uppgifter hos Crossref klistras inget in
+                    $("div.diva2addtextchoicecol:contains('Number:') , div.diva2addtextchoicecol:contains('Nummer:')").next().find('input').val(issue); // klistrar in nummer från Crossref
+                }
+                if($(response.data).find('journal_article').find('pages').find('first_page').text() != "") {  // om det inte finns några uppgifter hos Crossref klistras inget in
+                    $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').first().val(first_page); // klistrar in första sidan från Crossref
+                }
+                if($(response.data).find('journal_article').find('pages').find('last_page').text() != "") {  // om det inte finns några uppgifter hos Crossref klistras inget in
+                    $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').next().val(last_page); // klistrar in första sidan från Crossref
+                }
                 // $("div.diva2addtextchoicecol:contains('Article Id:') , div.diva2addtextchoicecol:contains('Artikel-id:')").next().find('input').val(xxxxx); // klistrar in förlagsinfo från Crossref
             })
         }
