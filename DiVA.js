@@ -300,23 +300,23 @@
      * @param {*} kthid
      */
     async function getLDAP(fnamn, enamn, kthid) {
-//        if(fnamn != "" && enamn != "") {
-            $("#monkeyresultswrapper_right i").css("display", "inline-block");  // visas i högermarginalen sen version 1.1.15
-            $("#monkeytalk_right").html("Jag pratar med LDAP...");
-            var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
-            var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
-            var url = ldap_apiurl + 'users/' +
-                fnamn2 +
-                '* ' +
-                enamn2 +
-                ' *' +
+        $("#monkeyresultswrapper_right i").css("display", "inline-block");  // visas i högermarginalen sen version 1.1.15
+        $("#monkeytalk_right").html("Jag pratar med LDAP...");
+        var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
+        var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
+        var url = ldap_apiurl + 'users/' +
+            fnamn2 +
+            '* ' +
+            enamn2 +
+            ' *' +
+            '?token=' + ldap_apikey;
+
+        if (kthid!= "") {
+            url = ldap_apiurl + 'kthid/' +
+                kthid +
                 '?token=' + ldap_apikey;
-            if (kthid!= "") {
-                url = ldap_apiurl + 'kthid/' +
-                    kthid +
-                    '?token=' + ldap_apikey;
-            }
-//        }
+        }
+
 
         await axios.get(url)
             .then(function (response) {
@@ -386,13 +386,17 @@
                 } else {
                     //gå igenom alla users och lägg till i html
                     $.each(json, function(key, value) {
-                        html += "<p>" + json[key].Fnamn + " " + json[key].Enamn + ", " +
-                            json[key].KTH_id + ", " +
-                            json[key].ORCIDid + ", " +
+                        html += "<p> Namn: " + json[key].Fnamn + " " + json[key].Enamn + "<br />" +
+                            "KTH-ID: " + json[key].KTH_id + "<br />" +
+                            "ORCiD: " + json[key].ORCIDid + "<br />" +
+                             json[key].Bef_ben + ", " +
                             json[key].Orgnamn + ", " +
-                            json[key].skola + ", " +
-                            json[key].datum +
+                            json[key].skola + "<br />" +
+                            "Fr.o.m. " + json[key].Anst_nuv_bef + "<br />" +
+                            "T.o.m. " + json[key].Bef_t_o_m + "<br />" +
+                            "Uppdaterat: " + json[key].datum +
                             "</p>"
+                        console.log(json);
                     });
                 }
             }
@@ -728,7 +732,7 @@
         });
     };
 
-/*
+    /*
     function mutationEditorCallback(mutations) {
         mutations.forEach(function(mutation) {
             var newNodes = mutation.addedNodes;
@@ -1373,7 +1377,7 @@
             i++;
         });
 
-         //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
         //
         //Knappar för *redaktörer* till LDAP, Leta KTH anställda, KTH Intra, Google och ORCiD
         //
@@ -1450,23 +1454,24 @@
 
         if (re_init!=true) {
             getLDAP('', '', $('.diva2identifier:eq(2)').html())
-                .then( function(result) {
+                .then( function(result)  {
                 getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
                     .then( function(result) {
                     getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
                         .then( function(result) {
                         $('html, body').animate({scrollTop:0},'slow');
+
                         /////////////////////////////////////////////////////////////////////////////////////////////////////////
                         //
                         // Öppna DiVA och kolla efter dubbletter när en post öppnas.
                         //
                         /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
                         $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
                         getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, ""), 'mods'); // ta bort saker som innehåller "&" och "?" som sökningen inte klarar av
                     });
                 });
             });
-
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
             //
