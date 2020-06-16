@@ -693,7 +693,7 @@
             var url = 'https://api.crossref.org/works/' + doi + '/transform/application/vnd.crossref.unixsd+xml';
             axios.get(url)
                 .then(function (response) {
-                var year = $(response.data).find('journal_issue').find('publication_date').find('year').text(); // hämtar year
+                var year = $(response.data).find('journal_issue').find('publication_date').find('year').last().text(); // hämtar year, svårt här, ibland två st year - tar det sista
                 var volume = $(response.data).find('journal_volume').find('volume').text(); // hämtar volume
                 var issue = $(response.data).find('journal_issue').find('issue').text(); // hämtar issue
                 var first_page = $(response.data).find('journal_article').find('pages').find('first_page').text(); // hämtar första sidan
@@ -743,23 +743,6 @@
         });
     };
 
-    /*
-    function mutationEditorCallback(mutations) {
-        mutations.forEach(function(mutation) {
-            var newNodes = mutation.addedNodes;
-            if (newNodes !== null) {
-                init(true);
-                var $nodes = $(newNodes);
-                $nodes.each(function() {
-                    var $node = $(this);
-                    if ($node.prop("id") == diva_id + ':editorSerie') {
-                        console.log('editor uppdaterad')
-                    }
-                });
-            }
-        });
-    };
-*/
     /**
      * Funktion för att initiera Apan
      *
@@ -1104,6 +1087,7 @@
                 getCrossref($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
             })
             $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").before(crossrefButtonjq);
+        //  $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher') , div.diva2addtextchoicecol:contains('Namn på utgivare') , div.diva2addtextchoicecol:contains('Name of publisher')").before(crossrefButtonjq);
         }
 
         ////////////////////////////////////
