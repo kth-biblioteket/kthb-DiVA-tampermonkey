@@ -28,6 +28,8 @@
 // @connect  dblp.uni-trier.de
 // @connect  search.crossref.org
 // @connect  api.crossref.org
+// @connect  bibliometri.swepub.kb.se
+
 // @noframes
 // ==/UserScript==
 /* global $ */
@@ -1087,7 +1089,7 @@
                 getCrossref($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
             })
             $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").before(crossrefButtonjq);
-        //  $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher') , div.diva2addtextchoicecol:contains('Namn på utgivare') , div.diva2addtextchoicecol:contains('Name of publisher')").before(crossrefButtonjq);
+            //  $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher') , div.diva2addtextchoicecol:contains('Namn på utgivare') , div.diva2addtextchoicecol:contains('Name of publisher')").before(crossrefButtonjq);
         }
 
         ////////////////////////////////////
@@ -1104,6 +1106,27 @@
             })
             $("div.diva2addtextchoice2:contains('Övriga uppgifter') , div.diva2addtextchoice2:contains('Other information') ").parent().before(crossrefVolButtonjq);
         }
+
+        ///////////////////////////////////////////////////
+        //
+        // Knapp för att kolla klassificering från Swepub
+        //
+        ///////////////////////////////////////////////////
+
+        $('#classButtonjq').remove();
+        var classButtonjq = $('<button id="classButtonjq" type="button">Klassifikation från Swepub</button>');
+        classButtonjq.on("click", function() {
+            var title = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first().contents().find("body").html();
+            var keywords = $("div.diva2addtextchoicebr:contains('Nyckelord') , div.diva2addtextchoicebr:contains('Keywords')").parent().find('input').val()
+            var abstract = $("div.diva2addtextchoicebr:contains('Abstract')").parent().parent().find('iframe').first().contents().find("body").html();
+            console.log(title);
+            console.log(keywords);
+            console.log(abstract);
+
+            //          getClass($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+
+        })
+        $("div.diva2addtextchoice2:contains('Nationell ämneskategori') , div.diva2addtextchoice2:contains('National subject category')").parent().before(classButtonjq);
 
         ////////////////////////////////////
         //
@@ -1463,7 +1486,7 @@
                         /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                         $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
-                        getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, ""), 'mods'); // ta bort saker som innehåller "&" och "?" som sökningen inte klarar av
+                        getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, "").replace(/["]+/g, ""), 'mods'); // ta bort saker som innehåller & och ? och " som sökningen inte klarar av
                     });
                 });
             });
