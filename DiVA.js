@@ -700,6 +700,7 @@
                 var issue = $(response.data).find('journal_issue').find('issue').text(); // hämtar issue
                 var first_page = $(response.data).find('journal_article').find('pages').find('first_page').text(); // hämtar första sidan
                 var last_page = $(response.data).find('journal_article').find('pages').find('last_page').text(); // hämtar sista sidan
+                var isbn = $(response.data).find('proceedings_metadata').find('isbn').text(); // hämtar isbn (finns det flera...?)
 
                 if($(response.data).find('journal_issue').find('publication_date').find('year').text() != "") {  // om det inte finns några uppgifter hos Crossref klistras inget in
                     $("div.diva2addtextchoicecol:contains('Year:') , div.diva2addtextchoicecol:contains('År:')").next().find('input').val(year); // klistrar in år från Crossref
@@ -716,7 +717,9 @@
                 if($(response.data).find('journal_article').find('pages').find('last_page').text() != "") {  // om det inte finns några uppgifter hos Crossref klistras inget in
                     $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').next().val(last_page); // klistrar in första sidan från Crossref
                 }
-                // $("div.diva2addtextchoicecol:contains('Article Id:') , div.diva2addtextchoicecol:contains('Artikel-id:')").next().find('input').val(xxxxx); // klistrar in förlagsinfo från Crossref
+                if($(response.data).find('proceedings_metadata').find('isbn').text() != "") {  // om det inte finns några uppgifter hos Crossref klistras inget in
+                    $("div.diva2addtextchoicecol:contains('ISBN')").next().find('input').val(isbn); // klistrar in isbn från Crossref FUNKAR BARA OM MAN KLICKAR TVÅ GGR PÅ KNAPPEN ARGH!!
+                }
             })
         }
     }
@@ -1122,9 +1125,18 @@
             console.log(title);
             console.log(keywords);
             console.log(abstract);
+            $.ajax({
+                //   url: 'https://bibliometri.swepub.kb.se/api/v1/info/research-subjects', // test av ett annat API när Swepub gav CORS-klagomål
+                url: 'https://bibliometri.swepub.kb.se/api/v1/classify/',
+                type: 'post',
+                data: {  "abstract": abstract,  "classes": 5,  "keywords": keywords,  "level": 3,  "title": title},
+                success: function(data){
+                },
+                error:function(){
+                }
+            }); // end ajax call
 
             //          getClass($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
-
         })
         $("div.diva2addtextchoice2:contains('Nationell ämneskategori') , div.diva2addtextchoice2:contains('National subject category')").parent().before(classButtonjq);
 
