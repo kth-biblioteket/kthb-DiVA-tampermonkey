@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.1.15
+// @version      1.2
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -1121,23 +1121,29 @@
         classButtonjq.on("click", function() {
             var title = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first().contents().find("body").html();
             var keywords = $("div.diva2addtextchoicebr:contains('Nyckelord') , div.diva2addtextchoicebr:contains('Keywords')").parent().find('input').val()
-            var abstract = $("div.diva2addtextchoicebr:contains('Abstract')").parent().parent().find('iframe').first().contents().find("body").html();
+            var abstract = $("div.diva2addtextchoicebr:contains('Abstract')").parent().parent().find('iframe').first().contents().find("body").html().replace(/<p>/g, "").replace(/<\/p>/g, "");
             console.log(title);
             console.log(keywords);
             console.log(abstract);
             $.ajax({
                 //   url: 'https://bibliometri.swepub.kb.se/api/v1/info/research-subjects', // test av ett annat API när Swepub gav CORS-klagomål
                 url: 'https://bibliometri.swepub.kb.se/api/v1/classify/',
+                contentType: 'application/json',
+                dataType: 'JSON',
                 type: 'post',
-                data: {  "abstract": abstract,  "classes": 5,  "keywords": keywords,  "level": 3,  "title": title},
+                data: JSON.stringify({ abstract: abstract,
+                                      classes: 5,
+                                      keywords: keywords,
+                                      level: 3,
+                                      title: title
+                                     }),
                 success: function(data){
                 },
                 error:function(){
                 }
             }); // end ajax call
-
-            //          getClass($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
         })
+
         $("div.diva2addtextchoice2:contains('Nationell ämneskategori') , div.diva2addtextchoice2:contains('National subject category')").parent().before(classButtonjq);
 
         ////////////////////////////////////
