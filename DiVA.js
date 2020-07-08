@@ -1122,26 +1122,39 @@
             var title = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first().contents().find("body").html();
             var keywords = $("div.diva2addtextchoicebr:contains('Nyckelord') , div.diva2addtextchoicebr:contains('Keywords')").parent().find('input').val()
             var abstract = $("div.diva2addtextchoicebr:contains('Abstract')").parent().parent().find('iframe').first().contents().find("body").html().replace(/<p>/g, "").replace(/<\/p>/g, "");
-            console.log(title);
-            console.log(keywords);
-            console.log(abstract);
+            //     console.log(title);
+            //     console.log(keywords);
+            //     console.log(abstract);
             $.ajax({
-                //   url: 'https://bibliometri.swepub.kb.se/api/v1/info/research-subjects', // test av ett annat API när Swepub gav CORS-klagomål
                 url: 'https://bibliometri.swepub.kb.se/api/v1/classify/',
                 contentType: 'application/json',
                 dataType: 'JSON',
                 type: 'post',
                 data: JSON.stringify({ abstract: abstract,
-                                      classes: 5,
+                                      classes: 3,
                                       keywords: keywords,
-                                      level: 3,
+                                      level: 5,
                                       title: title
                                      }),
-                success: function(data){
-                },
-                error:function(){
+                success: function(response){
+                    console.log(response);
+                    var json = response.data;
+                    //    var html = '<div><div class="resultsheader">Klassning från Swepub</div><div>' + JSON.stringify(response.suggestions) + '</div>';
+                    var html = '<div><div class="resultsheader">Klassning från Swepub</div><br /><div> Score: ' + JSON.stringify(response['suggestions'][0]['score']) + '</div><br />';
+                    html+= 'Ämne:  ' + JSON.stringify(response['suggestions'][0]['swe']['prefLabel']) +  '<br /><br /></div>';  // ger mest detaljerade klassningen
+                    //        html+= 'Ämne:  ' + response['suggestions'][0]['swe']['_topic_tree'] +  '<br /><br /></div>';  // funkar men inga blanksteg mellan klassningarna
+                    //        html+= 'Score: ' + JSON.stringify(response['suggestions'][1]['score']) + '</div><br />';
+                    //        html+= 'Ämne:  ' + JSON.stringify(response['suggestions'][1]['swe']['prefLabel']) +  '</div><br /><br />';
+                    //        html+= 'Score: ' + JSON.stringify(response['suggestions'][2]['score']) + '</div><br />';
+                    //        html+= 'Ämne:  ' + JSON.stringify(response['suggestions'][2]['swe']['prefLabel']) +  '</div><br />';
+
+                    $("#monkeyresultswrapper_right i").css("display", "none");
+                    $('#monkeyresults_right').html(html);
+                    $("#monkeytalk").html("Swepub svarade... se resultatet här nedanför");
+
                 }
-            }); // end ajax call
+            })
+
         })
 
         $("div.diva2addtextchoice2:contains('Nationell ämneskategori') , div.diva2addtextchoice2:contains('National subject category')").parent().before(classButtonjq);
