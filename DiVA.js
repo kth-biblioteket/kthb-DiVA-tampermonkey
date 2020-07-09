@@ -1139,14 +1139,17 @@
                 success: function(response){
                     console.log(response);
                     var json = response.data;
-                    //    var html = '<div><div class="resultsheader">Klassning från Swepub</div><div>' + JSON.stringify(response.suggestions) + '</div>';
-                    var html = '<div><div class="resultsheader">Klassning från Swepub</div><br /><div> Score: ' + JSON.stringify(response['suggestions'][0]['score']) + '</div><br />';
-                    html+= 'Ämne:  ' + JSON.stringify(response['suggestions'][0]['swe']['prefLabel']) +  '<br /><br /></div>';  // ger mest detaljerade klassningen
-                    html+= 'Topic tree:  ' + response['suggestions'][0]['swe']['_topic_tree'] +  '<br /><br /></div>';  // funkar men inga blanksteg mellan klassningarna
-                    //        html+= 'Score: ' + JSON.stringify(response['suggestions'][1]['score']) + '</div><br />';
-                    //        html+= 'Ämne:  ' + JSON.stringify(response['suggestions'][1]['swe']['prefLabel']) +  '</div><br /><br />';
-                    //        html+= 'Score: ' + JSON.stringify(response['suggestions'][2]['score']) + '</div><br />';
-                    //        html+= 'Ämne:  ' + JSON.stringify(response['suggestions'][2]['swe']['prefLabel']) +  '</div><br />';
+                    var html = '<div><div class="resultsheader">Klassning från Swepub</div><br /><div> Score: ' + JSON.stringify(response.suggestions[0].score) + '</div>';
+                    html+= '<div>Ämne:  ' + JSON.stringify(response.suggestions[0].swe.prefLabel) +  '</div><br />';  // ger mest detaljerade klassningen (dot notation)
+                    html+= '<div>Topic tree:  ' + response.suggestions[0].swe._topic_tree +  '</div><br />';
+                    if (response.suggestions[1] !== undefined) {
+                        html+= '<div>Score: ' + JSON.stringify(response.suggestions[1].score) + '</div>'; // bracket notation
+                        html+= '<div>Ämne:  ' + JSON.stringify(response.suggestions[1].swe.prefLabel) +  '</div><br />' // ger mest detaljerade klassningen
+                        html+= '<div>Topic tree:  ' + response.suggestions[1].swe._topic_tree +  '</div><br />' };
+                    if (response.suggestions[2] !== undefined) {
+                        html+= '<div>Score: ' + JSON.stringify(response.suggestions[2].score) + '</div>'; // bracket notation
+                        html+= '<div>Ämne:  ' + JSON.stringify(response.suggestions[2].swe.prefLabel) +  '</div><br />' // ger mest detaljerade klassningen
+                        html+= '<div>Topic tree:  ' + response.suggestions[2].swe._topic_tree +  '</div><br />' };
 
                     $("#monkeyresultswrapper_right i").css("display", "none");
                     $('#monkeyresults_right').html(html);
