@@ -1139,21 +1139,6 @@
                 success: function(response){
                     console.log(response);
                     var json = response.data;
-<<<<<<< Updated upstream
-                    var html = '<div><div class="resultsheader">Klassning från Swepub</div><br /><div> Score: ' + JSON.stringify(response.suggestions[0].score) + '</div>';
-                    html+= '<div>Ämne:  ' + JSON.stringify(response.suggestions[0].swe.prefLabel) +  '</div><br />';  // ger mest detaljerade klassningen (dot notation)
-                    html+= '<div>Topic tree:  ' + response.suggestions[0].swe._topic_tree +  '</div><br />';
-                    if (response.suggestions[1] !== undefined) {
-                        html+= '<div>Score: ' + JSON.stringify(response.suggestions[1].score) + '</div>'; // bracket notation
-                        html+= '<div>Ämne:  ' + JSON.stringify(response.suggestions[1].swe.prefLabel) +  '</div><br />' // ger mest detaljerade klassningen
-                        html+= '<div>Topic tree:  ' + response.suggestions[1].swe._topic_tree +  '</div><br />' };
-                    if (response.suggestions[2] !== undefined) {
-                        html+= '<div>Score: ' + JSON.stringify(response.suggestions[2].score) + '</div>'; // bracket notation
-                        html+= '<div>Ämne:  ' + JSON.stringify(response.suggestions[2].swe.prefLabel) +  '</div><br />' // ger mest detaljerade klassningen
-                        html+= '<div>Topic tree:  ' + response.suggestions[2].swe._topic_tree +  '</div><br />' };
-=======
-                    var topic_tree = response.suggestions[0].swe._topic_tree;
-                    console.log(topic_tree);
                     var html = '<div><div class="resultsheader">Klassning från Swepub</div><br /><div> Värde: ' + JSON.stringify(response.suggestions[0].score) + '</div>';
                     html+= '<div>Ämne:  ' + JSON.stringify(response.suggestions[0].swe.prefLabel) +  '</div><br />';
                     html+= '<div>Ämnesträd:  ' + JSON.stringify(response.suggestions[0].swe._topic_tree).replace(/\\/g, "").replace(/"\[/g, "").replace(/\]"/g, "") +  '</div><br />';
@@ -1165,7 +1150,6 @@
                         html+= '<div>Värde: ' + JSON.stringify(response.suggestions[2].score) + '</div>';
                         html+= '<div>Ämne:  ' + JSON.stringify(response.suggestions[2].swe.prefLabel) +  '</div><br />'
                         html+= '<div>Ämnesträd:  ' + JSON.stringify(response.suggestions[2].swe._topic_tree).replace(/\\/g, "").replace(/"\[/g, "").replace(/\]"/g, "") +  '</div><br />' };
->>>>>>> Stashed changes
 
                     $("#monkeyresultswrapper_right i").css("display", "none");
                     $('#monkeyresults_right').html(html);
