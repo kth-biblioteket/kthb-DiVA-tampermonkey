@@ -59,7 +59,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 
 ##### Vid "Nationell ämneskategori" finns en knapp som:
 
-- heter "Klassifikation från Swepub" och som hämtar upp till tre klassifikationer, deras värden samt ämnesträd (subject trees) från Swepubs API (baserat på titel, abstract och keywords). Klassningen visas till höger för att skapa lite omväxling.
+- heter "Klassifikation från Swepub" och som hämtar upp till tre klassifikationer, deras värden samt ämnesträd (subject trees) från [Swepubs API](https://bibliometri.swepub.kb.se/api/v1/apidocs/?urls.primaryName=Classify%20API) (baserat på titel, abstract och keywords). Klassningen visas till höger för att skapa lite omväxling.
 
 ##### Vid nyckelordsfältet finns en knapp som:
 
