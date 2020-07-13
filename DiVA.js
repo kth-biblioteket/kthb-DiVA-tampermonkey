@@ -678,7 +678,8 @@
             axios.get(url)
                 .then(function (response) {
                 var publisher = $(response.data).find('crm-item[name="publisher-name"]').text(); // hämtar förlagsinformation
-                $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").parent().find('input').val(publisher); // klistrar in förlagsinfo från Crossref
+                var publisher_edited = publisher.replace(/Springer Science and Business Media LLC/g, "Springer Nature");
+                $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").parent().find('input').val(publisher_edited); // klistrar in förlagsinfo från Crossref
             })
         }
     }
