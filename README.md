@@ -1,4 +1,4 @@
-## DiVA-apan 2020-05-27 (1.1.14)
+## DiVA-apan 2020-07-13 (1.2)
 
 <img src="https://apps.lib.kth.se/divaapan/apa.jpg" align="left" width="70" >
 
@@ -43,6 +43,10 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - Tar bort felaktigt placerade bindestreck (vilket gör att DiVA inte accepterar numret).
 - Söker på ISBN i [WorldCat](https://www.worldcat.org/) för att hitta en redigare titel.
 
+##### Vid fälten för "Övriga uppgifter" finns en knapp som:
+
+- heter "Uppdatera detaljer från Crossref". Denna knapp hämtar year/volume/issue/artikel-id/pages från Crossref och fyller i fälten nedanför om det inte redan finns något  där. Bra att ha ifall man vill uppdatera en Early Access/Article in Press med definitiva uppgifter.
+
 ##### Vid fältet för "Annat förlag" finns en knapp som:
 
 - Hämtar hem snyggare förlagsinformation från [Crossref API](https://www.crossref.org/education/retrieve-metadata/rest-api/a-non-technical-introduction-to-our-api/), istället för de versala horrörerna som kommer vid import från Web of Science.
@@ -52,6 +56,10 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - Uppdatera posten via Web of Science och Scopus API:er (samma funktion som görs automatiskt när man öppnar en post).
 - Öppna posten på identifierare i respektive databas webbgränssnitt.
 - Söka på titel i [Crossrefs](https://search.crossref.org/) webbgränssnitt i de fall det inte finns någon DOI (ännu).
+
+##### Vid "Nationell ämneskategori" finns en knapp som:
+
+- heter "Klassifikation från Swepub" och som hämtar upp till tre klassifikationer, deras värden samt ämnesträd (subject trees) från Swepubs API (baserat på titel, abstract och keywords).
 
 ##### Vid nyckelordsfältet finns en knapp som:
 
@@ -65,7 +73,6 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 ##### To Do
 
 - Crossref API, som nu endast används för förlagsinformation, öppnar oändliga möjligheter att berika data, t.ex. finansiärsinfo.
-- Automatiska förslag på ämnesklassificering via det kommande Swepub-APIet.
 - Ta bort copyright-info från abstractet. 
 - Klistra in valfri information som finns "till vänster" automatiskt, i rätt fält vid dubbelklick (typ KTH-id).
 - På något sätt få in finansiärsinfo från Crossref.
