@@ -78,3 +78,10 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - På något sätt få in finansiärsinfo från Crossref.
 
 Ap-bilden by [JohnE Sturdivant](https://www.epicentrofestival.com/monkey-face-drawing-happy-monkey-face-at-clker-monkey-face-png-clipart.html)
+
+##### Demo-videos
+
+- [Importera en Scopus-post](https://youtu.be/xfejnH0xnoY)
+
+
+
