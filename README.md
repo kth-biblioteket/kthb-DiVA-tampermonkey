@@ -84,7 +84,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 
 Ap-bilden by [JohnE Sturdivant](https://www.epicentrofestival.com/monkey-face-drawing-happy-monkey-face-at-clker-monkey-face-png-clipart.html)
 
-
+- <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Alla videos ligger i en [playlist som heter DiVA-apan](https://www.youtube.com/playlist?list=PLzkfWU-aTmu8c5Qd-D2U9YKSyZy8qiq_k).
 
 
 
