@@ -24,7 +24,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - Söka efter författaren i Google på för- och efternamn + "KTH".
 - Vid "Annan organisation" finns en knapp som vid ett musklick tar bort det som står i fältet.
 - Om det finns två eller flera affilieringar i fältet "Annan organisation", d.v.s. det finns ett semikolon som separator, syns inte denna knapp varför redigering måste ske för hand. Vi tar bort KTH-affilieringen och låter de övriga stå kvar.
-- Video om hur [författarknapparna kan användas](https://www.youtube.com/watch?v=ZQd8HgwuMnU).
+- Video om hur [författarknapparna kan användas](https://www.youtu.be/hFI1VX8r3Ig).
 
 ##### Vid titelfälten finns knappar för att:
 
@@ -63,6 +63,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 ##### Vid "Nationell ämneskategori" finns en knapp som:
 
 - heter "Klassifikation från Swepub" och som hämtar upp till tre klassifikationer, deras värden samt ämnesträd (subject trees) från [Swepubs API](https://bibliometri.swepub.kb.se/api/v1/apidocs/?urls.primaryName=Classify%20API) (baserat på titel, abstract och keywords). Klassningen visas till höger för att skapa lite omväxling.
+- Video som visar [klassningsfunktionen](https://youtu.be/hFI1VX8r3Ig).
 
 ##### Vid nyckelordsfältet finns en knapp som:
 
