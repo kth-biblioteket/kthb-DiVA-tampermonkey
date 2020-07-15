@@ -30,6 +30,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 
 - Sära på huvud- och undertitel vid  ":"  ifall dessa felaktigt är inskrivna i huvudtitelfältet.
 - Ändra versaler till gemener förutom den första bokstaven.
+- <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Video om hur vi kan [splitta och ändra case](https://youtu.be/zwzaPtqHcBQ).
 
 ##### Vid konferensfältet finns knappar för att:
 
