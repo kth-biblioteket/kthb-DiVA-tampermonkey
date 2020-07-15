@@ -12,7 +12,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - Snyggar till Linkoping till Linköping och Varobacka till Väröbacka etc.
 - Kollar om det finns en post med samma titel i DiVA redan (misstänkt dubblett?). Mycket nyttig funktion. Dubbletter suger!
 - Visar om den post som är en misstänkt dubblett har en fulltext eller ej, samt version av denna fulltext i förekommande fall.
-- Video om hur DiVA-apan <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20" >[uppdaterar identifierare automatiskt](https://youtu.be/tQRB8Ul0V34).
+- <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20"> Video om hur DiVA-apan <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">[uppdaterar identifierare automatiskt](https://youtu.be/tQRB8Ul0V34).
 - Video om hur [dubbletter kan identifieras](https://youtu.be/xJjWcJ2O47U).
 
 ##### Vid varje författarpost finns det knappar för att:
