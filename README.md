@@ -22,6 +22,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - Söka efter författaren i Google på för- och efternamn + "KTH".
 - Vid "Annan organisation" finns en knapp som vid ett musklick tar bort det som står i fältet.
 - Om det finns två eller flera affilieringar i fältet "Annan organisation", d.v.s. det finns ett semikolon som separator, syns inte denna knapp varför redigering måste ske för hand. Vi tar bort KTH-affilieringen och låter de övriga stå kvar.
+- Video om hur [författarknapparna kan användas](https://www.youtube.com/watch?v=ZQd8HgwuMnU).
 
 ##### Vid titelfälten finns knappar för att:
 
