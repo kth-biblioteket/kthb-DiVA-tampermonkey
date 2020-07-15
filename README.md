@@ -13,7 +13,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - Kollar om det finns en post med samma titel i DiVA redan (misstänkt dubblett?). Mycket nyttig funktion. Dubbletter suger!
 - Visar om den post som är en misstänkt dubblett har en fulltext eller ej, samt version av denna fulltext i förekommande fall.
 - <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Video om hur DiVA-apan [uppdaterar identifierare automatiskt](https://youtu.be/tQRB8Ul0V34).
-- Video om hur [dubbletter kan identifieras](https://youtu.be/xJjWcJ2O47U).
+- <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Video om hur [dubbletter kan identifieras](https://youtu.be/xJjWcJ2O47U).
 
 ##### Vid varje författarpost finns det knappar för att:
 
@@ -24,7 +24,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - Söka efter författaren i Google på för- och efternamn + "KTH".
 - Vid "Annan organisation" finns en knapp som vid ett musklick tar bort det som står i fältet.
 - Om det finns två eller flera affilieringar i fältet "Annan organisation", d.v.s. det finns ett semikolon som separator, syns inte denna knapp varför redigering måste ske för hand. Vi tar bort KTH-affilieringen och låter de övriga stå kvar.
-- Video om hur [författarknapparna kan användas](https://youtu.be/ZQd8HgwuMnU).
+- <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Video om hur [författarknapparna kan användas](https://youtu.be/ZQd8HgwuMnU).
 
 ##### Vid titelfälten finns knappar för att:
 
@@ -63,7 +63,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 ##### Vid "Nationell ämneskategori" finns en knapp som:
 
 - heter "Klassifikation från Swepub" och som hämtar upp till tre klassifikationer, deras värden samt ämnesträd (subject trees) från [Swepubs API](https://bibliometri.swepub.kb.se/api/v1/apidocs/?urls.primaryName=Classify%20API) (baserat på titel, abstract och keywords). Klassningen visas till höger för att skapa lite omväxling.
-- Video som visar [klassningsfunktionen](https://youtu.be/hFI1VX8r3Ig).
+- <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Video som visar [klassningsfunktionen](https://youtu.be/hFI1VX8r3Ig).
 
 ##### Vid nyckelordsfältet finns en knapp som:
 
