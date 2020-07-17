@@ -88,6 +88,6 @@ Ap-bilden by [JohnE Sturdivant](https://www.epicentrofestival.com/monkey-face-dr
 
 - <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Alla videos ligger i en [playlist som heter DiVA-apan](https://www.youtube.com/playlist?list=PLzkfWU-aTmu8c5Qd-D2U9YKSyZy8qiq_k).
 
-- Videosnuttarna är inspelade med [Mathew Sachins alldeles fantastiska och fria program Captura](https://mathewsachin.github.io/Captura/).
+- Videosnuttarna är inspelade med [Mathew Sachins alldeles fantastiska och fria program Captura v8.0.0](https://mathewsachin.github.io/Captura/).
 
 
