@@ -52,6 +52,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 
 - heter "Uppdatera detaljer från Crossref". Denna knapp hämtar year/volume/issue/artikel-id/pages från Crossref och fyller i fälten nedanför (om det inte redan finns något  fälten). Bra att ha ifall man vill uppdatera en Early Access/Article in Press med definitiva uppgifter.
 - <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Video som visar [uppdatering från Crossref](https://youtu.be/kaXBNbhh2FY).
+- <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Video som visar hur vi kan [snygga till en post som registrerats av en forskare med hjälp av Crossrefs API](https://youtu.be/ofv_klpRLss).
 
 ##### Vid fältet för "Annat förlag" finns en knapp som:
 
