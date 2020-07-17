@@ -25,7 +25,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - Vid "Annan organisation" finns en knapp som vid ett musklick tar bort det som står i fältet.
 - Om det finns två eller flera affilieringar i fältet "Annan organisation", d.v.s. det finns ett semikolon som separator, syns inte denna knapp varför redigering måste ske för hand. Vi tar bort KTH-affilieringen och låter de övriga stå kvar.
 - <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Video om hur [författarknapparna kan användas](https://youtu.be/ZQd8HgwuMnU).
-
+- <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Video som visar hur [fältet "Annan organisation" kan tömmas och automatisk korrigering till åäö.](https://youtu.be/u7csqQ3a5Y8)
 ##### Vid titelfälten finns knappar för att:
 
 - Sära på huvud- och undertitel vid  ":"  ifall dessa felaktigt är inskrivna i huvudtitelfältet.
