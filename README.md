@@ -14,6 +14,7 @@ DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnitte
 - Visar om den post som är en misstänkt dubblett har en fulltext eller ej, samt version av denna fulltext i förekommande fall.
 - <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Video om hur DiVA-apan [uppdaterar identifierare automatiskt](https://youtu.be/tQRB8Ul0V34).
 - <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Video om hur [dubbletter kan identifieras](https://youtu.be/xJjWcJ2O47U).
+- <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Video som visar [hur grisigt det är med dubbletter (igen)](https://youtu.be/gbE_BUx52OE)
 
 ##### Vid varje författarpost finns det knappar för att:
 
