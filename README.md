@@ -3,7 +3,7 @@
 <img src="https://apps.lib.kth.se/divaapan/apa.jpg" align="left" width="70" >
 
 DiVA-apan ligger som ett överliggande lager över det normala DiVA-gränssnittet. I grund och botten är det insticksmodulen [TamperMonkey](https://www.tampermonkey.net/) och en för KTHB specialskriven kod som gör jobbet. Det yttersta syftet med DiVA-apan är att minimera antalet klick, antalet och byten av olika fönster, manuell inskrivning av uppgifter; kort sagt att spara tid och pengar. En stor del av koden kan utan svårighet anpassas till andra DiVA-biblioteks behov. De KTHB-specifika delarna torde vara uppenbara. Egentligen rör sig dessa specifika delar bara om kopplingen till KTHs LDAP samt den lokala databasen över KTH-forskare. Funktioner programmerade mot Web of Science och Scopus API:er bör vara enkla att kopiera även för andra bibliotek och organisationer om API-nycklarna läggs in direkt i koden istället för som hos oss, hämtas från ett lokalt API skyddat med en KTH-inloggning.
-<img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Video: [introduktion till DiVA.apan, hur man installerar TamperMonkey och klistrar in kod i densamma.](https://youtu.be/r04xvE5Vhl0)
+- <img src="https://publicdomainvectors.org/photos/video-player.png" align="left" width="20">Video: [introduktion till DiVA.apan, hur man installerar TamperMonkey och klistrar in kod i densamma.](https://youtu.be/r04xvE5Vhl0)
 
 #### Vad gör DiVA-apan?
 
