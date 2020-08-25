@@ -40,6 +40,26 @@
     // Variabler
     //
     ///////////////////////////////
+    var monkey_config = {
+        login : true,
+        ldap : true,
+        letaanstallda : true,
+        wos : true,
+        scopus : true,
+        qc : true,
+        diva_search_api_url : 'https://kth.diva-portal.org/smash/export.jsf',
+        diva_search_url : 'https://kth.diva-portal.org/smash/resultList.jsf',
+        university_url : 'www.kth.se',
+        university_intranet_url : 'intra.kth.se',
+        scopus_api_url : 'https://api.elsevier.com/content/abstract/doi/',
+        dblp_api_doi_url : 'https://dblp.uni-trier.de/doi/xml/',
+        dblp_api_rec_url : 'https://dblp.uni-trier.de/rec/xml/',
+        google_search : 'KTH',
+        wos_api_url : 'https://ws.isiknowledge.com/cps/xrpc',
+        api_username_wos : 'kthroyal',
+        api_password_wos : 'r0yAl#1431',
+        api_key_scopus : ''
+    }
     var ldap_apikey;
     var orcid_apikey;
     var letaanstallda_apikey;
@@ -493,6 +513,8 @@
      */
 
     async function getWoS(doi) {
+        var api_wos_xml = '<?xml version="1.0" encoding="UTF-8" ?><request xmlns="http://www.isinet.com/xrpc42" src="app.id=API"><fn name="LinksAMR.retrieve"><list><map><val name="username">' + monkey_config.api_username_wos + '</val><val name="password">' + monkey_config.api_password_wos + '</val></map><!-- WHAT IS REQUESTED --><map><list name="WOS"><val>timesCited</val><val>ut</val><val>doi</val><val>pmid</val><val>sourceURL</val><val>citingArticlesURL</val><val>relatedRecordsURL</val></list></map><!-- LOOKUP DATA --><map><!-- QUERY "cite_1" --><map name="cite_1"><val name="doi">' + doi + '</val></map> <!-- end of cite_1--></map><!-- end of citations --></list></fn></request>';
+        console.log(api_wos_xml)
         if(doi == ""){
             $('#monkeytalk').html('Ojojoj, ingen DOI! Jag behöver en DOI för att kunna uppdatera från databaserna.');
             $("#monkeyresultswrapper i").css("display", "none");
@@ -500,8 +522,8 @@
         }
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $("#monkeytalk").html("Jag pratar med Web of Science...");
-        var url = wos_apiurl + doi;
-        await axios.get(url)
+        var url = monkey_config.wos_api_url;
+        await axios.get(url, api_wos_xml, {headers: {'Content-Type': 'text/xml'}})
             .then(function (response) {
             var html = '<div><div class="updateheader"></div>';
             if (response.status == 201) {
