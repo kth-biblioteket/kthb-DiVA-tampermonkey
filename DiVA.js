@@ -9,6 +9,7 @@
 // @match    https://kth.diva-portal.org/dream/import/importForm.jsf*
 // @match    https://kth.diva-portal.org/dream/publish/publishForm.jsf*
 // @match    https://kth.diva-portal.org/dream/review/reviewForm.jsf*
+// @match    https://kth.diva-portal.org/dream/add/add2.jsf*
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
 // @require  https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
@@ -1711,8 +1712,9 @@
     } else if (window.location.href.indexOf("importForm.jsf") !== -1) {
         diva_observer_selector = '.diva2impmainer .diva2addtextbotmargin .diva2addtextbotmargin';
         diva_id_selector = '#diva2addcontainer';
-    } else {
-        diva_id = "addForm";
+    } else if (window.location.href.indexOf("add2.jsf") !== -1) {
+        diva_observer_selector = '.diva2addtextmainer .diva2addtextbotmargin';
+        diva_id_selector = '#diva2addcontainer';
     }
 
     startMonkey()
