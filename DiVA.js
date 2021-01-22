@@ -523,7 +523,7 @@
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $("#monkeytalk").html("Jag pratar med Web of Science...");
         var url = monkey_config.wos_api_url;
-        await axios.get(url, api_wos_xml, {headers: {'Content-Type': 'text/xml'}})
+        await axios.post(url, api_wos_xml, {headers: {'Content-Type': 'text/xml'}})
             .then(function (response) {
             var html = '<div><div class="updateheader"></div>';
             if (response.status == 201) {
