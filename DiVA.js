@@ -3,8 +3,6 @@
 // @version      1.2.2
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
-// @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
-// @downloadURL  https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
 // @match    https://kth.diva-portal.org/dream/import/importForm.jsf*
 // @match    https://kth.diva-portal.org/dream/publish/publishForm.jsf*
@@ -41,39 +39,54 @@
     // Variabler
     //
     ///////////////////////////////
+
+    /**
+     * 
+     * Konfigurera monkey_config för respektive lärosäte
+     * 
+     * Aktivera/inaktivera aktuella funktioner som apan ska hantera
+     * (wos : true,
+     * scopus : false 
+     * etc)
+     * 
+     * Ange url:er, api-nycklar(scopus_api_url,scopus_apikey... etc)
+     * exvis:
+     * scopus_api_url : 'https://api.elsevier.com/content/abstract/doi',
+     * scopus_apikey : 'ER EGEN NYCKEL',
+     * etc
+     */
     var monkey_config = {
-        login : true,
-        ldap : true,
-        letaanstallda : true,
-        wos : true,
-        scopus : true,
-        qc : true,
+        login : false,
+        ldap : false,
+        letaanstallda : false,
+        orcid: false,
+        intranet: false,
+        wos : false,
+        scopus : false,
+        qc : false,
+        monkey_image_url: "https://apps.lib.kth.se/divaapan/apa.jpg",
+        oa_image_url : "https://apps.lib.kth.se/divaapan/oa.png",
+        university : 'KTH',
         diva_search_api_url : 'https://kth.diva-portal.org/smash/export.jsf',
         diva_search_url : 'https://kth.diva-portal.org/smash/resultList.jsf',
-        university_url : 'www.kth.se',
-        university_intranet_url : 'intra.kth.se',
-        scopus_api_url : 'https://api.elsevier.com/content/abstract/doi/',
-        dblp_api_doi_url : 'https://dblp.uni-trier.de/doi/xml/',
-        dblp_api_rec_url : 'https://dblp.uni-trier.de/rec/xml/',
-        google_search : 'KTH',
+        help_url : "https://confluence.sys.kth.se/confluence/pages/viewpage.action?pageId=74259261",
+        university_search_url : 'https://www.kth.se/search',
+        university_url : 'https://www.kth.se',
+        university_intranet_url : 'https://intra.kth.se',
+        scopus_api_url : 'https://api.elsevier.com/content/abstract/doi',
+        dblp_api_doi_url : 'https://dblp.uni-trier.de/doi/xml',
+        dblp_api_rec_url : 'https://dblp.uni-trier.de/rec/xml',
         wos_api_url : 'https://ws.isiknowledge.com/cps/xrpc',
-        api_username_wos : 'kthroyal',
-        api_password_wos : 'r0yAl#1431',
-        api_key_scopus : ''
+        api_username_wos : '',
+        api_password_wos : '',
+        ldap_apiurl : 'https://lib.kth.se/ldap/api/v1',
+        orcid_apiurl : 'https://pub.orcid.org/v3.0/search',
+        letaanstallda_apiurl : 'https://apps-ref.lib.kth.se/webservices/letaanstallda/api/v1',
+        ldap_apikey : '',
+        orcid_apikey : '',
+        letaanstallda_apikey : '',
+        scopus_apikey : ''
     }
-    var ldap_apikey;
-    var orcid_apikey;
-    var letaanstallda_apikey;
-    var scopus_apikey;
-    var ldap_apiurl = 'https://lib.kth.se/ldap/api/v1/';
-    var orcid_apiurl = 'https://lib.kth.se/orcid/api/v1/orcid/';
-    var letaanstallda_apiurl = 'https://apps-ref.lib.kth.se/webservices/letaanstallda/api/v1/';
-    var scopus_apiurl = 'https://api.elsevier.com/content/abstract/doi/';
-    var wos_apiurl = 'https://apps.lib.kth.se/alma/wos/wosapi_b.php?source=wos&doi=';
-    var dblp_apiurl1 = 'https://dblp.uni-trier.de/doi/xml/';
-    var dblp_apiurl2 = 'https://dblp.uni-trier.de/rec/xml/';
-    var diva_searchurl = 'https://kth.diva-portal.org/smash/export.jsf';
-    var doi = $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
 
     var observer_config = {
         attributes: true,
@@ -86,6 +99,7 @@
     var diva_id_selector;
     var diva_observer_selector;
     var i = 0;
+    var doi = $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
 
     /**
      * Funktion för att sätta apinycklar
@@ -93,10 +107,10 @@
      * @param {object} keys
      */
     function setapikeys(keys) {
-        ldap_apikey = keys.apikeys.ldap;
-        orcid_apikey = keys.apikeys.orcid;
-        letaanstallda_apikey = keys.apikeys.letaanstallda;
-        scopus_apikey = keys.apikeys.scopus;
+        monkey_config.ldap_apikey = keys.apikeys.ldap;
+        monkey_config.orcid_apikey = keys.apikeys.orcid;
+        monkey_config.letaanstallda_apikey = keys.apikeys.letaanstallda;
+        monkey_config.scopus_apikey = keys.apikeys.scopus;
     }
 
     /**
@@ -111,7 +125,7 @@
         if (token) {
             $.ajax({
                 type: 'POST',
-                url: ldap_apiurl + 'divamonkey',
+                url: monkey_config.ldap_apiurl + '/divamonkey',
                 dataType: 'JSON',
                 headers: {
                     'x-access-token': token
@@ -160,7 +174,7 @@
             var password = $('#password').val();
             $.ajax({
                 type: 'POST',
-                url:  ldap_apiurl + 'login',
+                url:  monkey_config.ldap_apiurl + '/login',
                 dataType: 'JSON',
                 data: {
                     username: username,
@@ -240,79 +254,87 @@
      * @param {*} fnamn
      * @param {*} enamn
      */
-    function getOrcid(fnamn, enamn) {
+    async function getOrcid(fnamn, enamn) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $("#monkeytalk").html("Jag pratar med ORCiD. Det kan ta lite tid...");
         var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
         var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
-
-        var url = orcid_apiurl + enamn2 + "/" + fnamn2 + "/?token=" + orcid_apikey;
-        axios.get(url)
-            .then(function (response) {
-            var html = '<div><h2>Information från ORCiD</h2>';
-            if (response.data) {
-                var json = response.data
-                if (response.status == 201) {
-                    html += "<p>Inga användare hittades</p>";
-                } else {
-                    $.each(json, function(key, value) {
-                        html += '<div class="inforecord flexbox column">';
-                        html += '<div>' +
-                            '<span class="fieldtitle">Namn: </span>' +
-                            '<span>' +
-                            '<a target="_new" href="' + json[key]['orcid-identifier'].uri + '">' +
-                            json[key].person.name['family-name'].value + " " + json[key].person.name['given-names'].value +
-                            '</a>' +
-                            '</span>' +
-                            '</div>'
-                        html += '<div>' +
-                            '<span class="fieldtitle">ORCiD: </span>' +
-                            '<span>' +
-                            json[key]['orcid-identifier'].path +
-                            '</span>' +
-                            '</div>'
-                        if (json[key]["activities-summary"].employments["affiliation-group"].length > 0) {
-                            $.each(json[key]["activities-summary"].employments["affiliation-group"], function(empkey, empvalue) {
-                                html += '<div>' +
-                                    '<span class="fieldtitle">Org: </span>' +
-                                    '<span>' +
-                                    json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"].organization.name +
-                                    '</span>' +
-                                    '</div>'
-                                var date;
-                                if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"]) {
-                                    if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year) {
-                                        date = json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year.value
-                                    }
-                                    if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month) {
-                                        date += '-' + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month.value
-                                    }
-                                    if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day) {
-                                        date += '-' + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day.value
-                                    }
-                                    html += '<div>' +
-                                        '<span class="fieldtitle">Datum: </span>' +
-                                        '<span>' +
-                                        date +
-                                        '</span>' +
-                                        '</div>'
-                                }
-                            })
-                        }
-                        html += '</div>'
-                    });
-                }
+        var url = monkey_config.orcid_apiurl + "?q=family-name:" + enamn2 + "+AND+given-names:" + fnamn2;
+        const response = await axios.get(url, {
+            headers: {
+              'Accept': 'application/json',
+              'content-type': 'application/json;charset=utf-8'
             }
-            html += '</div>'
-            $("#monkeyresultswrapper i").css("display", "none");
-            $('#monkeyresults').html(html);
-            $("#monkeytalk").html("ORCiD svarade... se resultatet här nedanför");
         })
-            .catch(function (error) {
-            api_error(error.response);
-        })
-            .then(function () {
-        });
+        var orcidusers = [];
+        var result = response.data.result;
+        if (result) {
+            for (i = 0; i < result.length; i++) {
+                const orciddetails = await axios.get(
+                    encodeURI(result[i]['orcid-identifier'].uri),{
+                        headers: { 'Accept': "application/json",
+                        'content-type': 'application/json;charset=utf-8' }
+                    }
+                );
+                var orciddetailsresult = orciddetails.data;
+                orcidusers.push(orciddetailsresult);
+            }
+        }
+        var html = '<div><h2>Information från ORCiD</h2>';
+        if (orcidusers) {
+            var json = orcidusers
+            $.each(json, function(key, value) {
+                html += '<div class="inforecord flexbox column">';
+                html += '<div>' +
+                    '<span class="fieldtitle">Namn: </span>' +
+                    '<span>' +
+                    '<a target="_new" href="' + json[key]['orcid-identifier'].uri + '">' +
+                    json[key].person.name['family-name'].value + " " + json[key].person.name['given-names'].value +
+                    '</a>' +
+                    '</span>' +
+                    '</div>'
+                html += '<div>' +
+                    '<span class="fieldtitle">ORCiD: </span>' +
+                    '<span>' +
+                    json[key]['orcid-identifier'].path +
+                    '</span>' +
+                    '</div>'
+                if (json[key]["activities-summary"].employments["affiliation-group"].length > 0) {
+                    $.each(json[key]["activities-summary"].employments["affiliation-group"], function(empkey, empvalue) {
+                        html += '<div>' +
+                            '<span class="fieldtitle">Org: </span>' +
+                            '<span>' +
+                            json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"].organization.name +
+                            '</span>' +
+                            '</div>'
+                        var date;
+                        if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"]) {
+                            if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year) {
+                                date = json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].year.value
+                            }
+                            if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month) {
+                                date += '-' + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].month.value
+                            }
+                            if (json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day) {
+                                date += '-' + json[key]["activities-summary"].employments["affiliation-group"][empkey].summaries["0"]["employment-summary"]["start-date"].day.value
+                            }
+                            html += '<div>' +
+                                '<span class="fieldtitle">Datum: </span>' +
+                                '<span>' +
+                                date +
+                                '</span>' +
+                                '</div>'
+                        }
+                    })
+                }
+                html += '</div>'
+            });
+        }
+        html += '</div>'
+        $("#monkeyresultswrapper i").css("display", "none");
+        $('#monkeyresults').html(html);
+        $("#monkeytalk").html("ORCiD svarade... se resultatet här nedanför");
+
     }
 
     /**
@@ -327,17 +349,17 @@
         $("#monkeytalk_right").html("Jag pratar med LDAP...");
         var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
         var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
-        var url = ldap_apiurl + 'users/' +
+        var url = monkey_config.ldap_apiurl + '/users/' +
             fnamn2 +
             '* ' +
             enamn2 +
             ' *' +
-            '?token=' + ldap_apikey;
+            '?token=' + monkey_config.ldap_apikey;
 
         if (kthid!= "") {
-            url = ldap_apiurl + 'kthid/' +
+            url = monkey_config.ldap_apiurl + '/kthid/' +
                 kthid +
-                '?token=' + ldap_apikey;
+                '?token=' + monkey_config.ldap_apikey;
         }
 
 
@@ -346,7 +368,6 @@
             var html = '<div><div class="resultsheader">Information från KTH UG(LDAP)</div>';
             if (response.data) {
                 var json = response.data
-                console.log(json) //kolla vad som finns i LDAP
                 if (response.status == 201) {
                     html += "<p>Inga användare hittades</p>";
                 } else {
@@ -394,12 +415,12 @@
         var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
         var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
         var enamn3 = enamn2.replace(/æ/g, "ae") // ersätt eventuella æ med ae i namnen före sökning. Leta KTH-anställda spricker annars
-        var url = letaanstallda_apiurl + "users?fname=" +
+        var url = monkey_config.letaanstallda_apiurl + "/users?fname=" +
             fnamn2 +
             "%&ename=" +
             enamn3 +
             "%" +
-            "&api_key=" + letaanstallda_apikey;
+            "&api_key=" + monkey_config.letaanstallda_apikey;
         axios.get(url)
             .then(function (response) {
             var html = '<div><h2>Information från Leta anställda</h2>';
@@ -420,7 +441,6 @@
                             "T.o.m. " + json[key].Bef_t_o_m + "<br />" +
                             "Uppdaterat: " + json[key].datum +
                             "</p>"
-                        console.log(json);
                     });
                 }
             }
@@ -451,9 +471,9 @@
         }
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $("#monkeytalk").html("Jag pratar med Scopus...");
-        var url = scopus_apiurl +
+        var url = monkey_config.scopus_api_url + "/" +
             doi +
-            '?apiKey=' + scopus_apikey;
+            '?apiKey=' + monkey_config.scopus_apikey;
         await axios.get(url)
             .then(function (response) {
             var html = '<div><div class="updateheader"></div>';
@@ -516,7 +536,6 @@
 
     async function getWoS(doi) {
         var api_wos_xml = '<?xml version="1.0" encoding="UTF-8" ?><request xmlns="http://www.isinet.com/xrpc42" src="app.id=API"><fn name="LinksAMR.retrieve"><list><map><val name="username">' + monkey_config.api_username_wos + '</val><val name="password">' + monkey_config.api_password_wos + '</val></map><!-- WHAT IS REQUESTED --><map><list name="WOS"><val>timesCited</val><val>ut</val><val>doi</val><val>pmid</val><val>sourceURL</val><val>citingArticlesURL</val><val>relatedRecordsURL</val></list></map><!-- LOOKUP DATA --><map><!-- QUERY "cite_1" --><map name="cite_1"><val name="doi">' + doi + '</val></map> <!-- end of cite_1--></map><!-- end of citations --></list></fn></request>';
-        console.log(api_wos_xml)
         if(doi == ""){
             $('#monkeytalk').html('Ojojoj, ingen DOI! Jag behöver en DOI för att kunna uppdatera från databaserna.');
             $("#monkeyresultswrapper i").css("display", "none");
@@ -525,45 +544,57 @@
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $("#monkeytalk").html("Jag pratar med Web of Science...");
         var url = monkey_config.wos_api_url;
-        await axios.post(url, api_wos_xml, {headers: {'Content-Type': 'text/xml'}})
-            .then(function (response) {
-            var html = '<div><div class="updateheader"></div>';
-            if (response.status == 201) {
-                html += "<p>Hittade inget i Web of Science</p>";
-            } else {
-                var isi = response.data.wos.ut; //plocka värdet för ISI/UT
-                if(isi == ""  // uppdatera bara om fältet är tomt
-                   || typeof isi === 'undefined'
-                   || isi == 'undefined') {
-                    //                 html += '<p>ISI hittades inte</p>';
-                } else {
-                    if($("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val() == "") {
-                        html += '<p style="color:green;">Uppdaterat ISI: ' + isi + '</p>';
-                        $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val(isi); // skriv in värdet för ISI/UT i fältet för ISI
-                    }}
 
-                var pmid = response.data.wos.pmid; //plocka värdet för PubMedID (PMID
-                if(pmid == ""
-                   || typeof pmid === 'undefined'
-                   || pmid == 'undefined') {
-                    //                  html += '<p>PubMedID hittades inte i Web of Science</p>';
+        //använd GM_xmlhttpRequest för anrop som annars inte fungerar pga CORS 
+        await GM_xmlhttpRequest ({
+            method: "POST",
+            url: url,
+            data: api_wos_xml,
+            headers: {
+                "Content-Type": "application/xml"
+            },
+            onload: function(response) {
+                var html = '<div><div class="updateheader"></div>';
+                if (response.status == 201) {
+                    html += "<p>Hittade inget i Web of Science</p>";
                 } else {
-                    if($("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val() == "") {
-                        html += '<p style="color:green;">Uppdaterat PubMedID: ' + pmid + '</p>';
-                        $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
-                    }}
-                $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-            };
-            $("#monkeyresultswrapper i").css("display", "none");
-            $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-            $("#monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
-        })
-            .catch(function (error) {
-            $("#monkeyresultswrapper i").css("display", "none");
-            $("#monkeytalk").html("Jag hittade inget i Web of Science");
-        })
-            .then(function () {
+                    var parser = new DOMParser();
+                    var xmlDoc = parser.parseFromString(response.responseText,"text/xml");
+                    var x = xmlDoc.getElementsByTagName('val');
+                    for (i = 0; i < x.length; i++) {
+                        var isi = x[i].getAttribute('ut');
+                        var pmid = x[i].getAttribute('pmid');
+                    }
+                    if(isi == ""  // uppdatera bara om fältet är tomt
+                       || typeof isi === 'undefined'
+                       || isi == 'undefined') {
+                        //                 html += '<p>ISI hittades inte</p>';
+                    } else {
+                        if($("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val() == "") {
+                            html += '<p style="color:green;">Uppdaterat ISI: ' + isi + '</p>';
+                            $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val(isi); // skriv in värdet för ISI/UT i fältet för ISI
+                        }}
+
+                    if(pmid == ""
+                       || typeof pmid === 'undefined'
+                       || pmid == 'undefined') {
+                        //                  html += '<p>PubMedID hittades inte i Web of Science</p>';
+                    } else {
+                        if($("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val() == "") {
+                            html += '<p style="color:green;">Uppdaterat PubMedID: ' + pmid + '</p>';
+                            $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
+                        }}
+                    $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                };
+                $("#monkeyresultswrapper i").css("display", "none");
+                $('#monkeyupdates').html(html + $('#monkeyupdates').html());
+                $("#monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
+            },
+            onerror: function(error) {
+                $("#monkeyresultswrapper i").css("display", "none");
+                $("#monkeytalk").html("Jag hittade inget i Web of Science");
+            }  
         });
     }
 
@@ -577,14 +608,13 @@
     async function getDiVA(titleAll, format) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $("#monkeytalk").html("Jag pratar med DiVA...");
-        var url = diva_searchurl + '?format=' + format + '&addFilename=true&aq=[[{"titleAll":"' +
+        var url = monkey_config.diva_search_api_url + '?format=' + format + '&addFilename=true&aq=[[{"titleAll":"' +
             titleAll.replace("?", "") + '"}]]&aqe=[]&aq2=[[]]&onlyFullText=false&noOfRows=50&sortOrder=title_sort_asc&sortOrder2=title_sort_asc'; // av någon anledning fixar inte sökningen titlar som innehåller eller i alla fall slutar med ett "?"
         await axios.get(url)
             .then(function (response) {
             var html = '<div><div class="resultsheader">Information från DiVA, Söktext: ' + '<br /><br />' + titleAll + '</div>';
             if (response.data) {
                 var json = response.data
-                console.log($(response.data).find('mods'))
                 if ($(response.data).find('mods').length == 0) {
                     html += '<div><span class="fieldtitle"><br /><p style="color:green;">Jag hittade ingenting!<br />Det finns sannolikt ingen dubblett!</p></span></div></div>';
                 } else {
@@ -603,10 +633,10 @@
                             //                            '<div><span class="fieldtitle">Changed: </span><span>' + $(j).find('recordChangeDate').text() + '</span></div>' +
                             //                            '<div><span class="fieldtitle">Origin: </span><span>' + $(j).find('recordOrigin').text() + '</span></div>' +
                             //                            '<div><span class="fieldtitle">Source: </span><span>' + $(j).find('recordContentSource').text() + '</span></div>' +
-                            '<div><span class="fieldtitle"><img class="oa" src="https://apps.lib.kth.se/divaapan/oa.png"> Publicerad version: </span><span><a href="' + $(j).find('url[displayLabel="fulltext:print"]').text() + '" target="_new">' + '<p style="color:red;">' + $(j).find('url[displayLabel="fulltext:print"]').text() + '</p>' + '</a></span></div>' +
-                            '<div><span class="fieldtitle"><img class="oa" src="https://apps.lib.kth.se/divaapan/oa.png"> Preprint: </span><span><a href="' + $(j).find('url[displayLabel="fulltext:preprint"]').text() + '" target="_new">' + '<p style="color:red;">' + $(j).find('url[displayLabel="fulltext:preprint"]').text() + '</p>' + '</a></span></div>' +
-                            '<div><span class="fieldtitle"><img class="oa" src="https://apps.lib.kth.se/divaapan/oa.png"> Postprint: </span><span><a href="' + $(j).find('url[displayLabel="fulltext:postprint"]').text() + '" target="_new">' + '<p style="color:red;">' + $(j).find('url[displayLabel="fulltext:postprint"]').text() + '</p>' + '</a></span></div>' +
-                            '<div><span class="fieldtitle"><img class="oa" src="https://apps.lib.kth.se/divaapan/oa.png"> Ospec: </span><span><a href="' + $(j).find('url[displayLabel="fulltext"]').text() + '" target="_new">' + '<p style="color:red;">' + $(j).find('url[displayLabel="fulltext"]').text() + '</p>' + '</a></span></div>' +
+                            '<div><span class="fieldtitle"><img class="oa" src="' + monkey_config.oa_image_url + '"> Publicerad version: </span><span><a href="' + $(j).find('url[displayLabel="fulltext:print"]').text() + '" target="_new">' + '<p style="color:red;">' + $(j).find('url[displayLabel="fulltext:print"]').text() + '</p>' + '</a></span></div>' +
+                            '<div><span class="fieldtitle"><img class="oa" src="' + monkey_config.oa_image_url + '"> Preprint: </span><span><a href="' + $(j).find('url[displayLabel="fulltext:preprint"]').text() + '" target="_new">' + '<p style="color:red;">' + $(j).find('url[displayLabel="fulltext:preprint"]').text() + '</p>' + '</a></span></div>' +
+                            '<div><span class="fieldtitle"><img class="oa" src="' + monkey_config.oa_image_url + '"> Postprint: </span><span><a href="' + $(j).find('url[displayLabel="fulltext:postprint"]').text() + '" target="_new">' + '<p style="color:red;">' + $(j).find('url[displayLabel="fulltext:postprint"]').text() + '</p>' + '</a></span></div>' +
+                            '<div><span class="fieldtitle"><img class="oa" src="' + monkey_config.oa_image_url + '"> Ospec: </span><span><a href="' + $(j).find('url[displayLabel="fulltext"]').text() + '" target="_new">' + '<p style="color:red;">' + $(j).find('url[displayLabel="fulltext"]').text() + '</p>' + '</a></span></div>' +
                             '<div><span class="fieldtitle">Förlag: </span><span>' + $(j).find('publisher').text() + '</span></div>' +
                             '<div><span class="fieldtitle">År: </span><span>' + $(j).find('dateIssued').text() + '</span></div>' +
                             '<div><span class="fieldtitle">Note: </span><span>' + $(j).find('note').text() + '</span></div>'
@@ -654,12 +684,12 @@
         }
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $("#monkeytalk").html("Jag pratar med DBLP...");
-        var url = dblp_apiurl1 + doi;
+        var url = monkey_config.dblp_api_doi_url + "/" + doi;
         axios.get(url)
             .then(function (response) {
             var html = '<div><div class="resultsheader">Information från dblp, DOI: ' + doi + '</div>';
             if ($(response.data).find("crossref").text()) {
-                var url = dblp_apiurl2 + $(response.data).find("crossref").text();
+                var url = monkey_config.dblp_api_rec_url + "/" + $(response.data).find("crossref").text();
                 axios.get(url)
                     .then(function (response) {
                     //                    html += '<div class="inforecord flexbox column">';
@@ -696,7 +726,6 @@
      */
 
     function getCrossref(doi) {
-        //          var doi = $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
         if(doi != ""){
             var url = 'https://api.crossref.org/works/' + doi + '/transform/application/vnd.crossref.unixsd+xml';
             axios.get(url)
@@ -715,7 +744,6 @@
      */
 
     function getCrossrefVol(doi) {
-        //          var doi = $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
         if(doi != ""){
             var url = 'https://api.crossref.org/works/' + doi + '/transform/application/vnd.crossref.unixsd+xml';
             axios.get(url)
@@ -1039,30 +1067,30 @@
         // WoS-knappar vid ISI-fältet
         //
         ////////////////////////////////////////
+        if(monkey_config.wos) {
+            $('#WoSButtonjq').remove();
+            var WoSButtonjq = $('<button class="link" id="WoSButtonjq" type="button">Öppna i WoS</button>');
+            WoSButtonjq.on("click", function() {
+                var url = "https://focus.lib.kth.se/login?url=http://gateway.isiknowledge.com/gateway/Gateway.cgi?SrcApp=sfx&KeyUT=" +
+                    $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val() +
+                    "&DestLinkType=FullRecord&SrcAuth=Name&DestApp=WOS&GWVersion=2";
+                window.open(url, '_blank');
+            })
+            $("div.diva2addtextchoicecol:contains('ISI')").before(WoSButtonjq)
 
-        $('#WoSButtonjq').remove();
-        var WoSButtonjq = $('<button class="link" id="WoSButtonjq" type="button">Öppna i WoS</button>');
-        WoSButtonjq.on("click", function() {
-            var url = "https://focus.lib.kth.se/login?url=http://gateway.isiknowledge.com/gateway/Gateway.cgi?SrcApp=sfx&KeyUT=" +
-                $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val() +
-                "&DestLinkType=FullRecord&SrcAuth=Name&DestApp=WOS&GWVersion=2";
-            window.open(url, '_blank');
-        })
-        $("div.diva2addtextchoicecol:contains('ISI')").before(WoSButtonjq)
-
-        $('#wosapiButtonjq').remove();
-        var wosapiButtonjq = $('<button id="wosapiButtonjq" type="button" class="buttonload"><i class="fa fa-spinner fa-spin"></i>Uppdatera från WoS</button>');
-        wosapiButtonjq.on("click", function() {
-            getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
-        })
-        $("div.diva2addtextchoicecol:contains('ISI')").before(wosapiButtonjq)
+            $('#wosapiButtonjq').remove();
+            var wosapiButtonjq = $('<button id="wosapiButtonjq" type="button" class="buttonload"><i class="fa fa-spinner fa-spin"></i>Uppdatera från WoS</button>');
+            wosapiButtonjq.on("click", function() {
+                getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+            })
+            $("div.diva2addtextchoicecol:contains('ISI')").before(wosapiButtonjq)
+        }
 
         ////////////////////////////////////
         //
         // Sökning på ScopusId i Scopus webbgränssnitt
         //
         ////////////////////////////////////
-
         $('#openScopusButtonjq').remove();
         var openScopusButtonjq = $('<button class="link" id="openScopusButtonjq" type="button">Öppna i Scopus</button>');
         openScopusButtonjq.on("click", function() {
@@ -1114,14 +1142,14 @@
         // Uppdatera fält från Scopus
         //
         ////////////////////////////////////
-
-        $('#scopusButtonjq').remove();
-        var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Uppdatera från Scopus</button>');
-        scopusButtonjq.on("click", function() {
-            getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
-        })
-        $("div.diva2addtextchoicecol:contains('ScopusID')").before(scopusButtonjq)
-
+        if(monkey_config.scopus) {
+            $('#scopusButtonjq').remove();
+            var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Uppdatera från Scopus</button>');
+            scopusButtonjq.on("click", function() {
+                getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+            })
+            $("div.diva2addtextchoicecol:contains('ScopusID')").before(scopusButtonjq)
+        }
         ////////////////////////////////////
         //
         // Uppdatera förlagsfält från Crossref
@@ -1165,9 +1193,6 @@
             var title = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first().contents().find("body").html();
             var keywords = $("div.diva2addtextchoicebr:contains('Nyckelord') , div.diva2addtextchoicebr:contains('Keywords')").parent().find('input').val()
             var abstract = $("div.diva2addtextchoicebr:contains('Abstract')").parent().parent().find('iframe').first().contents().find("body").html().replace(/<p>/g, "").replace(/<\/p>/g, "");
-            //     console.log(title);
-            //     console.log(keywords);
-            //     console.log(abstract);
             $.ajax({
                 url: 'https://bibliometri.swepub.kb.se/api/v1/classify/',
                 contentType: 'application/json',
@@ -1180,7 +1205,6 @@
                                       title: title
                                      }),
                 success: function(response){
-                    console.log(response);
                     var json = response.data;
                     var html = '<div><div class="resultsheader">Klassning från Swepub</div><br /><div> Värde: ' + JSON.stringify(response.suggestions[0].score) + '</div>';
                     html+= '<div>Ämne:  ' + JSON.stringify(response.suggestions[0].swe.prefLabel) +  '</div><br />';
@@ -1282,7 +1306,7 @@
 
         /////////////////////////////////////////////////////
         //
-        // Knapp och länk till hjälpsida i Confluence
+        // Knapp och länk till hjälpsida
         //
         /////////////////////////////////////////////////////
 
@@ -1290,7 +1314,7 @@
         var helpButtonjq = $('<button class="link" id="helpButtonjq" type="button">Hjälp</button>');
         //bind en clickfunktion öppnar en hjälpsida
         helpButtonjq.on("click", function() {
-            var url = "https://confluence.sys.kth.se/confluence/pages/viewpage.action?pageId=74259261"
+            var url = monkey_config.help_url;
             window.open(url, '_blank'); // öppna hjälpsida i ett nytt fönster
         })
         $(".diva2editmainer").before(helpButtonjq) // hjälpknapp längst upp på sidan
@@ -1300,17 +1324,17 @@
 
         ///////////////////////////////////////////////////////////////////////////////////////////////
         //
-        // Knapp och länk till extern sökning i KTH webb-DiVA för att se eventuella dubbletter
+        // Knapp och länk till extern sökning i webb-DiVA för att se eventuella dubbletter
         //
         ///////////////////////////////////////////////////////////////////////////////////////////////
 
         $('#dubblettButtonjq').remove();
         var dubblettButtonjq = $('<button class="link" id="dubblettButtonjq" type="button">Dubblett?</button>');
-        //bind en clickfunktion som anropar DiVA KTH:s webbgränssnitt och söker på titel
+        //bind en clickfunktion som anropar DiVA webbgränssnitt och söker på titel
         dubblettButtonjq.on("click", function() {
             var title = $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").parent().find('textarea').eq(0).val();
             var newtitle = title.replace("?", "") // av någon anledning fixar inte sökningen titlar som innehåller eller i alla fall slutar med ett "?"
-            var url = "https://kth.diva-portal.org/smash/resultList.jsf?dswid=-4067&language=en&searchType=RESEARCH&query=&af=%5B%5D&aq=%5B%5B%7B%22titleAll%22%3A%22" +
+            var url = monkey_config.diva_search_url + "?dswid=-4067&language=en&searchType=RESEARCH&query=&af=%5B%5D&aq=%5B%5B%7B%22titleAll%22%3A%22" +
                 newtitle +
                 "%22%7D%5D%5D&aq2=%5B%5B%5D%5D&aqe=%5B%5D&noOfRimportForm:j_id758ows=50&sortOrder=author_sort_asc&sortOrder2=title_sort_asc&onlyFullText=false&sf=all"
             window.open(url, '_blank'); // sök i DiVA webb på titel, öppna i ett nytt fönster
@@ -1357,7 +1381,7 @@
         ///////////////////////////////////////////////////////////////////////////////////
         //
         // Funktion för att skapa en knapp vid "Annan organisation" för varje författare,
-        // för att sedan kunna radera detta fält när vi kopplat en KTH-person
+        // för att sedan kunna radera detta fält när vi kopplat en lärosätesperson
         //
         ///////////////////////////////////////////////////////////////////////////////////
 
@@ -1371,7 +1395,7 @@
             clearorgButtonjq.on("click", function() {
                 $(thiz).next().find('input').val("");
             })
-            if(!($(thiz).next().find('input').val().includes(";"))) { // vi vill inte ta bort hela "Annan organisation"-fältet som innehåller icke-KTH-affilieringar, d.v.s. de som har ett semikolon i sig
+            if(!($(thiz).next().find('input').val().includes(";"))) { // vi vill inte ta bort hela "Annan organisation"-fältet som innehåller icke-affilieringar, d.v.s. de som har ett semikolon i sig
                 $(this).next().find('input').after(clearorgButtonjq);
             }
             i++;
@@ -1400,7 +1424,6 @@
             $(thiz).next().find('input').val(neworg2);
             if(neworg != neworg2) {
                 html += '<div><p style="color:green;">Uppdaterat "Annan Organisation"</p></div>';
-                console.log(neworg2);
                 $('#monkeyupdates').html(html + $('#monkeyupdates').html());
             } else {}
             i++;
@@ -1418,54 +1441,64 @@
             var thiz = this;
 
             //LDAP/UG
-            $('#ldapButtonjq' + i).remove();
-            var ldapButtonjq = $('<button id="ldapButtonjq' + i + '" type="button">LDAP-info</button>');
-            ldapButtonjq.on("click", function() {
-                getLDAP($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val(),'');
-            })
-            $(this).before(ldapButtonjq)
-
+            if(monkey_config.ldap) {
+                $('#ldapButtonjq' + i).remove();
+                var ldapButtonjq = $('<button id="ldapButtonjq' + i + '" type="button">LDAP-info</button>');
+                ldapButtonjq.on("click", function() {
+                    getLDAP($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val(),'');
+                })
+                $(this).before(ldapButtonjq)
+            }
             //Leta KTH-anställda
-            $('#letaButtonjq' + i).remove();
-            var letaButtonjq = $('<button id="letaButtonjq' + i + '" type="button">Leta KTH-anställda</button>');
-            letaButtonjq.on("click", function() {
-                getLeta($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val());
-            })
-            $(this).before(letaButtonjq)
+            if(monkey_config.letaanstallda) {
+                $('#letaButtonjq' + i).remove();
+                var letaButtonjq = $('<button id="letaButtonjq' + i + '" type="button">Leta KTH-anställda</button>');
+                letaButtonjq.on("click", function() {
+                    getLeta($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val());
+                })
+                $(this).before(letaButtonjq)
+            }
 
             //Sök i ORCiD
-            $('#orcidButtonjq' + i).remove();
-            var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök i ORCiD</button>');
-            orcidButtonjq.on("click", function() {
-                getOrcid($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val());
-            })
-            $(this).before(orcidButtonjq);
+            if(monkey_config.orcid) {
+                $('#orcidButtonjq' + i).remove();
+                var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök i ORCiD</button>');
+                orcidButtonjq.on("click", function() {
+                    getOrcid($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val());
+                })
+                $(this).before(orcidButtonjq);
+            }
 
-            //KTH Intranät förnamn efternamn
-            $('#kthintraButtonjq' + i).remove();
-            var kthintraButtonjq = $('<button class="link" id="kthintraButtonjq' + i + '" type="button">KTH Intra</button>');
-            kthintraButtonjq.on("click", function() {
-                var url = "https://www.kth.se/search?q=" +
-                    $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val() +
-                    "%20" +
-                    $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val() +
-                    "&urlFilter=https://intra.kth.se&filterLabel=KTH%20Intran%C3%A4t&entityFilter=kth-profile,kth-place,%20kth-system"
-                var newurl = url.replace("$$$", "") // ta bort eventuella $$$ från efternamnen före sökning
-                var newurl2 = newurl.replace(/[A-Z]\./g, "") // ta bort allt som ser ut som en VERSAL med en punkt efter, typ förnamn från Scopus. Verkar ge bättre resultat med bara efternamn vid sökning i KTH Intra
-                window.open(newurl2, '_blank'); // sök på förnamn efternamn på KTH Intranät
-            })
-            $(this).before(kthintraButtonjq)
+            //Intranät förnamn efternamn
+            if(monkey_config.intranet) {
+                $('#intraButtonjq' + i).remove();
+                var intraButtonjq = $('<button class="link" id="intraButtonjq' + i + '" type="button">' + monkey_config.university + ' Intra</button>');
+                intraButtonjq.on("click", function() {
+                    var url = monkey_config.university_search_url + "?q=" +
+                        $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val() +
+                        "%20" +
+                        $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val() +
+                        "&urlFilter=" + monkey_config.university_intranet_url + "&filterLabel=KTH%20Intran%C3%A4t&entityFilter=kth-profile,kth-place,%20kth-system"
+                    // ta bort eventuella $$$ från efternamnen före sökning
+                    var newurl = url.replace("$$$", "")
+                    // ta bort allt som ser ut som en VERSAL med en punkt efter, typ förnamn från Scopus. Verkar ge bättre resultat med bara efternamn vid sökning i Intra
+                    var newurl2 = newurl.replace(/[A-Z]\./g, "")
+                    window.open(newurl2, '_blank'); // sök på förnamn efternamn på Intranät
+                })
+                $(this).before(intraButtonjq)
+            }
 
-            //Google.com förnamn + efternamn + KTH
+            //Google.com förnamn + efternamn + lärosäte
             $('#googleButtonjq' + i).remove();
             var googleButtonjq = $('<button class="link" id="googleButtonjq' + i + '" type="button">Google</button>');
             googleButtonjq.on("click", function() {
-                var url = "https://www.google.com/search?q=KTH+" +
+                var url = "https://www.google.com/search?q=" + monkey_config.university + "+" +
                     $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val() +
                     "+" +
                     $(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val()
-                var newurl = url.replace("$$$", "") // ta bort eventuella $$$ från efternamnen före sökning
-                window.open(newurl, '_blank'); // sök på förnamn efternamn + KTH i google
+                // ta bort eventuella $$$ från efternamnen före sökning
+                var newurl = url.replace("$$$", "")
+                window.open(newurl, '_blank'); // sök på förnamn efternamn + lärosäte i google
             })
             $(this).before(googleButtonjq)
 
@@ -1484,56 +1517,69 @@
             var thiz = this;
 
             //LDAP/UG
-            $('#ldapButtonjq' + i).remove();
-            var ldapButtonjq = $('<button id="ldapButtonjq' + i + '" type="button">LDAP-info</button>');
-            ldapButtonjq.on("click", function() {
-                getLDAP($(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val(),'');
-            })
-            $(this).before(ldapButtonjq)
+            if(monkey_config.ldap) {
+                $('#ldapButtonjq' + i).remove();
+                var ldapButtonjq = $('<button id="ldapButtonjq' + i + '" type="button">LDAP-info</button>');
+                ldapButtonjq.on("click", function() {
+                    getLDAP($(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val(),'');
+                })
+                $(this).before(ldapButtonjq)
+            }
 
             //Leta KTH-anställda
-            $('#letaButtonjq' + i).remove();
-            var letaButtonjq = $('<button id="letaButtonjq' + i + '" type="button">Leta KTH-anställda</button>');
-            letaButtonjq.on("click", function() {
-                getLeta($(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val());
-            })
-            $(this).before(letaButtonjq)
+            if(monkey_config.letaanstallda) {
+                $('#letaButtonjq' + i).remove();
+                var letaButtonjq = $('<button id="letaButtonjq' + i + '" type="button">Leta KTH-anställda</button>');
+                letaButtonjq.on("click", function() {
+                    getLeta($(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val());
+                })
+                $(this).before(letaButtonjq)
+            }
 
             //Sök i ORCiD
-            $('#orcidButtonjq' + i).remove();
-            var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök i ORCiD</button>');
-            orcidButtonjq.on("click", function() {
-                getOrcid($(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val());
-            })
-            $(this).before(orcidButtonjq);
+            if(monkey_config.orcid) {
+                $('#orcidButtonjq' + i).remove();
+                var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök i ORCiD</button>');
+                orcidButtonjq.on("click", function() {
+                    getOrcid($(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val());
+                })
+                $(this).before(orcidButtonjq);
+            }
 
-            //KTH Intranät förnamn efternamn
-            $('#kthintraButtonjq' + i).remove();
-            var kthintraButtonjq = $('<button class="link" id="kthintraButtonjq' + i + '" type="button">KTH Intra</button>');
-            kthintraButtonjq.on("click", function() {
-                var url = "https://www.kth.se/search?q=" +
-                    $(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val() +
-                    "%20" +
-                    $(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val() +
-                    "&urlFilter=https://intra.kth.se&filterLabel=KTH%20Intran%C3%A4t&entityFilter=kth-profile,kth-place,%20kth-system"
-                var newurl = url.replace("$$$", "") // ta bort eventuella $$$ från efternamnen före sökning
-                var newurl2 = newurl.replace(/[A-Z]\./g, "") // ta bort allt som ser ut som en VERSAL med en punkt efter, typ förnamn från Scopus. Verkar ge bättre resultat med bara efternamn vid sökning i KTH Intra
-                window.open(newurl2, '_blank'); // sök på förnamn efternamn på KTH Intranät
-            })
-            $(this).before(kthintraButtonjq)
+            //Intranät förnamn efternamn
+            if(monkey_config.intranet) {
+                $('#intraButtonjq' + i).remove();
+                var intraButtonjq = $('<button class="link" id="intraButtonjq' + i + '" type="button">' + monkey_config.university + ' Intra</button>');
+                intraButtonjq.on("click", function() {
+                    var url = monkey_config.university_search_url + "?q=" +
+                        $(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val() +
+                        "%20" +
+                        $(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val() +
+                        "&urlFilter=" + monkey_config.university_intranet_url + "&filterLabel=KTH%20Intran%C3%A4t&entityFilter=kth-profile,kth-place,%20kth-system"
+                    // ta bort eventuella $$$ från efternamnen före sökning
+                    var newurl = url.replace("$$$", "")
+                    // ta bort allt som ser ut som en VERSAL med en punkt efter, typ förnamn från Scopus. Verkar ge bättre resultat med bara efternamn vid sökning i KTH Intra
+                    var newurl2 = newurl.replace(/[A-Z]\./g, "")
+                    // sök på förnamn efternamn på KTH Intranät
+                    window.open(newurl2, '_blank');
+                })
+                $(this).before(intraButtonjq)
+            }
 
-            //Google.com förnamn + efternamn + KTH
-            $('#googleButtonjq' + i).remove();
-            var googleButtonjq = $('<button class="link" id="googleButtonjq' + i + '" type="button">Google</button>');
-            googleButtonjq.on("click", function() {
-                var url = "https://www.google.com/search?q=KTH+" +
-                    $(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val() +
-                    "+" +
-                    $(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val()
-                var newurl = url.replace("$$$", "") // ta bort eventuella $$$ från efternamnen före sökning
-                window.open(newurl, '_blank'); // sök på förnamn efternamn + KTH i google
-            })
-            $(this).before(googleButtonjq)
+            //Google.com förnamn + efternamn + Lärosäte
+                $('#googleButtonjq' + i).remove();
+                var googleButtonjq = $('<button class="link" id="googleButtonjq' + i + '" type="button">Google</button>');
+                googleButtonjq.on("click", function() {
+                    var url = "https://www.google.com/search?q=" + monkey_config.university + "+" +
+                        $(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val() +
+                        "+" +
+                        $(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val()
+                    // ta bort eventuella $$$ från efternamnen före sökning
+                    var newurl = url.replace("$$$", "")
+                    // sök på förnamn efternamn + lärosäte i google
+                    window.open(newurl, '_blank'); 
+                })
+                $(this).before(googleButtonjq)
 
             i++;
         });
@@ -1548,25 +1594,26 @@
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         if (re_init!=true) {
-            getLDAP('', '', $('.diva2identifier:eq(2)').html())
-                .then( function(result)  {
-                getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
-                    .then( function(result) {
-                    getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
-                        .then( function(result) {
-                        $('html, body').animate({scrollTop:0},'slow');
+            if(monkey_config.ldap) {
+                await getLDAP('', '', $('.diva2identifier:eq(2)').html())
+            }
+            if(monkey_config.scopus) {
+                await getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
+            }
+            if(monkey_config.wos) {
+                await getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
+            }
+            $('html, body').animate({scrollTop:0},'slow');
 
-                        /////////////////////////////////////////////////////////////////////////////////////////////////////////
-                        //
-                        // Öppna DiVA och kolla efter dubbletter när en post öppnas.
-                        //
-                        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////
+            //
+            // Öppna DiVA och kolla efter dubbletter när en post öppnas.
+            //
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-                        $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
-                        getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, "").replace(/["]+/g, ""), 'mods'); // ta bort saker som innehåller & och ? och " som sökningen inte klarar av
-                    });
-                });
-            });
+            $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
+            // ta bort saker som innehåller & och ? och " som sökningen inte klarar av
+            getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, "").replace(/["]+/g, ""), 'mods');
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
             //
@@ -1575,6 +1622,7 @@
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         }
+    // End async function init()
     }
 
     /**
@@ -1593,25 +1641,33 @@
             });
             waitForKeyElements('#' + diva_id + '\\:notes_ifr', function() {
                 //Kolla om användartoken finns och verifera i så fall, annars inloggning
-                if (Cookies.get('token')) {
-                    if (typeof Cookies.get('token') === 'undefined' ||
-                        Cookies.get('token') == 'undefined' ||
-                        Cookies.get('token') == '') {
-                        Cookies.remove('token');
+                if(monkey_config.login) {
+                    if (Cookies.get('token')) {
+                        if (typeof Cookies.get('token') === 'undefined' ||
+                            Cookies.get('token') == 'undefined' ||
+                            Cookies.get('token') == '') {
+                            Cookies.remove('token');
+                        } else {
+                            $("#monkeyresultswrapper i").css("display", "inline-block");
+                            $("#monkeytalk").html("Jag gör mig redo...");
+                            verifytoken(Cookies.get('token'));
+                            $("#monkeyresultswrapper").css("display", "block");
+                            $("#monkeyresultswrapper_right").css("display", "block");
+                            return
+                        }
                     } else {
-                        $("#monkeyresultswrapper i").css("display", "inline-block");
-                        $("#monkeytalk").html("Jag gör mig redo...");
-                        verifytoken(Cookies.get('token'));
+                        Cookies.remove('token');
                         $("#monkeyresultswrapper").css("display", "block");
                         $("#monkeyresultswrapper_right").css("display", "block");
-                        return
+                        $("#monkeylogin").css("display", "block");
+                        monkeylogin();
                     }
-                } else {
-                    Cookies.remove('token');
+                }
+                else {
+                    //Initiera apan utan login
+                    init(false);
                     $("#monkeyresultswrapper").css("display", "block");
                     $("#monkeyresultswrapper_right").css("display", "block");
-                    $("#monkeylogin").css("display", "block");
-                    monkeylogin();
                 }
             });
         });
@@ -1631,7 +1687,7 @@
     var monkeyresultswrapper =
         ($('<div style="display:none" id="monkeyresultswrapper">' +
            '<div>' +
-           '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' +
+           '<img class="logo" src="' + monkey_config.monkey_image_url + '">' +
            '<div class="bubble">' +
            '<i class="fa fa-spinner fa-spin"></i>' +
            '<div id="monkeytalk"></div>' +
@@ -1667,22 +1723,8 @@
     //DIV för att kunna visa Apresultat även till höger på sidan
     var monkeyresultswrapper_right =
         ($('<div style="display:none" id="monkeyresultswrapper_right">' +
-           //                '<div>' +
-           //                    '<img class="logo" src="https://apps.lib.kth.se/divaapan/apa.jpg">' +
-           //                    '<div class="bubble">' +
-           //                        '<i class="fa fa-spinner fa-spin"></i>' +
-           //                        '<div id="monkeytalk_right"></div>' +
-           //                    '</div>' +
-           //                '</div>' +
            '<div class="monkeyheader">' +
-           //                    '<h1>DiVA-Apan</h1>' +
            '</div>' +
-           //'<h2>' +
-           //'Uppdateringar' +
-           //'</h2>' +
-           //'<div id="monkeyupdates_right" class="flexbox column">' +
-           //'</div>' +
-           //'<hr class="solid">' +
            '<h2>' +
            'Resultat' +
            '</h2>' +
