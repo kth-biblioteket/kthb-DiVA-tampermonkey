@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.2
+// @version      1.2.2
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @updateURL    https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/raw/master/DiVA.js
@@ -29,6 +29,7 @@
 // @connect  search.crossref.org
 // @connect  api.crossref.org
 // @connect  bibliometri.swepub.kb.se
+// @connect  www.semanticscholar.org
 
 // @noframes
 // ==/UserScript==
@@ -345,6 +346,7 @@
             var html = '<div><div class="resultsheader">Information från KTH UG(LDAP)</div>';
             if (response.data) {
                 var json = response.data
+                console.log(json) //kolla vad som finns i LDAP
                 if (response.status == 201) {
                     html += "<p>Inga användare hittades</p>";
                 } else {
@@ -590,7 +592,7 @@
                         html += '<div class="inforecord flexbox column">';
                         html += '<h2><p style="color:red;">ID: ' + $(j).find('recordIdentifier').text() +'</p></h2>';
                         html += '<div><span class="fieldtitle">Status (artiklar): </span><span>' + $(j).find('note[type="publicationStatus"]').text() + '</span></div>' +
-                            '<div><span class="fieldtitle">URI: </span><span><a href="' + $(j).find('identifier[type="uri"]').text() + '" target="_new">' + $(j).find('identifier[type="uri"]').text() + '</a></span></div>' +
+                            '<div><span class="fieldtitle">URI: </span><span><a href="' + $(j).find('identifier[type="uri"]').text() + '" target="_blank">' + $(j).find('identifier[type="uri"]').text() + '</a></span></div>' +
                             //   '<div><span class="fieldtitle">Publiceringsstatus<br/>(artiklar): </span><span>' + $(j).find('note[type="publicationStatus"]').text() + '</span></div>' +
                             '<div><span class="fieldtitle">Publikationstyp: </span><span>' + $(j).find('genre[authority="diva"][type="publicationType"][lang="swe"]').text() + '</span></div>' +
                             '<div><span class="fieldtitle">DOI: </span><span>' + $(j).find('identifier[type="doi"]').text() + '</span></div>' +
@@ -1091,6 +1093,24 @@
         }
         ////////////////////////////////////
         //
+        // Sökning på titel i SemanticScholar för att hitta DOI - experimentellt!
+        //
+        ////////////////////////////////////
+
+        if($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() == "") {  // bara om det saknas en DOI
+            $('#titleSemanticScholarButtonjq').remove();
+            var titleSemanticScholarButtonjq = $('<button class="link" id="titleSemanticScholarButtonjq" type="button">##Sök i SemanticScholar på titel för att hitta DOI##</button>');
+            titleSemanticScholarButtonjq.on("click", function() {
+                var title = $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").parent().find('textarea').eq(0).val();
+                //       var newtitle = title.replace("?", "") // av någon anledning fixar inte sökningen titlar som innehåller eller i alla fall slutar med ett "?"
+                var url = "https://www.semanticscholar.org/search?q=" +
+                    title;
+                window.open(url, '_blank');
+            })
+            $("div.diva2addtextchoicecol:contains('DOI')").before(titleSemanticScholarButtonjq)
+        }
+        ////////////////////////////////////
+        //
         // Uppdatera fält från Scopus
         //
         ////////////////////////////////////
@@ -1376,7 +1396,7 @@
             replace(/Boras/g, "Borås").replace(/Sodertalje/g, "Södertälje").replace(/Borlange/g, "Borlänge").replace(/Harnosand/g, "Härnösand").replace(/Skelleftea/g, "Skellefteå").
             replace(/Sjofart/g, "Sjöfart").replace(/Molnlycke/g, "Mölnlycke").replace(/Domsjo/g, "Domsjö").replace(/Varobacka/g, "Väröbacka").replace(/Sodra Innovat/g, "Södra Innovat").
             replace(/Nykoping/g, "Nyköping").replace(/Ornskoldsvik/g, "Örnsköldsvik").replace(/Molndal/g, "Mölndal").replace(/Upplands Vasby/g, "Upplands Väsby").
-            replace(/Lowenstromska/g, "Löwenströmska").replace(/Skarholmen/g, "Skärholmen").replace(/Lantmateri/g, "Lantmäteri");
+            replace(/Lowenstromska/g, "Löwenströmska").replace(/Skarholmen/g, "Skärholmen").replace(/Lantmateri/g, "Lantmäteri").replace(/Kraftnat/g, "Kraftnät");
             $(thiz).next().find('input').val(neworg2);
             if(neworg != neworg2) {
                 html += '<div><p style="color:green;">Uppdaterat "Annan Organisation"</p></div>';
