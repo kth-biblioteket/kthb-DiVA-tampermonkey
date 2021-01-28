@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.2.2
+// @version      1.2.3
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
 // @match    https://kth.diva-portal.org/dream/import/importForm.jsf*
 // @match    https://kth.diva-portal.org/dream/publish/publishForm.jsf*
 // @match    https://kth.diva-portal.org/dream/review/reviewForm.jsf*
+// @match    https://kth.diva-portal.org/dream/add/add2.jsf*
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
 // @require  https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
@@ -140,7 +141,9 @@
                     //Om behörig bibblananvändare
                     if (response.apikeys) {
                         //Spara token i en cookie (som gäller lång hur tid?)
-                        Cookies.set('token', response.token, { expires: 30 })
+                        Cookies.set('token', response.token, {
+                            expires: 30
+                        })
                         setapikeys(response)
                         init(false);
                     } else {
@@ -149,12 +152,12 @@
                     }
                 },
                 error:
-                //401 Unauthorized
-                function(response, textStatus, xhr) {
-                    alert("Unauthorized")
-                    Cookies.remove('token')
-                    $('#monkeylogin').css("display", "block");
-                }
+                    //401 Unauthorized
+                    function(response, textStatus, xhr) {
+                        alert("Unauthorized")
+                        Cookies.remove('token')
+                        $('#monkeylogin').css("display", "block");
+                    }
             });
         } else {
             Cookies.remove('token')
@@ -219,20 +222,21 @@
             };
         });
         return array.map(item => {
-            return {
-                src: item,
-                compareValues: predicates.map(predicate => predicate.getter(item))
-            };
-        })
+                return {
+                    src: item,
+                    compareValues: predicates.map(predicate => predicate.getter(item))
+                };
+            })
             .sort((o1, o2) => {
-            let i = -1, result = 0;
-            while (++i < predicates.length) {
-                if (o1.compareValues[i] < o2.compareValues[i]) result = -1;
-                if (o1.compareValues[i] > o2.compareValues[i]) result = 1;
-                if (result *= predicates[i].descend) break;
-            }
-            return result;
-        })
+                let i = -1,
+                    result = 0;
+                while (++i < predicates.length) {
+                    if (o1.compareValues[i] < o2.compareValues[i]) result = -1;
+                    if (o1.compareValues[i] > o2.compareValues[i]) result = 1;
+                    if (result *= predicates[i].descend) break;
+                }
+                return result;
+            })
             .map(item => item.src);
     }
 
@@ -345,7 +349,7 @@
      * @param {*} kthid
      */
     async function getLDAP(fnamn, enamn, kthid) {
-        $("#monkeyresultswrapper_right i").css("display", "inline-block");  // visas i högermarginalen sen version 1.1.15
+        $("#monkeyresultswrapper_right i").css("display", "inline-block"); // visas i högermarginalen sen version 1.1.15
         $("#monkeytalk_right").html("Jag pratar med LDAP...");
         var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
         var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
@@ -387,19 +391,18 @@
                         html += '</div>';
                     });
 
+                    }
                 }
-            }
 
-            html += '</div>'
-            $("#monkeyresultswrapper_right i").css("display", "none");
-            $('#monkeyresults_right').html(html);
-            $("#monkeytalk_right").html("LDAP svarade... se resultatet här nedanför");
-        })
-            .catch(function (error) {
-            api_error(error.response);
-        })
-            .then(function () {
-        });
+                html += '</div>'
+                $("#monkeyresultswrapper_right i").css("display", "none");
+                $('#monkeyresults_right').html(html);
+                $("#monkeytalk_right").html("LDAP svarade... se resultatet här nedanför");
+            })
+            .catch(function(error) {
+                api_error(error.response);
+            })
+            .then(function() {});
     }
 
     /**
@@ -450,10 +453,10 @@
             $('#monkeyresults').html(html);
             $("#monkeytalk").html("Leta KTH-anställda svarade... se resultatet här nedanför");
         })
-            .catch(function (error) {
+            .catch(function(error) {
             api_error(error.response);
         })
-            .then(function () {
+            .then(function() {
         });
     }
 
@@ -464,7 +467,7 @@
      */
 
     async function getScopus(doi) {
-        if(doi == ""){
+        if (doi == "") {
             $('#monkeytalk').html('Ojojoj, ingen DOI!');
             $("#monkeyresultswrapper i").css("display", "none");
             return 0;
@@ -475,57 +478,60 @@
             doi +
             '?apiKey=' + monkey_config.scopus_apikey;
         await axios.get(url)
-            .then(function (response) {
-            var html = '<div><div class="updateheader"></div>';
-            if (response.status == 201) {
-                html += "<p>Hittade inget i Scopus!</p>";
-            } else {
-                //hitta ScopusId
-                var eid = response.data['abstracts-retrieval-response']['coredata']['eid']; //plocka värdet för ScopusId (eid)
-                if(eid == "" // uppdatera bara om fältet är tomt
-                   || typeof eid === 'undefined'
-                   || eid == 'undefined') {
-                    //                 html += '<p>ScopusID hittades inte</p>';
+            .then(function(response) {
+                var html = '<div><div class="updateheader"></div>';
+                if (response.status == 201) {
+                    html += "<p>Hittade inget i Scopus!</p>";
                 } else {
-                    if($("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val() == "") {
-                        html += '<p style="color:green;">Uppdaterat ScopusID: ' + eid + '</p>';
-                        $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                        $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
-                    }}
+                    //hitta ScopusId
+                    var eid = response.data['abstracts-retrieval-response']['coredata']['eid']; //plocka värdet för ScopusId (eid)
+                    if (eid == "" // uppdatera bara om fältet är tomt
+                        ||
+                        typeof eid === 'undefined' ||
+                        eid == 'undefined') {
+                        //                 html += '<p>ScopusID hittades inte</p>';
+                    } else {
+                        if ($("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val() == "") {
+                            html += '<p style="color:green;">Uppdaterat ScopusID: ' + eid + '</p>';
+                            $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                            $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
+                        }
+                    }
 
-                var pmid = response.data['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
-                if(pmid == ""  // uppdatera bara om fältet är tomt
-                   || typeof pmid === 'undefined'
-                   || pmid == 'undefined') {
-                    //                 html += '<p>PubMedID hittades inte i Scopus</p>';
-                } else {
-                    if($("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val() == "") {
-                        html += '<p style="color:green;">Uppdaterat PubMedID: ' + pmid + '</p>';
-                        $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
-                    }}
+                    var pmid = response.data['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
+                    if (pmid == "" // uppdatera bara om fältet är tomt
+                        ||
+                        typeof pmid === 'undefined' ||
+                        pmid == 'undefined') {
+                        //                 html += '<p>PubMedID hittades inte i Scopus</p>';
+                    } else {
+                        if ($("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val() == "") {
+                            html += '<p style="color:green;">Uppdaterat PubMedID: ' + pmid + '</p>';
+                            $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
+                        }
+                    }
 
-                var oa = response.data['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
-                if (oa == 'true') { // kolla om artikeln är OA
-                    document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
-                    html += '<p style="color:green;">Uppdaterat Free full-text: ' + response.data['abstracts-retrieval-response']['coredata']['openaccessFlag'] + '</p>'; // visa bara uppdatering om Free full-text = 'true'
-                } else {
-                    ""; // checka inte boxen
-                }
-                $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                    var oa = response.data['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
+                    if (oa == 'true') { // kolla om artikeln är OA
+                        document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
+                        html += '<p style="color:green;">Uppdaterat Free full-text: ' + response.data['abstracts-retrieval-response']['coredata']['openaccessFlag'] + '</p>'; // visa bara uppdatering om Free full-text = 'true'
+                    } else {
+                        ""; // checka inte boxen
+                    }
+                    $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
 
-            };
-            $("#monkeyresultswrapper i").css("display", "none");
-            $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-            $("#monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
-            return 1;
-        })
-            .catch(function (error) {
-            $("#monkeyresultswrapper i").css("display", "none");
-            $("#monkeytalk").html("Jag hittade inget i Scopus!");
-        })
-            .then(function () {
-        });
+                };
+                $("#monkeyresultswrapper i").css("display", "none");
+                $('#monkeyupdates').html(html + $('#monkeyupdates').html());
+                $("#monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
+                return 1;
+            })
+            .catch(function(error) {
+                $("#monkeyresultswrapper i").css("display", "none");
+                $("#monkeytalk").html("Jag hittade inget i Scopus!");
+            })
+            .then(function() {});
     }
 
     /**
@@ -662,11 +668,11 @@
             $('#monkeyresults').html(html);
             $("#monkeytalk").html("DiVA svarade... se resultatet här nedanför");
         })
-            .catch(function (error) {
+            .catch(function(error) {
             $("#monkeyresultswrapper i").css("display", "none");
             $("#monkeytalk").html("Jag hittade inget i DiVA");
         })
-            .then(function () {
+            .then(function() {
         });
     }
 
@@ -677,7 +683,7 @@
      */
 
     function getDblp(doi) {
-        if(doi == ""){
+        if (doi == "") {
             $('#monkeyresults').html('DBLP: Ingen DOI finns!');
             $("#monkeyresultswrapper i").css("display", "none");
             return;
@@ -726,16 +732,30 @@
      */
 
     function getCrossref(doi) {
-        if(doi != ""){
+        //          var doi = $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
+
+        if (doi != "") {
+            $("#monkeyresultswrapper i").css("display", "inline-block");
+            $("#monkeytalk").html("Jag pratar med Crossref...");
             var url = 'https://api.crossref.org/works/' + doi + '/transform/application/vnd.crossref.unixsd+xml';
             axios.get(url)
-                .then(function (response) {
-                var publisher = $(response.data).find('crm-item[name="publisher-name"]').text(); // hämtar förlagsinformation
-                var publisher_edited = publisher.replace(/Springer Science and Business Media LLC/g, "Springer Nature");
-                $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").parent().find('input').val(publisher_edited); // klistrar in förlagsinfo från Crossref
-            })
+                .then(function(response) {
+                    var publisher = $(response.data).find('crm-item[name="publisher-name"]').text(); // hämtar förlagsinformation
+                    var publisher_edited = publisher.replace(/Springer Science and Business Media LLC/g, "Springer Nature");
+                    $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").parent().find('input').val(publisher_edited); // klistrar in förlagsinfo från Crossref
+                    $("#monkeyresultswrapper i").css("display", "none");
+                    $('#monkeyresults').html();
+                    $("#monkeytalk").html("Crossref svarade... se resultatet under \"Annat förlag\" i posten!");
+                })
+                .catch(function(error) {
+                    $('#monkeyresults').html('');
+                    $("#monkeyresultswrapper i").css("display", "none");
+                    $("#monkeytalk").html("Nej, jag hittade inget i Crossref");
+                })
+                .then(function() {});
         }
     }
+
 
     /**
      * Funktion för att anropa Crossref och volume/issue/pages via DOI
@@ -744,36 +764,49 @@
      */
 
     function getCrossrefVol(doi) {
-        if(doi != ""){
+        //          var doi = $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
+        if (doi != "") {
+            $("#monkeyresultswrapper i").css("display", "inline-block");
+            $("#monkeytalk").html("Jag pratar med Crossref...");
             var url = 'https://api.crossref.org/works/' + doi + '/transform/application/vnd.crossref.unixsd+xml';
             axios.get(url)
-                .then(function (response) {
-                var year = $(response.data).find('journal_issue').find('publication_date').find('year').last().text(); // hämtar year, svårt här, ibland två st year - tar det sista
-                var volume = $(response.data).find('journal_volume').find('volume').text(); // hämtar volume
-                var issue = $(response.data).find('journal_issue').find('issue').text(); // hämtar issue
-                var first_page = $(response.data).find('journal_article').find('pages').find('first_page').text(); // hämtar första sidan
-                var last_page = $(response.data).find('journal_article').find('pages').find('last_page').text(); // hämtar sista sidan
-                var isbn = $(response.data).find('proceedings_metadata').find('isbn').text(); // hämtar isbn (finns det flera...?)
+                .then(function(response) {
+                    var year = $(response.data).find('journal_issue').find('publication_date').find('year').last().text(); // hämtar year, svårt här, ibland två st year - tar det sista
+                    var volume = $(response.data).find('journal_volume').find('volume').text(); // hämtar volume
+                    var issue = $(response.data).find('journal_issue').find('issue').text(); // hämtar issue
+                    var first_page = $(response.data).find('journal_article').find('pages').find('first_page').text(); // hämtar första sidan
+                    var last_page = $(response.data).find('journal_article').find('pages').find('last_page').text(); // hämtar sista sidan
+                    var isbn = $(response.data).find('proceedings_metadata').find('isbn').text(); // hämtar isbn (finns det flera...?)
 
-                if($(response.data).find('journal_issue').find('publication_date').find('year').text() != "") {  // om det inte finns några uppgifter hos Crossref klistras inget in
-                    $("div.diva2addtextchoicecol:contains('Year:') , div.diva2addtextchoicecol:contains('År:')").next().find('input').val(year); // klistrar in år från Crossref
-                }
-                if($(response.data).find('journal_volume').find('volume').text() != "") {  // om det inte finns några uppgifter hos Crossref klistras inget in
-                    $("div.diva2addtextchoicecol:contains('Volume:') , div.diva2addtextchoicecol:contains('Volym:')").next().find('input').val(volume); // klistrar in volym från Crossref
-                }
-                if($(response.data).find('journal_issue').find('issue').text() != "") {  // om det inte finns några uppgifter hos Crossref klistras inget in
-                    $("div.diva2addtextchoicecol:contains('Number:') , div.diva2addtextchoicecol:contains('Nummer:')").next().find('input').val(issue); // klistrar in nummer från Crossref
-                }
-                if($(response.data).find('journal_article').find('pages').find('first_page').text() != "") {  // om det inte finns några uppgifter hos Crossref klistras inget in
-                    $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').first().val(first_page); // klistrar in första sidan från Crossref
-                }
-                if($(response.data).find('journal_article').find('pages').find('last_page').text() != "") {  // om det inte finns några uppgifter hos Crossref klistras inget in
-                    $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').next().val(last_page); // klistrar in första sidan från Crossref
-                }
-                if($(response.data).find('proceedings_metadata').find('isbn').text() != "") {  // om det inte finns några uppgifter hos Crossref klistras inget in
-                    $("div.diva2addtextchoicecol:contains('ISBN')").next().find('input').val(isbn); // klistrar in isbn från Crossref FUNKAR BARA OM MAN KLICKAR TVÅ GGR PÅ KNAPPEN ARGH!!
-                }
-            })
+                    if ($(response.data).find('journal_issue').find('publication_date').find('year').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
+                        $("div.diva2addtextchoicecol:contains('Year:') , div.diva2addtextchoicecol:contains('År:')").next().find('input').val(year); // klistrar in år från Crossref
+                    }
+                    if ($(response.data).find('journal_volume').find('volume').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
+                        $("div.diva2addtextchoicecol:contains('Volume:') , div.diva2addtextchoicecol:contains('Volym:')").next().find('input').val(volume); // klistrar in volym från Crossref
+                    }
+                    if ($(response.data).find('journal_issue').find('issue').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
+                        $("div.diva2addtextchoicecol:contains('Number:') , div.diva2addtextchoicecol:contains('Nummer:')").next().find('input').val(issue); // klistrar in nummer från Crossref
+                    }
+                    if ($(response.data).find('journal_article').find('pages').find('first_page').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
+                        $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').first().val(first_page); // klistrar in första sidan från Crossref
+                    }
+                    if ($(response.data).find('journal_article').find('pages').find('last_page').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
+                        $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').next().val(last_page); // klistrar in första sidan från Crossref
+                    }
+                    if ($(response.data).find('proceedings_metadata').find('isbn').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
+                        $("div.diva2addtextchoicecol:contains('ISBN')").next().find('input').val(isbn); // klistrar in isbn från Crossref FUNKAR BARA OM MAN KLICKAR TVÅ GGR PÅ KNAPPEN ARGH!!
+                    }
+                    $("#monkeyresultswrapper i").css("display", "none");
+                    $('#monkeyresults').html();
+                    $("#monkeytalk").html("Crossref svarade... se resultatet under År/Volym/nummer i posten!");
+                })
+                .catch(function(error) {
+                    $('#monkeyresults').html('');
+                    $("#monkeyresultswrapper i").css("display", "none");
+                    $("#monkeytalk").html("Nej, jag hittade inget i Crossref");
+
+                })
+                .then(function() {});
         }
     }
 
@@ -818,7 +851,7 @@
         var $maintitleiframe;
         $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
         DiVAButtonjq.on("click", function() {
-            getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, ""), 'mods');  // ta bort saker som innehåller "&" och "?" som sökningen inte klarar av
+            getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, ""), 'mods'); // ta bort saker som innehåller "&" och "?" som sökningen inte klarar av
         })
         $(".diva2editmainer").before(DiVAButtonjq)
         $(".diva2impmainer").before(DiVAButtonjq)
@@ -995,7 +1028,7 @@
         //
         ////////////////////////////////////
 
-        if($("div.diva2addtextchoicecol:contains('ISSN')").parent().find('input').eq(0).val() != "") {    // ingen mening att visa knappar om det inte står något i fältet
+        if ($("div.diva2addtextchoicecol:contains('ISSN')").parent().find('input').eq(0).val() != "") { // ingen mening att visa knappar om det inte står något i fältet
             $('#issnTitleButtonjq').remove();
             var issnTitleButtonjq = $('<button class="link" id="issnTitleButtonjq" type="button">Öppna i ISSN Portal på serietitel</button>');
             issnTitleButtonjq.on("click", function() {
@@ -1003,11 +1036,11 @@
                     $("div.diva2addtextchoicecol:contains('ISSN')").parent().find('input').eq(0).val() +
                     "";
                 window.open(url, '_blank');
-            })}
-        else {}
+            })
+        } else {}
         $("div.diva2addtextchoicecol:contains('Title of series:'), div.diva2addtextchoicecol:contains('Seriens namn:')").before(issnTitleButtonjq)
 
-        if($("div.diva2addtextchoicecol:contains('ISSN')").parent().find('input').eq(1).val() != "") {   // ingen mening att visa knappar om det inte står något i fältet
+        if ($("div.diva2addtextchoicecol:contains('ISSN')").parent().find('input').eq(1).val() != "") { // ingen mening att visa knappar om det inte står något i fältet
             $('#issnButtonjq').remove();
             var issnButtonjq = $('<button class="link" id="issnButtonjq" type="button">Öppna i ISSN Portal på ISSN</button>');
             issnButtonjq.on("click", function() {
@@ -1016,8 +1049,8 @@
                     "&search[]=SHOULD=allissnbis=%22" + $("div.diva2addtextchoicecol:contains('ISSN')").parent().find('input').eq(2).val() +
                     "%22";
                 window.open(url, '_blank');
-            })}
-        else {}
+            })
+        } else {}
         $("div.diva2addtextchoicecol:contains('ISSN')").parent().find('input').eq(0).after(issnButtonjq)
 
         ///////////////////////////////////////////////////////////////
@@ -1107,7 +1140,7 @@
         //
         ////////////////////////////////////
 
-        if($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() == "") {  // bara om det saknas en DOI
+        if ($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() == "") { // bara om det saknas en DOI
             $('#titleCrossrefButtonjq').remove();
             var titleCrossrefButtonjq = $('<button class="link" id="titleCrossrefButtonjq" type="button">##Sök i Crossref på titel för att hitta DOI##</button>');
             titleCrossrefButtonjq.on("click", function() {
@@ -1125,7 +1158,7 @@
         //
         ////////////////////////////////////
 
-        if($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() == "") {  // bara om det saknas en DOI
+        if ($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val() == "") { // bara om det saknas en DOI
             $('#titleSemanticScholarButtonjq').remove();
             var titleSemanticScholarButtonjq = $('<button class="link" id="titleSemanticScholarButtonjq" type="button">##Sök i SemanticScholar på titel för att hitta DOI##</button>');
             titleSemanticScholarButtonjq.on("click", function() {
@@ -1156,7 +1189,7 @@
         //
         ////////////////////////////////////
 
-        if(doi != ""){  // bara om det finns en DOI, annars är det meningslöst
+        if (doi != "") { // bara om det finns en DOI, annars är det meningslöst
             $('#crossrefButtonjq').remove();
             var crossrefButtonjq = $('<button id="crossrefButtonjq" type="button">Uppdatera förlag från Crossref</button>');
             crossrefButtonjq.on("click", function() {
@@ -1172,7 +1205,7 @@
         //
         ////////////////////////////////////
 
-        if(doi != ""){  // bara om det finns en DOI, annars är det meningslöst
+        if (doi != "") { // bara om det finns en DOI, annars är det meningslöst
             $('#crossrefVolButtonjq').remove();
             var crossrefVolButtonjq = $('<button id="crossrefVolButtonjq" type="button">Uppdatera detaljer från Crossref</button>');
             crossrefVolButtonjq.on("click", function() {
@@ -1198,25 +1231,29 @@
                 contentType: 'application/json',
                 dataType: 'JSON',
                 type: 'post',
-                data: JSON.stringify({ abstract: abstract,
-                                      classes: 3,
-                                      keywords: keywords,
-                                      level: 5,
-                                      title: title
-                                     }),
-                success: function(response){
+                data: JSON.stringify({
+                    abstract: abstract,
+                    classes: 3,
+                    keywords: keywords,
+                    level: 5,
+                    title: title
+                }),
+                success: function(response) {
+                    console.log(response);
                     var json = response.data;
                     var html = '<div><div class="resultsheader">Klassning från Swepub</div><br /><div> Värde: ' + JSON.stringify(response.suggestions[0].score) + '</div>';
-                    html+= '<div>Ämne:  ' + JSON.stringify(response.suggestions[0].swe.prefLabel) +  '</div><br />';
-                    html+= '<div>Ämnesträd:  ' + JSON.stringify(response.suggestions[0].swe._topic_tree).replace(/\\/g, "").replace(/"\[/g, "").replace(/\]"/g, "") +  '</div><br />';
+                    html += '<div>Ämne:  ' + JSON.stringify(response.suggestions[0].swe.prefLabel) + '</div><br />';
+                    html += '<div>Ämnesträd:  ' + JSON.stringify(response.suggestions[0].swe._topic_tree).replace(/\\/g, "").replace(/"\[/g, "").replace(/\]"/g, "") + '</div><br />';
                     if (response.suggestions[1] !== undefined) {
-                        html+= '<div>Värde: ' + JSON.stringify(response.suggestions[1].score) + '</div>';
-                        html+= '<div>Ämne:  ' + JSON.stringify(response.suggestions[1].swe.prefLabel) +  '</div><br />'
-                        html+= '<div>Ämnesträd:  ' + JSON.stringify(response.suggestions[1].swe._topic_tree).replace(/\\/g, "").replace(/"\[/g, "").replace(/\]"/g, "") +  '</div><br />' };
+                        html += '<div>Värde: ' + JSON.stringify(response.suggestions[1].score) + '</div>';
+                        html += '<div>Ämne:  ' + JSON.stringify(response.suggestions[1].swe.prefLabel) + '</div><br />'
+                        html += '<div>Ämnesträd:  ' + JSON.stringify(response.suggestions[1].swe._topic_tree).replace(/\\/g, "").replace(/"\[/g, "").replace(/\]"/g, "") + '</div><br />'
+                    };
                     if (response.suggestions[2] !== undefined) {
-                        html+= '<div>Värde: ' + JSON.stringify(response.suggestions[2].score) + '</div>';
-                        html+= '<div>Ämne:  ' + JSON.stringify(response.suggestions[2].swe.prefLabel) +  '</div><br />'
-                        html+= '<div>Ämnesträd:  ' + JSON.stringify(response.suggestions[2].swe._topic_tree).replace(/\\/g, "").replace(/"\[/g, "").replace(/\]"/g, "") +  '</div><br />' };
+                        html += '<div>Värde: ' + JSON.stringify(response.suggestions[2].score) + '</div>';
+                        html += '<div>Ämne:  ' + JSON.stringify(response.suggestions[2].swe.prefLabel) + '</div><br />'
+                        html += '<div>Ämnesträd:  ' + JSON.stringify(response.suggestions[2].swe._topic_tree).replace(/\\/g, "").replace(/"\[/g, "").replace(/\]"/g, "") + '</div><br />'
+                    };
 
                     $("#monkeyresultswrapper_right i").css("display", "none");
                     $('#monkeyresults_right').html(html);
@@ -1372,7 +1409,7 @@
             var $iframe = $('#' + diva_id + '\\:notes_ifr');
             $iframe.ready(function() {
                 $iframe.contents().find("body p").html($iframe.contents().find("body p").html(""));
-                $iframe.contents().find("body p").html($iframe.contents().find("body p").html()+ QC);
+                $iframe.contents().find("body p").html($iframe.contents().find("body p").html() + QC);
             });
         })
         $('#' + diva_id + '\\:notes').after(qcclearButton)
@@ -1422,7 +1459,7 @@
             replace(/Nykoping/g, "Nyköping").replace(/Ornskoldsvik/g, "Örnsköldsvik").replace(/Molndal/g, "Mölndal").replace(/Upplands Vasby/g, "Upplands Väsby").
             replace(/Lowenstromska/g, "Löwenströmska").replace(/Skarholmen/g, "Skärholmen").replace(/Lantmateri/g, "Lantmäteri").replace(/Kraftnat/g, "Kraftnät");
             $(thiz).next().find('input').val(neworg2);
-            if(neworg != neworg2) {
+            if (neworg != neworg2) {
                 html += '<div><p style="color:green;">Uppdaterat "Annan Organisation"</p></div>';
                 $('#monkeyupdates').html(html + $('#monkeyupdates').html());
             } else {}
@@ -1746,8 +1783,9 @@
     } else if (window.location.href.indexOf("importForm.jsf") !== -1) {
         diva_observer_selector = '.diva2impmainer .diva2addtextbotmargin .diva2addtextbotmargin';
         diva_id_selector = '#diva2addcontainer';
-    } else {
-        diva_id = "addForm";
+    } else if (window.location.href.indexOf("add2.jsf") !== -1) {
+        diva_observer_selector = '.diva2addtextmainer .diva2addtextbotmargin';
+        diva_id_selector = '#diva2addcontainer';
     }
 
     startMonkey()
