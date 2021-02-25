@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.2.3
+// @version      1.3.0-general
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
@@ -541,6 +541,8 @@
      */
 
     async function getWoS(doi) {
+        var pmid ="";
+        var isi ="";
         var api_wos_xml = '<?xml version="1.0" encoding="UTF-8" ?><request xmlns="http://www.isinet.com/xrpc42" src="app.id=API"><fn name="LinksAMR.retrieve"><list><map><val name="username">' + monkey_config.api_username_wos + '</val><val name="password">' + monkey_config.api_password_wos + '</val></map><!-- WHAT IS REQUESTED --><map><list name="WOS"><val>timesCited</val><val>ut</val><val>doi</val><val>pmid</val><val>sourceURL</val><val>citingArticlesURL</val><val>relatedRecordsURL</val></list></map><!-- LOOKUP DATA --><map><!-- QUERY "cite_1" --><map name="cite_1"><val name="doi">' + doi + '</val></map> <!-- end of cite_1--></map><!-- end of citations --></list></fn></request>';
         if(doi == ""){
             $('#monkeytalk').html('Ojojoj, ingen DOI! Jag behöver en DOI för att kunna uppdatera från databaserna.');
@@ -568,8 +570,12 @@
                     var xmlDoc = parser.parseFromString(response.responseText,"text/xml");
                     var x = xmlDoc.getElementsByTagName('val');
                     for (i = 0; i < x.length; i++) {
-                        var isi = x[i].getAttribute('ut');
-                        var pmid = x[i].getAttribute('pmid');
+                        if(x[i].getAttribute('name')=="ut") {
+                            isi = x[i].childNodes[0].nodeValue;
+                        }
+                        if(x[i].getAttribute('name')=="pmid") {
+                            pmid = x[i].childNodes[0].nodeValue;
+                        }
                     }
                     if(isi == ""  // uppdatera bara om fältet är tomt
                        || typeof isi === 'undefined'
