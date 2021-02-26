@@ -1220,7 +1220,8 @@
             $("div.diva2addtextchoice2:contains('Övriga uppgifter') , div.diva2addtextchoice2:contains('Other information') ").parent().before(crossrefVolButtonjq);
         }
 
-        ///////////////////////////////////////////////////
+        
+		/*  Klassificering från Swepub finns integrerad i DiVA nu = kan tas bort (även om jag tycker att den rosa knappen är snyggare)  2021-02-24 /Anders W
         //
         // Knapp för att kolla klassificering från Swepub
         //
@@ -1272,7 +1273,9 @@
 
         $("div.diva2addtextchoice2:contains('Nationell ämneskategori') , div.diva2addtextchoice2:contains('National subject category')").parent().before(classButtonjq);
 
-        ////////////////////////////////////
+		*/
+		
+		////////////////////////////////////
         //
         // Knapp vid PubMed-fältet
         //
