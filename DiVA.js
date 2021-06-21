@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.3.0-general
+// @version      1.3.1-general
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
@@ -42,14 +42,14 @@
     ///////////////////////////////
 
     /**
-     * 
+     *
      * Konfigurera monkey_config för respektive lärosäte
-     * 
+     *
      * Aktivera/inaktivera aktuella funktioner som apan ska hantera
      * (wos : true,
-     * scopus : false 
+     * scopus : false
      * etc)
-     * 
+     *
      * Ange url:er, api-nycklar(scopus_api_url,scopus_apikey... etc)
      * exvis:
      * scopus_api_url : 'https://api.elsevier.com/content/abstract/doi',
@@ -57,14 +57,14 @@
      * etc
      */
     var monkey_config = {
-        login : false,
-        ldap : false,
-        letaanstallda : false,
-        orcid: false,
-        intranet: false,
-        wos : false,
-        scopus : false,
-        qc : false,
+        login : true,
+        ldap : true,
+        letaanstallda : true,
+        orcid: true,
+        intranet: true,
+        wos : true,
+        scopus : true,
+        qc : true,
         monkey_image_url: "https://apps.lib.kth.se/divaapan/apa.jpg",
         oa_image_url : "https://apps.lib.kth.se/divaapan/oa.png",
         university : 'KTH',
@@ -78,15 +78,15 @@
         dblp_api_doi_url : 'https://dblp.uni-trier.de/doi/xml',
         dblp_api_rec_url : 'https://dblp.uni-trier.de/rec/xml',
         wos_api_url : 'https://ws.isiknowledge.com/cps/xrpc',
-        api_username_wos : '',
-        api_password_wos : '',
+        api_username_wos : 'xxx',
+        api_password_wos : 'xxx',
         ldap_apiurl : 'https://lib.kth.se/ldap/api/v1',
         orcid_apiurl : 'https://pub.orcid.org/v3.0/search',
         letaanstallda_apiurl : 'https://apps-ref.lib.kth.se/webservices/letaanstallda/api/v1',
-        ldap_apikey : '',
+        ldap_apikey : 'xxx',
         orcid_apikey : '',
-        letaanstallda_apikey : '',
-        scopus_apikey : ''
+        letaanstallda_apikey : 'xxx',
+        scopus_apikey : 'xxx'
     }
 
     var observer_config = {
@@ -152,12 +152,12 @@
                     }
                 },
                 error:
-                    //401 Unauthorized
-                    function(response, textStatus, xhr) {
-                        alert("Unauthorized")
-                        Cookies.remove('token')
-                        $('#monkeylogin').css("display", "block");
-                    }
+                //401 Unauthorized
+                function(response, textStatus, xhr) {
+                    alert("Unauthorized")
+                    Cookies.remove('token')
+                    $('#monkeylogin').css("display", "block");
+                }
             });
         } else {
             Cookies.remove('token')
@@ -222,21 +222,21 @@
             };
         });
         return array.map(item => {
-                return {
-                    src: item,
-                    compareValues: predicates.map(predicate => predicate.getter(item))
-                };
-            })
+            return {
+                src: item,
+                compareValues: predicates.map(predicate => predicate.getter(item))
+            };
+        })
             .sort((o1, o2) => {
-                let i = -1,
-                    result = 0;
-                while (++i < predicates.length) {
-                    if (o1.compareValues[i] < o2.compareValues[i]) result = -1;
-                    if (o1.compareValues[i] > o2.compareValues[i]) result = 1;
-                    if (result *= predicates[i].descend) break;
-                }
-                return result;
-            })
+            let i = -1,
+                result = 0;
+            while (++i < predicates.length) {
+                if (o1.compareValues[i] < o2.compareValues[i]) result = -1;
+                if (o1.compareValues[i] > o2.compareValues[i]) result = 1;
+                if (result *= predicates[i].descend) break;
+            }
+            return result;
+        })
             .map(item => item.src);
     }
 
@@ -266,8 +266,8 @@
         var url = monkey_config.orcid_apiurl + "?q=family-name:" + enamn2 + "+AND+given-names:" + fnamn2;
         const response = await axios.get(url, {
             headers: {
-              'Accept': 'application/json',
-              'content-type': 'application/json;charset=utf-8'
+                'Accept': 'application/json',
+                'content-type': 'application/json;charset=utf-8'
             }
         })
         var orcidusers = [];
@@ -277,7 +277,7 @@
                 const orciddetails = await axios.get(
                     encodeURI(result[i]['orcid-identifier'].uri),{
                         headers: { 'Accept': "application/json",
-                        'content-type': 'application/json;charset=utf-8' }
+                                  'content-type': 'application/json;charset=utf-8' }
                     }
                 );
                 var orciddetailsresult = orciddetails.data;
@@ -387,21 +387,22 @@
                             '<div><span class="fieldtitle">Titel: </span><span>' + json.ugusers[key].title + '</span></div>' +
                             '<div><span class="fieldtitle">Skola/org: </span><span>' + json.ugusers[key].kthPAGroupMembership + '</span></div>' +
                             '<div><span class="fieldtitle">KTH-affiliering: </span><span>' + json.ugusers[key].ugPrimaryAffiliation + '</span></div>' +
-                            '<div><span class="fieldtitle">Email: </span><span>' + json.ugusers[key].mail + '</span></div>'
+                            '<div><span class="fieldtitle">Email: </span><span>' + json.ugusers[key].mail + '</span></div>' +
+                            '<div><span class="fieldtitle">Username: </span><span><a href="https://www.kth.se/profile/' + json.ugusers[key].ugUsername + '" target="_new">' + json.ugusers[key].ugUsername + '</a></span></div>'
                         html += '</div>';
                     });
 
-                    }
                 }
+            }
 
-                html += '</div>'
-                $("#monkeyresultswrapper_right i").css("display", "none");
-                $('#monkeyresults_right').html(html);
-                $("#monkeytalk_right").html("LDAP svarade... se resultatet här nedanför");
-            })
+            html += '</div>'
+            $("#monkeyresultswrapper_right i").css("display", "none");
+            $('#monkeyresults_right').html(html);
+            $("#monkeytalk_right").html("LDAP svarade... se resultatet här nedanför");
+        })
             .catch(function(error) {
-                api_error(error.response);
-            })
+            api_error(error.response);
+        })
             .then(function() {});
     }
 
@@ -479,58 +480,58 @@
             '?apiKey=' + monkey_config.scopus_apikey;
         await axios.get(url)
             .then(function(response) {
-                var html = '<div><div class="updateheader"></div>';
-                if (response.status == 201) {
-                    html += "<p>Hittade inget i Scopus!</p>";
+            var html = '<div><div class="updateheader"></div>';
+            if (response.status == 201) {
+                html += "<p>Hittade inget i Scopus!</p>";
+            } else {
+                //hitta ScopusId
+                var eid = response.data['abstracts-retrieval-response']['coredata']['eid']; //plocka värdet för ScopusId (eid)
+                if (eid == "" // uppdatera bara om fältet är tomt
+                    ||
+                    typeof eid === 'undefined' ||
+                    eid == 'undefined') {
+                    //                 html += '<p>ScopusID hittades inte</p>';
                 } else {
-                    //hitta ScopusId
-                    var eid = response.data['abstracts-retrieval-response']['coredata']['eid']; //plocka värdet för ScopusId (eid)
-                    if (eid == "" // uppdatera bara om fältet är tomt
-                        ||
-                        typeof eid === 'undefined' ||
-                        eid == 'undefined') {
-                        //                 html += '<p>ScopusID hittades inte</p>';
-                    } else {
-                        if ($("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val() == "") {
-                            html += '<p style="color:green;">Uppdaterat ScopusID: ' + eid + '</p>';
-                            $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                            $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
-                        }
+                    if ($("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val() == "") {
+                        html += '<p style="color:green;">Uppdaterat ScopusID: ' + eid + '</p>';
+                        $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                        $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
                     }
+                }
 
-                    var pmid = response.data['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
-                    if (pmid == "" // uppdatera bara om fältet är tomt
-                        ||
-                        typeof pmid === 'undefined' ||
-                        pmid == 'undefined') {
-                        //                 html += '<p>PubMedID hittades inte i Scopus</p>';
-                    } else {
-                        if ($("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val() == "") {
-                            html += '<p style="color:green;">Uppdaterat PubMedID: ' + pmid + '</p>';
-                            $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
-                        }
+                var pmid = response.data['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
+                if (pmid == "" // uppdatera bara om fältet är tomt
+                    ||
+                    typeof pmid === 'undefined' ||
+                    pmid == 'undefined') {
+                    //                 html += '<p>PubMedID hittades inte i Scopus</p>';
+                } else {
+                    if ($("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val() == "") {
+                        html += '<p style="color:green;">Uppdaterat PubMedID: ' + pmid + '</p>';
+                        $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
                     }
+                }
 
-                    var oa = response.data['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
-                    if (oa == 'true') { // kolla om artikeln är OA
-                        document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
-                        html += '<p style="color:green;">Uppdaterat Free full-text: ' + response.data['abstracts-retrieval-response']['coredata']['openaccessFlag'] + '</p>'; // visa bara uppdatering om Free full-text = 'true'
-                    } else {
-                        ""; // checka inte boxen
-                    }
-                    $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                var oa = response.data['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
+                if (oa == 'true') { // kolla om artikeln är OA
+                    document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
+                    html += '<p style="color:green;">Uppdaterat Free full-text: ' + response.data['abstracts-retrieval-response']['coredata']['openaccessFlag'] + '</p>'; // visa bara uppdatering om Free full-text = 'true'
+                } else {
+                    ""; // checka inte boxen
+                }
+                $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
 
-                };
-                $("#monkeyresultswrapper i").css("display", "none");
-                $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-                $("#monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
-                return 1;
-            })
+            };
+            $("#monkeyresultswrapper i").css("display", "none");
+            $('#monkeyupdates').html(html + $('#monkeyupdates').html());
+            $("#monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
+            return 1;
+        })
             .catch(function(error) {
-                $("#monkeyresultswrapper i").css("display", "none");
-                $("#monkeytalk").html("Jag hittade inget i Scopus!");
-            })
+            $("#monkeyresultswrapper i").css("display", "none");
+            $("#monkeytalk").html("Jag hittade inget i Scopus!");
+        })
             .then(function() {});
     }
 
@@ -553,7 +554,7 @@
         $("#monkeytalk").html("Jag pratar med Web of Science...");
         var url = monkey_config.wos_api_url;
 
-        //använd GM_xmlhttpRequest för anrop som annars inte fungerar pga CORS 
+        //använd GM_xmlhttpRequest för anrop som annars inte fungerar pga CORS
         await GM_xmlhttpRequest ({
             method: "POST",
             url: url,
@@ -606,7 +607,7 @@
             onerror: function(error) {
                 $("#monkeyresultswrapper i").css("display", "none");
                 $("#monkeytalk").html("Jag hittade inget i Web of Science");
-            }  
+            }
         });
     }
 
@@ -746,18 +747,18 @@
             var url = 'https://api.crossref.org/works/' + doi + '/transform/application/vnd.crossref.unixsd+xml';
             axios.get(url)
                 .then(function(response) {
-                    var publisher = $(response.data).find('crm-item[name="publisher-name"]').text(); // hämtar förlagsinformation
-                    var publisher_edited = publisher.replace(/Springer Science and Business Media LLC/g, "Springer Nature");
-                    $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").parent().find('input').val(publisher_edited); // klistrar in förlagsinfo från Crossref
-                    $("#monkeyresultswrapper i").css("display", "none");
-                    $('#monkeyresults').html();
-                    $("#monkeytalk").html("Crossref svarade... se resultatet under \"Annat förlag\" i posten!");
-                })
+                var publisher = $(response.data).find('crm-item[name="publisher-name"]').text(); // hämtar förlagsinformation
+                var publisher_edited = publisher.replace(/Springer Science and Business Media LLC/g, "Springer Nature");
+                $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").parent().find('input').val(publisher_edited); // klistrar in förlagsinfo från Crossref
+                $("#monkeyresultswrapper i").css("display", "none");
+                $('#monkeyresults').html();
+                $("#monkeytalk").html("Crossref svarade... se resultatet under \"Annat förlag\" i posten!");
+            })
                 .catch(function(error) {
-                    $('#monkeyresults').html('');
-                    $("#monkeyresultswrapper i").css("display", "none");
-                    $("#monkeytalk").html("Nej, jag hittade inget i Crossref");
-                })
+                $('#monkeyresults').html('');
+                $("#monkeyresultswrapper i").css("display", "none");
+                $("#monkeytalk").html("Nej, jag hittade inget i Crossref");
+            })
                 .then(function() {});
         }
     }
@@ -777,41 +778,41 @@
             var url = 'https://api.crossref.org/works/' + doi + '/transform/application/vnd.crossref.unixsd+xml';
             axios.get(url)
                 .then(function(response) {
-                    var year = $(response.data).find('journal_issue').find('publication_date').find('year').last().text(); // hämtar year, svårt här, ibland två st year - tar det sista
-                    var volume = $(response.data).find('journal_volume').find('volume').text(); // hämtar volume
-                    var issue = $(response.data).find('journal_issue').find('issue').text(); // hämtar issue
-                    var first_page = $(response.data).find('journal_article').find('pages').find('first_page').text(); // hämtar första sidan
-                    var last_page = $(response.data).find('journal_article').find('pages').find('last_page').text(); // hämtar sista sidan
-                    var isbn = $(response.data).find('proceedings_metadata').find('isbn').text(); // hämtar isbn (finns det flera...?)
+                var year = $(response.data).find('journal_issue').find('publication_date').find('year').last().text(); // hämtar year, svårt här, ibland två st year - tar det sista
+                var volume = $(response.data).find('journal_volume').find('volume').text(); // hämtar volume
+                var issue = $(response.data).find('journal_issue').find('issue').text(); // hämtar issue
+                var first_page = $(response.data).find('journal_article').find('pages').find('first_page').text(); // hämtar första sidan
+                var last_page = $(response.data).find('journal_article').find('pages').find('last_page').text(); // hämtar sista sidan
+                var isbn = $(response.data).find('proceedings_metadata').find('isbn').text(); // hämtar isbn (finns det flera...?)
 
-                    if ($(response.data).find('journal_issue').find('publication_date').find('year').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
-                        $("div.diva2addtextchoicecol:contains('Year:') , div.diva2addtextchoicecol:contains('År:')").next().find('input').val(year); // klistrar in år från Crossref
-                    }
-                    if ($(response.data).find('journal_volume').find('volume').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
-                        $("div.diva2addtextchoicecol:contains('Volume:') , div.diva2addtextchoicecol:contains('Volym:')").next().find('input').val(volume); // klistrar in volym från Crossref
-                    }
-                    if ($(response.data).find('journal_issue').find('issue').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
-                        $("div.diva2addtextchoicecol:contains('Number:') , div.diva2addtextchoicecol:contains('Nummer:')").next().find('input').val(issue); // klistrar in nummer från Crossref
-                    }
-                    if ($(response.data).find('journal_article').find('pages').find('first_page').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
-                        $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').first().val(first_page); // klistrar in första sidan från Crossref
-                    }
-                    if ($(response.data).find('journal_article').find('pages').find('last_page').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
-                        $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').next().val(last_page); // klistrar in första sidan från Crossref
-                    }
-                    if ($(response.data).find('proceedings_metadata').find('isbn').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
-                        $("div.diva2addtextchoicecol:contains('ISBN')").next().find('input').val(isbn); // klistrar in isbn från Crossref FUNKAR BARA OM MAN KLICKAR TVÅ GGR PÅ KNAPPEN ARGH!!
-                    }
-                    $("#monkeyresultswrapper i").css("display", "none");
-                    $('#monkeyresults').html();
-                    $("#monkeytalk").html("Crossref svarade... se resultatet under År/Volym/nummer i posten!");
-                })
+                if ($(response.data).find('journal_issue').find('publication_date').find('year').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
+                    $("div.diva2addtextchoicecol:contains('Year:') , div.diva2addtextchoicecol:contains('År:')").next().find('input').val(year); // klistrar in år från Crossref
+                }
+                if ($(response.data).find('journal_volume').find('volume').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
+                    $("div.diva2addtextchoicecol:contains('Volume:') , div.diva2addtextchoicecol:contains('Volym:')").next().find('input').val(volume); // klistrar in volym från Crossref
+                }
+                if ($(response.data).find('journal_issue').find('issue').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
+                    $("div.diva2addtextchoicecol:contains('Number:') , div.diva2addtextchoicecol:contains('Nummer:')").next().find('input').val(issue); // klistrar in nummer från Crossref
+                }
+                if ($(response.data).find('journal_article').find('pages').find('first_page').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
+                    $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').first().val(first_page); // klistrar in första sidan från Crossref
+                }
+                if ($(response.data).find('journal_article').find('pages').find('last_page').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
+                    $("div.diva2addtextchoicecol:contains('Pages:') , div.diva2addtextchoicecol:contains('Sidor:')").next().find('input').next().val(last_page); // klistrar in första sidan från Crossref
+                }
+                if ($(response.data).find('proceedings_metadata').find('isbn').text() != "") { // om det inte finns några uppgifter hos Crossref klistras inget in
+                    $("div.diva2addtextchoicecol:contains('ISBN')").next().find('input').val(isbn); // klistrar in isbn från Crossref FUNKAR BARA OM MAN KLICKAR TVÅ GGR PÅ KNAPPEN ARGH!!
+                }
+                $("#monkeyresultswrapper i").css("display", "none");
+                $('#monkeyresults').html();
+                $("#monkeytalk").html("Crossref svarade... se resultatet under År/Volym/nummer i posten!");
+            })
                 .catch(function(error) {
-                    $('#monkeyresults').html('');
-                    $("#monkeyresultswrapper i").css("display", "none");
-                    $("#monkeytalk").html("Nej, jag hittade inget i Crossref");
+                $('#monkeyresults').html('');
+                $("#monkeyresultswrapper i").css("display", "none");
+                $("#monkeytalk").html("Nej, jag hittade inget i Crossref");
 
-                })
+            })
                 .then(function() {});
         }
     }
@@ -883,7 +884,7 @@
             $subtitleiframe.contents().find("body").html(subtitle);
         })
         // extremt fult sätt att skilja 'titel' från 'alternativ titel' eftersom 'alternativ titel' innehåller 'titel'
-        var s_title = $("div.diva2addtextchoicebr:contains('Titel'), div.diva2addtextchoicebr:contains('Title')").not($("div.diva2addtextchoicebr:contains('Alternativ'), div.diva2addtextchoicebr:contains('Alternative')"))
+        var s_title = $("div.diva2addtextchoicebr:contains('Titel'), div.diva2addtextchoicebr:contains('Title')").not($("div.diva2addtextchoicebr:contains('Alternativ'), div.diva2addtextchoicebr:contains('Alternative'), div.diva2addtextchoicebr:contains('Titel: Handledarens'), div.diva2addtextchoicebr:contains('Title: The supervisor'), div.diva2addtextchoicebr:contains('Titel: Ange opponentens'), div.diva2addtextchoicebr:contains('Title: The opponent'), div.diva2addtextchoicebr:contains('Titel: Ange examinatorns'), div.diva2addtextchoicebr:contains('Title: The examiner')"))
         $(s_title).before(titlesplitButtonjq)
 
         ///////////////////////////////////////////////////////////
@@ -905,7 +906,7 @@
             $subtitleiframe.contents().find("body").html(changedsubtitle);
         })
         // extremt fult sätt att skilja 'titel' från 'alternativ titel' eftersom 'alternativ titel' innehåller 'titel'
-        var c_title = $("div.diva2addtextchoicebr:contains('Titel'), div.diva2addtextchoicebr:contains('Title')").not($("div.diva2addtextchoicebr:contains('Alternativ'), div.diva2addtextchoicebr:contains('Alternative')"));
+        var c_title = $("div.diva2addtextchoicebr:contains('Titel'), div.diva2addtextchoicebr:contains('Title')").not($("div.diva2addtextchoicebr:contains('Alternativ'), div.diva2addtextchoicebr:contains('Alternative'), div.diva2addtextchoicebr:contains('Titel: Handledarens'), div.diva2addtextchoicebr:contains('Title: The supervisor'), div.diva2addtextchoicebr:contains('Titel: Ange opponentens'), div.diva2addtextchoicebr:contains('Title: The opponent'), div.diva2addtextchoicebr:contains('Titel: Ange examinatorns'), div.diva2addtextchoicebr:contains('Title: The examiner')"))
         $(c_title).before(caseButtonjq)
 
         ///////////////////////////////////////////////////////////
@@ -995,8 +996,8 @@
         //
         ///////////////////////////////////////////////////////////
 
-        var $altmaintitleiframe = $("div.diva2addtextchoice2:contains('Alternativ') , div.diva2addtextchoice2:contains('Alternative')").parent().next().find('iframe').first();
-        var $altsubtitleiframe = $("div.diva2addtextchoice2:contains('Alternativ') , div.diva2addtextchoice2:contains('Alternative')").parent().next().next().next().find('iframe').first();
+        var $altmaintitleiframe = $("div.diva2addtextchoice2:contains('Alternativ titel') , div.diva2addtextchoice2:contains('Alternative title')").parent().next().find('iframe').first();
+        var $altsubtitleiframe = $("div.diva2addtextchoice2:contains('Alternativ titel') , div.diva2addtextchoice2:contains('Alternative title')").parent().next().next().next().find('iframe').first();
         $('#alttitlesplitButtonjq').remove();
         var alttitlesplitButtonjq = $('<button id="alttitlesplitButtonjq" type="button">Split : </button>');
         alttitlesplitButtonjq.on("click", function() {
@@ -1007,7 +1008,7 @@
             $altmaintitleiframe.contents().find("body").html(changedaltmaintitle);
             $altsubtitleiframe.contents().find("body").html(altsubtitle);
         })
-        $("div.diva2addtextchoice2:contains('Alternativ'), div.diva2addtextchoice2:contains('Alternative')").parent().before(alttitlesplitButtonjq)
+        $("div.diva2addtextchoice2:contains('Alternativ titel'), div.diva2addtextchoice2:contains('Alternative title')").parent().before(alttitlesplitButtonjq)
 
         ///////////////////////////////////////////////////////////////
         //
@@ -1220,8 +1221,9 @@
             $("div.diva2addtextchoice2:contains('Övriga uppgifter') , div.diva2addtextchoice2:contains('Other information') ").parent().before(crossrefVolButtonjq);
         }
 
-        
-		/*  Klassificering från Swepub finns integrerad i DiVA nu = kan tas bort (även om jag tycker att den rosa knappen är snyggare)  2021-02-24 /Anders W
+        ///////////////////////////////////////////////////
+        //
+        /*  Klassificering från Swepub finns integrerad i DiVA nu = kan tas bort (även om jag tycker att den rosa knappen är snyggare)  2021-02-24 /Anders W
         //
         // Knapp för att kolla klassificering från Swepub
         //
@@ -1274,8 +1276,8 @@
         $("div.diva2addtextchoice2:contains('Nationell ämneskategori') , div.diva2addtextchoice2:contains('National subject category')").parent().before(classButtonjq);
 
 		*/
-		
-		////////////////////////////////////
+
+        ////////////////////////////////////
         //
         // Knapp vid PubMed-fältet
         //
@@ -1488,8 +1490,8 @@
 
             //LDAP/UG
             if(monkey_config.ldap) {
-                $('#ldapButtonjq' + i).remove();
-                var ldapButtonjq = $('<button id="ldapButtonjq' + i + '" type="button">LDAP-info</button>');
+                $('#ldapButtonAuthorjq' + i).remove();
+                var ldapButtonjq = $('<button id="ldapButtonAuthorjq' + i + '" type="button">LDAP-info</button>');
                 ldapButtonjq.on("click", function() {
                     getLDAP($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val(),'');
                 })
@@ -1497,8 +1499,8 @@
             }
             //Leta KTH-anställda
             if(monkey_config.letaanstallda) {
-                $('#letaButtonjq' + i).remove();
-                var letaButtonjq = $('<button id="letaButtonjq' + i + '" type="button">Leta KTH-anställda</button>');
+                $('#letaButtonAuthorjq' + i).remove();
+                var letaButtonjq = $('<button id="letaButtonAuthorjq' + i + '" type="button">Leta KTH-anställda</button>');
                 letaButtonjq.on("click", function() {
                     getLeta($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val());
                 })
@@ -1507,8 +1509,8 @@
 
             //Sök i ORCiD
             if(monkey_config.orcid) {
-                $('#orcidButtonjq' + i).remove();
-                var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök i ORCiD</button>');
+                $('#orcidButtonAuthorjq' + i).remove();
+                var orcidButtonjq = $('<button id="orcidButtonAuthorjq' + i + '" type="button">Sök i ORCiD</button>');
                 orcidButtonjq.on("click", function() {
                     getOrcid($(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="autFamily"]').val());
                 })
@@ -1517,8 +1519,8 @@
 
             //Intranät förnamn efternamn
             if(monkey_config.intranet) {
-                $('#intraButtonjq' + i).remove();
-                var intraButtonjq = $('<button class="link" id="intraButtonjq' + i + '" type="button">' + monkey_config.university + ' Intra</button>');
+                $('#intraButtonAuthorjq' + i).remove();
+                var intraButtonjq = $('<button class="link" id="intraButtonAuthorjq' + i + '" type="button">' + monkey_config.university + ' Intra</button>');
                 intraButtonjq.on("click", function() {
                     var url = monkey_config.university_search_url + "?q=" +
                         $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val() +
@@ -1535,8 +1537,8 @@
             }
 
             //Google.com förnamn + efternamn + lärosäte
-            $('#googleButtonjq' + i).remove();
-            var googleButtonjq = $('<button class="link" id="googleButtonjq' + i + '" type="button">Google</button>');
+            $('#googleButtonAuthorjq' + i).remove();
+            var googleButtonjq = $('<button class="link" id="googleButtonAuthorjq' + i + '" type="button">Google</button>');
             googleButtonjq.on("click", function() {
                 var url = "https://www.google.com/search?q=" + monkey_config.university + "+" +
                     $(thiz).find('.diva2addtextplusname input[id$="autGiven"]').val() +
@@ -1564,8 +1566,8 @@
 
             //LDAP/UG
             if(monkey_config.ldap) {
-                $('#ldapButtonjq' + i).remove();
-                var ldapButtonjq = $('<button id="ldapButtonjq' + i + '" type="button">LDAP-info</button>');
+                $('#ldapButtonEditorjq' + i).remove();
+                var ldapButtonjq = $('<button id="ldapButtonEditorjq' + i + '" type="button">LDAP-info</button>');
                 ldapButtonjq.on("click", function() {
                     getLDAP($(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val(),'');
                 })
@@ -1574,8 +1576,8 @@
 
             //Leta KTH-anställda
             if(monkey_config.letaanstallda) {
-                $('#letaButtonjq' + i).remove();
-                var letaButtonjq = $('<button id="letaButtonjq' + i + '" type="button">Leta KTH-anställda</button>');
+                $('#letaButtonEditorjq' + i).remove();
+                var letaButtonjq = $('<button id="letaButtonEditorjq' + i + '" type="button">Leta KTH-anställda</button>');
                 letaButtonjq.on("click", function() {
                     getLeta($(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val());
                 })
@@ -1584,8 +1586,8 @@
 
             //Sök i ORCiD
             if(monkey_config.orcid) {
-                $('#orcidButtonjq' + i).remove();
-                var orcidButtonjq = $('<button id="orcidButtonjq' + i + '" type="button">Sök i ORCiD</button>');
+                $('#orcidButtonEditorjq' + i).remove();
+                var orcidButtonjq = $('<button id="orcidButtonEditorjq' + i + '" type="button">Sök i ORCiD</button>');
                 orcidButtonjq.on("click", function() {
                     getOrcid($(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val());
                 })
@@ -1594,8 +1596,8 @@
 
             //Intranät förnamn efternamn
             if(monkey_config.intranet) {
-                $('#intraButtonjq' + i).remove();
-                var intraButtonjq = $('<button class="link" id="intraButtonjq' + i + '" type="button">' + monkey_config.university + ' Intra</button>');
+                $('#intraButtonEditorjq' + i).remove();
+                var intraButtonjq = $('<button class="link" id="intraButtonEditorjq' + i + '" type="button">' + monkey_config.university + ' Intra</button>');
                 intraButtonjq.on("click", function() {
                     var url = monkey_config.university_search_url + "?q=" +
                         $(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val() +
@@ -1613,22 +1615,261 @@
             }
 
             //Google.com förnamn + efternamn + Lärosäte
-                $('#googleButtonjq' + i).remove();
-                var googleButtonjq = $('<button class="link" id="googleButtonjq' + i + '" type="button">Google</button>');
-                googleButtonjq.on("click", function() {
-                    var url = "https://www.google.com/search?q=" + monkey_config.university + "+" +
-                        $(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val() +
-                        "+" +
-                        $(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val()
-                    // ta bort eventuella $$$ från efternamnen före sökning
-                    var newurl = url.replace("$$$", "")
-                    // sök på förnamn efternamn + lärosäte i google
-                    window.open(newurl, '_blank'); 
-                })
-                $(this).before(googleButtonjq)
+            $('#googleButtonEditorjq' + i).remove();
+            var googleButtonjq = $('<button class="link" id="googleButtonEditorjq' + i + '" type="button">Google</button>');
+            googleButtonjq.on("click", function() {
+                var url = "https://www.google.com/search?q=" + monkey_config.university + "+" +
+                    $(thiz).find('.diva2addtextplusname input[id$="editorGiven"]').val() +
+                    "+" +
+                    $(thiz).find('.diva2addtextplusname input[id$="editorFamily"]').val()
+                // ta bort eventuella $$$ från efternamnen före sökning
+                var newurl = url.replace("$$$", "")
+                // sök på förnamn efternamn + lärosäte i google
+                window.open(newurl, '_blank');
+            })
+            $(this).before(googleButtonjq)
 
             i++;
         });
+
+        //////////////////////////////////////////////////////////////////////////
+        //
+        //Knappar för *supervisors* till LDAP, Leta KTH anställda, KTH Intra, Google och ORCiD
+        //
+        //////////////////////////////////////////////////////////////////////////
+
+        var supervisors = $('#' + diva_id + '\\:supervisorSerie');
+        i = 0;
+        $(supervisors).find('.diva2addtextarea').each(function() {
+            var thiz = this;
+
+            //LDAP/UG
+            if(monkey_config.ldap) {
+                $('#ldapButtonSupervisorjq' + i).remove();
+                var ldapButtonjq = $('<button id="ldapButtonSupervisorjq' + i + '" type="button">LDAP-info</button>');
+                ldapButtonjq.on("click", function() {
+                    getLDAP($(thiz).find('.diva2addtextplusname input[id$="supGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="supFamily"]').val(),'');
+                })
+                $(this).before(ldapButtonjq)
+            }
+
+            //Leta KTH-anställda
+            if(monkey_config.letaanstallda) {
+                $('#letaButtonSupervisorjq' + i).remove();
+                var letaButtonjq = $('<button id="letaButtonSupervisorjq' + i + '" type="button">Leta KTH-anställda</button>');
+                letaButtonjq.on("click", function() {
+                    getLeta($(thiz).find('.diva2addtextplusname input[id$="supGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="supFamily"]').val());
+                })
+                $(this).before(letaButtonjq)
+            }
+
+            //Sök i ORCiD
+            if(monkey_config.orcid) {
+                $('#orcidButtonSupervisorjq' + i).remove();
+                var orcidButtonjq = $('<button id="orcidButtonSupervisorjq' + i + '" type="button">Sök i ORCiD</button>');
+                orcidButtonjq.on("click", function() {
+                    getOrcid($(thiz).find('.diva2addtextplusname input[id$="supGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="supFamily"]').val());
+                })
+                $(this).before(orcidButtonjq);
+            }
+
+            //Intranät förnamn efternamn
+            if(monkey_config.intranet) {
+                $('#intraButtonSupervisorjq' + i).remove();
+                var intraButtonjq = $('<button class="link" id="intraButtonSupervisorjq' + i + '" type="button">' + monkey_config.university + ' Intra</button>');
+                intraButtonjq.on("click", function() {
+                    var url = monkey_config.university_search_url + "?q=" +
+                        $(thiz).find('.diva2addtextplusname input[id$="supGiven"]').val() +
+                        "%20" +
+                        $(thiz).find('.diva2addtextplusname input[id$="supFamily"]').val() +
+                        "&urlFilter=" + monkey_config.university_intranet_url + "&filterLabel=KTH%20Intran%C3%A4t&entityFilter=kth-profile,kth-place,%20kth-system"
+                    // ta bort eventuella $$$ från efternamnen före sökning
+                    var newurl = url.replace("$$$", "")
+                    // ta bort allt som ser ut som en VERSAL med en punkt efter, typ förnamn från Scopus. Verkar ge bättre resultat med bara efternamn vid sökning i KTH Intra
+                    var newurl2 = newurl.replace(/[A-Z]\./g, "")
+                    // sök på förnamn efternamn på KTH Intranät
+                    window.open(newurl2, '_blank');
+                })
+                $(this).before(intraButtonjq)
+            }
+
+            //Google.com förnamn + efternamn + Lärosäte
+            $('#googleButtonSupervisorjq' + i).remove();
+            var googleButtonjq = $('<button class="link" id="googleButtonSupervisorjq' + i + '" type="button">Google</button>');
+            googleButtonjq.on("click", function() {
+                var url = "https://www.google.com/search?q=" + monkey_config.university + "+" +
+                    $(thiz).find('.diva2addtextplusname input[id$="supGiven"]').val() +
+                    "+" +
+                    $(thiz).find('.diva2addtextplusname input[id$="supFamily"]').val()
+                // ta bort eventuella $$$ från efternamnen före sökning
+                var newurl = url.replace("$$$", "")
+                // sök på förnamn efternamn + lärosäte i google
+                window.open(newurl, '_blank');
+            })
+            $(this).before(googleButtonjq)
+
+            i++;
+        });
+
+        //////////////////////////////////////////////////////////////////////////
+        //
+        // Knappar för *opponenter* till LDAP, Leta KTH anställda, KTH Intra, Google och ORCiD
+        // Inte sannolikt att det finns KTH:are bland opponenterna, men kanske...
+        //
+        //////////////////////////////////////////////////////////////////////////
+
+        var opponents = $('#' + diva_id + '\\:opponentSerie');
+        i = 0;
+        $(opponents).find('.diva2addtextarea').each(function() {
+            var thiz = this;
+
+            //LDAP/UG
+            if(monkey_config.ldap) {
+                $('#ldapButtonOpponentjq' + i).remove();
+                var ldapButtonjq = $('<button id="ldapButtonOpponentjq' + i + '" type="button">LDAP-info</button>');
+                ldapButtonjq.on("click", function() {
+                    getLDAP($(thiz).find('.diva2addtextplusname input[id$="oppGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="oppFamily"]').val(),'');
+                })
+                $(this).before(ldapButtonjq)
+            }
+
+            //Leta KTH-anställda
+            if(monkey_config.letaanstallda) {
+                $('#letaButtonOpponentjq' + i).remove();
+                var letaButtonjq = $('<button id="letaButtonOpponentjq' + i + '" type="button">Leta KTH-anställda</button>');
+                letaButtonjq.on("click", function() {
+                    getLeta($(thiz).find('.diva2addtextplusname input[id$="oppGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="oppFamily"]').val());
+                })
+                $(this).before(letaButtonjq)
+            }
+
+            //Sök i ORCiD
+            if(monkey_config.orcid) {
+                $('#orcidButtonOpponentjq' + i).remove();
+                var orcidButtonjq = $('<button id="orcidButtonOpponentjq' + i + '" type="button">Sök i ORCiD</button>');
+                orcidButtonjq.on("click", function() {
+                    getOrcid($(thiz).find('.diva2addtextplusname input[id$="oppGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="oppFamily"]').val());
+                })
+                $(this).before(orcidButtonjq);
+            }
+
+            //Intranät förnamn efternamn
+            if(monkey_config.intranet) {
+                $('#intraButtonOpponentjq' + i).remove();
+                var intraButtonjq = $('<button class="link" id="intraButtonOpponentjq' + i + '" type="button">' + monkey_config.university + ' Intra</button>');
+                intraButtonjq.on("click", function() {
+                    var url = monkey_config.university_search_url + "?q=" +
+                        $(thiz).find('.diva2addtextplusname input[id$="oppGiven"]').val() +
+                        "%20" +
+                        $(thiz).find('.diva2addtextplusname input[id$="oppFamily"]').val() +
+                        "&urlFilter=" + monkey_config.university_intranet_url + "&filterLabel=KTH%20Intran%C3%A4t&entityFilter=kth-profile,kth-place,%20kth-system"
+                    // ta bort eventuella $$$ från efternamnen före sökning
+                    var newurl = url.replace("$$$", "")
+                    // ta bort allt som ser ut som en VERSAL med en punkt efter, typ förnamn från Scopus. Verkar ge bättre resultat med bara efternamn vid sökning i KTH Intra
+                    var newurl2 = newurl.replace(/[A-Z]\./g, "")
+                    // sök på förnamn efternamn på KTH Intranät
+                    window.open(newurl2, '_blank');
+                })
+                $(this).before(intraButtonjq)
+            }
+
+            //Google.com förnamn + efternamn + Lärosäte
+            $('#googleButtonOpponentjq' + i).remove();
+            var googleButtonjq = $('<button class="link" id="googleButtonOpponentjq' + i + '" type="button">Google</button>');
+            googleButtonjq.on("click", function() {
+                var url = "https://www.google.com/search?q=" + monkey_config.university + "+" +
+                    $(thiz).find('.diva2addtextplusname input[id$="oppGiven"]').val() +
+                    "+" +
+                    $(thiz).find('.diva2addtextplusname input[id$="oppFamily"]').val()
+                // ta bort eventuella $$$ från efternamnen före sökning
+                var newurl = url.replace("$$$", "")
+                // sök på förnamn efternamn + lärosäte i google
+                window.open(newurl, '_blank');
+            })
+            $(this).before(googleButtonjq)
+
+            i++;
+        });
+
+        //////////////////////////////////////////////////////////////////////////
+        //
+        // Knappar för *examinatorer* till LDAP, Leta KTH anställda, KTH Intra, Google och ORCiD
+        //
+        //////////////////////////////////////////////////////////////////////////
+
+        var examiners = $('#' + diva_id + '\\:examinerSerie');
+        i = 0;
+        $(examiners).find('.diva2addtextarea').each(function() {
+            var thiz = this;
+
+            //LDAP/UG
+            if(monkey_config.ldap) {
+                $('#ldapButtonExaminerjq' + i).remove();
+                var ldapButtonjq = $('<button id="ldapButtonExaminerjq' + i + '" type="button">LDAP-info</button>');
+                ldapButtonjq.on("click", function() {
+                    getLDAP($(thiz).find('.diva2addtextplusname input[id$="examinerGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="examinerFamily"]').val(),'');
+                })
+                $(this).before(ldapButtonjq)
+            }
+
+            //Leta KTH-anställda
+            if(monkey_config.letaanstallda) {
+                $('#letaButtonExaminerjq' + i).remove();
+                var letaButtonjq = $('<button id="letaButtonExaminerjq' + i + '" type="button">Leta KTH-anställda</button>');
+                letaButtonjq.on("click", function() {
+                    getLeta($(thiz).find('.diva2addtextplusname input[id$="examinerGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="examinerFamily"]').val());
+                })
+                $(this).before(letaButtonjq)
+            }
+
+            //Sök i ORCiD
+            if(monkey_config.orcid) {
+                $('#orcidButtonExaminerjq' + i).remove();
+                var orcidButtonjq = $('<button id="orcidButtonExaminerjq' + i + '" type="button">Sök i ORCiD</button>');
+                orcidButtonjq.on("click", function() {
+                    getOrcid($(thiz).find('.diva2addtextplusname input[id$="examinerGiven"]').val(),$(thiz).find('.diva2addtextplusname input[id$="examinerFamily"]').val());
+                })
+                $(this).before(orcidButtonjq);
+            }
+
+            //Intranät förnamn efternamn
+            if(monkey_config.intranet) {
+                $('#intraButtonExaminerjq' + i).remove();
+                var intraButtonjq = $('<button class="link" id="intraButtonExaminerjq' + i + '" type="button">' + monkey_config.university + ' Intra</button>');
+                intraButtonjq.on("click", function() {
+                    var url = monkey_config.university_search_url + "?q=" +
+                        $(thiz).find('.diva2addtextplusname input[id$="examinerGiven"]').val() +
+                        "%20" +
+                        $(thiz).find('.diva2addtextplusname input[id$="examinerFamily"]').val() +
+                        "&urlFilter=" + monkey_config.university_intranet_url + "&filterLabel=KTH%20Intran%C3%A4t&entityFilter=kth-profile,kth-place,%20kth-system"
+                    // ta bort eventuella $$$ från efternamnen före sökning
+                    var newurl = url.replace("$$$", "")
+                    // ta bort allt som ser ut som en VERSAL med en punkt efter, typ förnamn från Scopus. Verkar ge bättre resultat med bara efternamn vid sökning i KTH Intra
+                    var newurl2 = newurl.replace(/[A-Z]\./g, "")
+                    // sök på förnamn efternamn på KTH Intranät
+                    window.open(newurl2, '_blank');
+                })
+                $(this).before(intraButtonjq)
+            }
+
+            //Google.com förnamn + efternamn + Lärosäte
+            $('#googleButtonExaminerjq' + i).remove();
+            var googleButtonjq = $('<button class="link" id="googleButtonExaminerjq' + i + '" type="button">Google</button>');
+            googleButtonjq.on("click", function() {
+                var url = "https://www.google.com/search?q=" + monkey_config.university + "+" +
+                    $(thiz).find('.diva2addtextplusname input[id$="examinerGiven"]').val() +
+                    "+" +
+                    $(thiz).find('.diva2addtextplusname input[id$="examinerFamily"]').val()
+                // ta bort eventuella $$$ från efternamnen före sökning
+                var newurl = url.replace("$$$", "")
+                // sök på förnamn efternamn + lärosäte i google
+                window.open(newurl, '_blank');
+            })
+            $(this).before(googleButtonjq)
+
+            i++;
+        });
+
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
@@ -1668,7 +1909,7 @@
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         }
-    // End async function init()
+        // End async function init()
     }
 
     /**
