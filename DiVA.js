@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.3.1-general
+// @version      1.4.1-general
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
@@ -29,6 +29,7 @@
 // @connect  api.crossref.org
 // @connect  bibliometri.swepub.kb.se
 // @connect  www.semanticscholar.org
+// @connect  www.example.net
 
 // @noframes
 // ==/UserScript==
@@ -464,6 +465,8 @@
     /**
      * Hämta info från Scopus
      *
+     * Scopus har slutat fungera pga CORS
+     * Skriv om till GM_xmlhttpRequest
      * @param {*} doi
      */
 
@@ -478,61 +481,69 @@
         var url = monkey_config.scopus_api_url + "/" +
             doi +
             '?apiKey=' + monkey_config.scopus_apikey;
-        await axios.get(url)
-            .then(function(response) {
-            var html = '<div><div class="updateheader"></div>';
-            if (response.status == 201) {
-                html += "<p>Hittade inget i Scopus!</p>";
-            } else {
-                //hitta ScopusId
-                var eid = response.data['abstracts-retrieval-response']['coredata']['eid']; //plocka värdet för ScopusId (eid)
-                if (eid == "" // uppdatera bara om fältet är tomt
-                    ||
-                    typeof eid === 'undefined' ||
-                    eid == 'undefined') {
-                    //                 html += '<p>ScopusID hittades inte</p>';
+        await GM_xmlhttpRequest ({
+            method: "GET",
+            url: url,
+            headers: {
+			'Accept': 'application/json',
+            'Content-Type': 'application/json',
+		  },
+            onload: function(response) {
+                var html = '<div><div class="updateheader"></div>';
+                if (response.status == 201) {
+                    html += "<p>Hittade inget i Scopus!</p>";
                 } else {
-                    if ($("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val() == "") {
-                        html += '<p style="color:green;">Uppdaterat ScopusID: ' + eid + '</p>';
-                        $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                        $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
+                    var scopusjson = JSON.parse(response.responseText)
+                    //hitta ScopusId
+
+                    var eid = scopusjson['abstracts-retrieval-response']['coredata']['eid']; //plocka värdet för ScopusId (eid)
+                    if (eid == "" // uppdatera bara om fältet är tomt
+                        ||
+                        typeof eid === 'undefined' ||
+                        eid == 'undefined') {
+                        //                 html += '<p>ScopusID hittades inte</p>';
+                    } else {
+                        if ($("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val() == "") {
+                            html += '<p style="color:green;">Uppdaterat ScopusID: ' + eid + '</p>';
+                            $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                            $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
+                        }
                     }
-                }
 
-                var pmid = response.data['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
-                if (pmid == "" // uppdatera bara om fältet är tomt
-                    ||
-                    typeof pmid === 'undefined' ||
-                    pmid == 'undefined') {
-                    //                 html += '<p>PubMedID hittades inte i Scopus</p>';
-                } else {
-                    if ($("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val() == "") {
-                        html += '<p style="color:green;">Uppdaterat PubMedID: ' + pmid + '</p>';
-                        $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
+                    var pmid = scopusjson['abstracts-retrieval-response']['coredata']['pubmed-id']; //plocka värdet för PubMedID (PMID
+                    if (pmid == "" // uppdatera bara om fältet är tomt
+                        ||
+                        typeof pmid === 'undefined' ||
+                        pmid == 'undefined') {
+                        //                 html += '<p>PubMedID hittades inte i Scopus</p>';
+                    } else {
+                        if ($("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val() == "") {
+                            html += '<p style="color:green;">Uppdaterat PubMedID: ' + pmid + '</p>';
+                            $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
+                        }
                     }
-                }
 
-                var oa = response.data['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
-                if (oa == 'true') { // kolla om artikeln är OA
-                    document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
-                    html += '<p style="color:green;">Uppdaterat Free full-text: ' + response.data['abstracts-retrieval-response']['coredata']['openaccessFlag'] + '</p>'; // visa bara uppdatering om Free full-text = 'true'
-                } else {
-                    ""; // checka inte boxen
-                }
-                $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                    var oa = scopusjson['abstracts-retrieval-response']['coredata']['openaccessFlag']; // plocka openaccessFlag true or false
+                    if (oa == 'true') { // kolla om artikeln är OA
+                        document.getElementById(diva_id + ":doiFree").checked = true; // checka boxen
+                        html += '<p style="color:green;">Uppdaterat Free full-text: ' + scopusjson['abstracts-retrieval-response']['coredata']['openaccessFlag'] + '</p>'; // visa bara uppdatering om Free full-text = 'true'
+                    } else {
+                        ""; // checka inte boxen
+                    }
+                    $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
+                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
 
-            };
-            $("#monkeyresultswrapper i").css("display", "none");
-            $('#monkeyupdates').html(html + $('#monkeyupdates').html());
-            $("#monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
-            return 1;
-        })
-            .catch(function(error) {
-            $("#monkeyresultswrapper i").css("display", "none");
-            $("#monkeytalk").html("Jag hittade inget i Scopus!");
-        })
-            .then(function() {});
+                }
+                $("#monkeyresultswrapper i").css("display", "none");
+                $('#monkeyupdates').html(html + $('#monkeyupdates').html());
+                $("#monkeytalk").html("Titta här nedanför för att se om jag uppdaterat något.");
+                return 1;
+            },
+            onerror: function(error) {
+                $("#monkeyresultswrapper i").css("display", "none");
+                $("#monkeytalk").html("Jag hittade inget i Scopus!");
+            }
+        });
     }
 
     /**
@@ -567,6 +578,7 @@
                 if (response.status == 201) {
                     html += "<p>Hittade inget i Web of Science</p>";
                 } else {
+                    console.log(response)
                     var parser = new DOMParser();
                     var xmlDoc = parser.parseFromString(response.responseText,"text/xml");
                     var x = xmlDoc.getElementsByTagName('val');
