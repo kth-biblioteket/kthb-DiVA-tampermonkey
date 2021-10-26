@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.4.1-general
+// @version      1.4.5-general
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
@@ -8,6 +8,13 @@
 // @match    https://kth.diva-portal.org/dream/publish/publishForm.jsf*
 // @match    https://kth.diva-portal.org/dream/review/reviewForm.jsf*
 // @match    https://kth.diva-portal.org/dream/add/add2.jsf*
+//
+// @match    https://kth.test.diva-portal.org/dream/edit/editForm.jsf*
+// @match    https://kth.test.diva-portal.org/dream/import/importForm.jsf*
+// @match    https://kth.test.diva-portal.org/dream/publish/publishForm.jsf*
+// @match    https://kth.test.diva-portal.org/dream/review/reviewForm.jsf*
+// @match    https://kth.test.diva-portal.org/dream/add/add2.jsf*
+//
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
 // @require  https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
@@ -79,15 +86,15 @@
         dblp_api_doi_url : 'https://dblp.uni-trier.de/doi/xml',
         dblp_api_rec_url : 'https://dblp.uni-trier.de/rec/xml',
         wos_api_url : 'https://ws.isiknowledge.com/cps/xrpc',
-        api_username_wos : 'xxx',
-        api_password_wos : 'xxx',
+        api_username_wos : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+        api_password_wos : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
         ldap_apiurl : 'https://lib.kth.se/ldap/api/v1',
         orcid_apiurl : 'https://pub.orcid.org/v3.0/search',
         letaanstallda_apiurl : 'https://apps-ref.lib.kth.se/webservices/letaanstallda/api/v1',
-        ldap_apikey : 'xxx',
+        ldap_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxx',
         orcid_apikey : '',
-        letaanstallda_apikey : 'xxx',
-        scopus_apikey : 'xxx'
+        letaanstallda_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+        scopus_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
     }
 
     var observer_config = {
@@ -276,7 +283,7 @@
         if (result) {
             for (i = 0; i < result.length; i++) {
                 const orciddetails = await axios.get(
-                    encodeURI(result[i]['orcid-identifier'].uri),{
+                    encodeURI("https://pub.orcid.org/v3.0/" + result[i]['orcid-identifier'].path),{
                         headers: { 'Accept': "application/json",
                                   'content-type': 'application/json;charset=utf-8' }
                     }
@@ -485,9 +492,9 @@
             method: "GET",
             url: url,
             headers: {
-			'Accept': 'application/json',
-            'Content-Type': 'application/json',
-		  },
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
             onload: function(response) {
                 var html = '<div><div class="updateheader"></div>';
                 if (response.status == 201) {
@@ -1146,7 +1153,7 @@
         $('#openScopusButtonjq').remove();
         var openScopusButtonjq = $('<button class="link" id="openScopusButtonjq" type="button">Öppna i Scopus</button>');
         openScopusButtonjq.on("click", function() {
-            var url = "https://focus.lib.kth.se/login?url=http://www.scopus.com/record/display.url?origin=inward&partnerID=40&eid=" +
+            var url = "https://focus.lib.kth.se/login?url=https://www.scopus.com/record/display.url?origin=inward&partnerID=40&eid=" +
                 $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val() +
                 "";
             window.open(url, '_blank');
@@ -1480,7 +1487,8 @@
             replace(/Boras/g, "Borås").replace(/Sodertalje/g, "Södertälje").replace(/Borlange/g, "Borlänge").replace(/Harnosand/g, "Härnösand").replace(/Skelleftea/g, "Skellefteå").
             replace(/Sjofart/g, "Sjöfart").replace(/Molnlycke/g, "Mölnlycke").replace(/Domsjo/g, "Domsjö").replace(/Varobacka/g, "Väröbacka").replace(/Sodra Innovat/g, "Södra Innovat").
             replace(/Nykoping/g, "Nyköping").replace(/Ornskoldsvik/g, "Örnsköldsvik").replace(/Molndal/g, "Mölndal").replace(/Upplands Vasby/g, "Upplands Väsby").
-            replace(/Lowenstromska/g, "Löwenströmska").replace(/Skarholmen/g, "Skärholmen").replace(/Lantmateri/g, "Lantmäteri").replace(/Kraftnat/g, "Kraftnät");
+            replace(/Lowenstromska/g, "Löwenströmska").replace(/Skarholmen/g, "Skärholmen").replace(/Tjarno/g, "Tjärnö").replace(/Arrhenius Vag/g, "Arrhenius Väg").
+            replace(/Lantmateri/g, "Lantmäteri").replace(/Kraftnat/g, "Kraftnät").replace(/Stromstad/g, "Strömstad");
             $(thiz).next().find('input').val(neworg2);
             if (neworg != neworg2) {
                 html += '<div><p style="color:green;">Uppdaterat "Annan Organisation"</p></div>';
