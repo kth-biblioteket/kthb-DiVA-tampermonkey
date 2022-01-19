@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.4.5-general
+// @version      1.4.6-general
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
@@ -29,6 +29,7 @@
 // @connect  google.com
 // @connect  kth.diva-portal.org
 // @connect  ws.isiknowledge.com
+// @connect  wos-api.clarivate.com
 // @connect  portal.issn.org
 // @connect  www.worldcat.org
 // @connect  dblp.uni-trier.de
@@ -85,9 +86,7 @@
         scopus_api_url : 'https://api.elsevier.com/content/abstract/doi',
         dblp_api_doi_url : 'https://dblp.uni-trier.de/doi/xml',
         dblp_api_rec_url : 'https://dblp.uni-trier.de/rec/xml',
-        wos_api_url : 'https://ws.isiknowledge.com/cps/xrpc',
-        api_username_wos : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-        api_password_wos : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+        wos_api_url : 'https://wos-api.clarivate.com/api/wos/?databaseId=WOS&count=1&firstRecord=1',
         ldap_apiurl : 'https://lib.kth.se/ldap/api/v1',
         orcid_apiurl : 'https://pub.orcid.org/v3.0/search',
         letaanstallda_apiurl : 'https://apps-ref.lib.kth.se/webservices/letaanstallda/api/v1',
@@ -120,6 +119,7 @@
         monkey_config.orcid_apikey = keys.apikeys.orcid;
         monkey_config.letaanstallda_apikey = keys.apikeys.letaanstallda;
         monkey_config.scopus_apikey = keys.apikeys.scopus;
+        monkey_config.wos_apikey = keys.apikeys.wos;
     }
 
     /**
@@ -562,7 +562,6 @@
     async function getWoS(doi) {
         var pmid ="";
         var isi ="";
-        var api_wos_xml = '<?xml version="1.0" encoding="UTF-8" ?><request xmlns="http://www.isinet.com/xrpc42" src="app.id=API"><fn name="LinksAMR.retrieve"><list><map><val name="username">' + monkey_config.api_username_wos + '</val><val name="password">' + monkey_config.api_password_wos + '</val></map><!-- WHAT IS REQUESTED --><map><list name="WOS"><val>timesCited</val><val>ut</val><val>doi</val><val>pmid</val><val>sourceURL</val><val>citingArticlesURL</val><val>relatedRecordsURL</val></list></map><!-- LOOKUP DATA --><map><!-- QUERY "cite_1" --><map name="cite_1"><val name="doi">' + doi + '</val></map> <!-- end of cite_1--></map><!-- end of citations --></list></fn></request>';
         if(doi == ""){
             $('#monkeytalk').html('Ojojoj, ingen DOI! Jag behöver en DOI för att kunna uppdatera från databaserna.');
             $("#monkeyresultswrapper i").css("display", "none");
@@ -570,31 +569,28 @@
         }
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $("#monkeytalk").html("Jag pratar med Web of Science...");
-        var url = monkey_config.wos_api_url;
+        var url = monkey_config.wos_api_url + '&usrQuery=DO=' + doi;
 
         //använd GM_xmlhttpRequest för anrop som annars inte fungerar pga CORS
         await GM_xmlhttpRequest ({
-            method: "POST",
+            method: "GET",
             url: url,
-            data: api_wos_xml,
             headers: {
-                "Content-Type": "application/xml"
+                "application": "application/json",
+                "X-ApiKey": monkey_config.wos_apikey
             },
             onload: function(response) {
                 var html = '<div><div class="updateheader"></div>';
                 if (response.status == 201) {
                     html += "<p>Hittade inget i Web of Science</p>";
                 } else {
-                    console.log(response)
-                    var parser = new DOMParser();
-                    var xmlDoc = parser.parseFromString(response.responseText,"text/xml");
-                    var x = xmlDoc.getElementsByTagName('val');
-                    for (i = 0; i < x.length; i++) {
-                        if(x[i].getAttribute('name')=="ut") {
-                            isi = x[i].childNodes[0].nodeValue;
-                        }
-                        if(x[i].getAttribute('name')=="pmid") {
-                            pmid = x[i].childNodes[0].nodeValue;
+                    response = JSON.parse(response.response).Data.Records.records.REC[0]
+
+                    isi = response.UID.split("WOS:")[1]
+
+                    for (i = 0; i < response.dynamic_data.cluster_related.identifiers.identifier.length; i++) {
+                        if(response.dynamic_data.cluster_related.identifiers.identifier[i].type=="pmid") {
+                            pmid = response.dynamic_data.cluster_related.identifiers.identifier[i].value.split("MEDLINE:")[1];
                         }
                     }
                     if(isi == ""  // uppdatera bara om fältet är tomt
