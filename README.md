@@ -1,4 +1,4 @@
-## DiVA-apan 2020-07-13 (1.2)
+## DiVA-apan 2020-07-13 (1.2.2)
 
 <img src="https://apps.lib.kth.se/divaapan/apa.jpg" align="left" width="70" >
 
