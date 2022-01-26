@@ -93,7 +93,8 @@
         ldap_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxx',
         orcid_apikey : '',
         letaanstallda_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-        scopus_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+        scopus_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+		wos_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
     }
 
     var observer_config = {
