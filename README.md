@@ -1,10 +1,9 @@
+
 ## DiVA-apan 2022-10-17 (1.4.6)
 
 Dokumentationen av DiVA-apan nedan stämmer i allt väsentligt men koden har förändrats till att bli mer generaliserad. I början av koden kan den som så önskar välja bort/till de funktioner som nu används av oss på KTHB. Se rad 68 och en bit framåt. Det borde bara vara ganska straight-forward, framför allt att välja bort saker, men ni är välkomna att kontakta oss ifall ni har frågor. Det finns också en slack-grupp där den som är intresserad av apan kan vara med för att diskutera olika upplägg och konfigurationer. Just nu sker ingen utveckling att tala om, utan apan används stillsamt och odramatiskt i produktion hos oss på KTHB. Den aktuella koden som vi använder och som vi kallar 1.4.6 ligger här:
 
 https://raw.githubusercontent.com/kth-biblioteket/kthb-DiVA-tampermonkey/general/DiVA.js
-
-## DiVA-apan 2020-07-13 (1.2.2)
 
 <img src="https://apps.lib.kth.se/divaapan/apa.jpg" align="left" width="70" >
 
