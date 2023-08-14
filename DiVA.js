@@ -1487,7 +1487,7 @@
             replace(/Sjofart/g, "Sjöfart").replace(/Molnlycke/g, "Mölnlycke").replace(/Domsjo/g, "Domsjö").replace(/Varobacka/g, "Väröbacka").replace(/Sodra Innovat/g, "Södra Innovat").
             replace(/Nykoping/g, "Nyköping").replace(/Ornskoldsvik/g, "Örnsköldsvik").replace(/Molndal/g, "Mölndal").replace(/Upplands Vasby/g, "Upplands Väsby").
             replace(/Lowenstromska/g, "Löwenströmska").replace(/Skarholmen/g, "Skärholmen").replace(/Tjarno/g, "Tjärnö").replace(/Arrhenius Vag/g, "Arrhenius Väg").
-            replace(/Lantmateri/g, "Lantmäteri").replace(/Kraftnat/g, "Kraftnät").replace(/Stromstad/g, "Strömstad");
+            replace(/Lantmateri/g, "Lantmäteri").replace(/Kraftnat/g, "Kraftnät").replace(/Stromstad/g, "Strömstad").replace(/Stralsakerhetsmyndigheten/g, "Strålsäkerhetsmyndigheten");
             $(thiz).next().find('input').val(neworg2);
             if (neworg != neworg2) {
                 html += '<div><p style="color:green;">Uppdaterat "Annan Organisation"</p></div>';
@@ -1909,7 +1909,7 @@
             if(monkey_config.wos) {
                 await getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
             }
-            $('html, body').animate({scrollTop:0},'slow');
+            $('html, body').animate({scrollTop:0},'1');
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
             //
