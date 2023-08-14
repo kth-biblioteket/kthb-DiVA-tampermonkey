@@ -22,6 +22,7 @@
 // @grant    GM_xmlhttpRequest
 // @grant    GM_addStyle
 // @connect  apps.lib.kth.se
+// @connect  api.lib.kth.se
 // @connect  lib.kth.se
 // @connect  pub.orcid.org
 // @connect  localhost
@@ -38,6 +39,7 @@
 // @connect  bibliometri.swepub.kb.se
 // @connect  www.semanticscholar.org
 // @connect  www.example.net
+// @connect  github.com
 
 // @noframes
 // ==/UserScript==
@@ -74,8 +76,8 @@
         wos : true,
         scopus : true,
         qc : true,
-        monkey_image_url: "https://apps.lib.kth.se/divaapan/apa.jpg",
-        oa_image_url : "https://apps.lib.kth.se/divaapan/oa.png",
+        monkey_image_url: "https://raw.githubusercontent.com/kth-biblioteket/kthb-DiVA-tampermonkey/master/images/apa.jpg",
+        oa_image_url : "https://raw.githubusercontent.com/kth-biblioteket/kthb-DiVA-tampermonkey/master/images/oa.png",
         university : 'KTH',
         diva_search_api_url : 'https://kth.diva-portal.org/smash/export.jsf',
         diva_search_url : 'https://kth.diva-portal.org/smash/resultList.jsf',
@@ -87,7 +89,7 @@
         dblp_api_doi_url : 'https://dblp.uni-trier.de/doi/xml',
         dblp_api_rec_url : 'https://dblp.uni-trier.de/rec/xml',
         wos_api_url : 'https://wos-api.clarivate.com/api/wos/?databaseId=WOS&count=1&firstRecord=1',
-        ldap_apiurl : 'https://lib.kth.se/ldap/api/v1',
+        ldap_apiurl : 'https://api.lib.kth.se/ldap/api/v1',
         orcid_apiurl : 'https://pub.orcid.org/v3.0/search',
         letaanstallda_apiurl : 'https://apps.lib.kth.se/webservices/letaanstallda/api/v1',
         ldap_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxx',
