@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.4.7-general
+// @version      1.5-general
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
