@@ -88,7 +88,7 @@
         scopus_api_url : 'https://api.elsevier.com/content/abstract/doi',
         dblp_api_doi_url : 'https://dblp.uni-trier.de/doi/xml',
         dblp_api_rec_url : 'https://dblp.uni-trier.de/rec/xml',
-        wos_api_url : 'https://wos-api.clarivate.com/api/wos/?databaseId=WOS&count=1&firstRecord=1',
+        wos_api_url : 'https://wos-api.clarivate.com/api/woslite/?databaseId=WOS&count=1&firstRecord=1',
         ldap_apiurl : 'https://api.lib.kth.se/ldap/api/v1',
         orcid_apiurl : 'https://pub.orcid.org/v3.0/search',
         letaanstallda_apiurl : 'https://apps.lib.kth.se/webservices/letaanstallda/api/v1',
@@ -587,15 +587,18 @@
                 if (response.status == 201) {
                     html += "<p>Hittade inget i Web of Science</p>";
                 } else {
-                    response = JSON.parse(response.response).Data.Records.records.REC[0]
+                    response = JSON.parse(response.response).Data //.Records.records.REC[0]
+                    if(response.length !== 0) {
+                        isi = response[0].UT.split("WOS:")[1] //Ändrat api
+                    }
 
-                    isi = response.UID.split("WOS:")[1]
-
+                    /*
                     for (i = 0; i < response.dynamic_data.cluster_related.identifiers.identifier.length; i++) {
                         if(response.dynamic_data.cluster_related.identifiers.identifier[i].type=="pmid") {
                             pmid = response.dynamic_data.cluster_related.identifiers.identifier[i].value.split("MEDLINE:")[1];
                         }
                     }
+                    */
                     if(isi == ""  // uppdatera bara om fältet är tomt
                        || typeof isi === 'undefined'
                        || isi == 'undefined') {
