@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.5-general
+// @version      1.5.1-general
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
@@ -30,7 +30,7 @@
 // @connect  google.com
 // @connect  kth.diva-portal.org
 // @connect  ws.isiknowledge.com
-// @connect  wos-api.clarivate.com
+// @connect  clarivate.com
 // @connect  portal.issn.org
 // @connect  www.worldcat.org
 // @connect  dblp.uni-trier.de
@@ -88,7 +88,8 @@
         scopus_api_url : 'https://api.elsevier.com/content/abstract/doi',
         dblp_api_doi_url : 'https://dblp.uni-trier.de/doi/xml',
         dblp_api_rec_url : 'https://dblp.uni-trier.de/rec/xml',
-        wos_api_url : 'https://wos-api.clarivate.com/api/woslite/?databaseId=WOS&count=1&firstRecord=1',
+        wos_api_url_lite : 'https://wos-api.clarivate.com/api/woslite/?databaseId=WOS&count=1&firstRecord=1',
+        wos_api_url : 'https://api.clarivate.com/apis/wos-starter/v1/documents',
         ldap_apiurl : 'https://api.lib.kth.se/ldap/api/v1',
         orcid_apiurl : 'https://pub.orcid.org/v3.0/search',
         letaanstallda_apiurl : 'https://apps.lib.kth.se/webservices/letaanstallda/api/v1',
@@ -96,7 +97,7 @@
         orcid_apikey : '',
         letaanstallda_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
         scopus_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-		wos_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+	wos_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
     }
 
     var observer_config = {
@@ -572,7 +573,7 @@
         }
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $("#monkeytalk").html("Jag pratar med Web of Science...");
-        var url = monkey_config.wos_api_url + '&usrQuery=DO=' + doi;
+        var url = monkey_config.wos_api_url + '?q=DO=' + doi;
 
         //använd GM_xmlhttpRequest för anrop som annars inte fungerar pga CORS
         await GM_xmlhttpRequest ({
@@ -587,18 +588,11 @@
                 if (response.status == 201) {
                     html += "<p>Hittade inget i Web of Science</p>";
                 } else {
-                    response = JSON.parse(response.response).Data //.Records.records.REC[0]
+                    response = JSON.parse(response.response).hits
                     if(response.length !== 0) {
-                        isi = response[0].UT.split("WOS:")[1] //Ändrat api
+                        isi = response[0].uid.split("WOS:")[1]
                     }
 
-                    /*
-                    for (i = 0; i < response.dynamic_data.cluster_related.identifiers.identifier.length; i++) {
-                        if(response.dynamic_data.cluster_related.identifiers.identifier[i].type=="pmid") {
-                            pmid = response.dynamic_data.cluster_related.identifiers.identifier[i].value.split("MEDLINE:")[1];
-                        }
-                    }
-                    */
                     if(isi == ""  // uppdatera bara om fältet är tomt
                        || typeof isi === 'undefined'
                        || isi == 'undefined') {
@@ -609,16 +603,6 @@
                             $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val(isi); // skriv in värdet för ISI/UT i fältet för ISI
                         }}
 
-                    if(pmid == ""
-                       || typeof pmid === 'undefined'
-                       || pmid == 'undefined') {
-                        //                  html += '<p>PubMedID hittades inte i Web of Science</p>';
-                    } else {
-                        if($("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val() == "") {
-                            html += '<p style="color:green;">Uppdaterat PubMedID: ' + pmid + '</p>';
-                            $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').val(pmid); // skriv in det i fältet för PubMedID
-                        }}
-                    $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                     $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                 };
                 $("#monkeyresultswrapper i").css("display", "none");
