@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.5.1-general
+// @version      1.5.2-general
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
@@ -92,7 +92,7 @@
         wos_api_url : 'https://api.clarivate.com/apis/wos-starter/v1/documents',
         ldap_apiurl : 'https://api.lib.kth.se/ldap/api/v1',
         orcid_apiurl : 'https://pub.orcid.org/v3.0/search',
-        letaanstallda_apiurl : 'https://apps.lib.kth.se/webservices/letaanstallda/api/v1',
+	letaanstallda_apiurl : 'https://api.lib.kth.se/pi/v1',
         ldap_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxx',
         orcid_apikey : '',
         letaanstallda_apikey : 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
