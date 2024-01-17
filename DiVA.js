@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.5.2-general
+// @version      1.5.3-general
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
@@ -600,7 +600,7 @@
                     } else {
                         if($("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val() == "") {
                             html += '<p style="color:green;">Uppdaterat ISI: ' + isi + '</p>';
-                            $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val(isi); // skriv in värdet för ISI/UT i fältet för ISI
+                            $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').focus().val(isi); // skriv in värdet för ISI/UT i fältet för ISI
                         }}
 
                     $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
