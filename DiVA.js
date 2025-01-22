@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.5.4-general
+// @version      1.6.1-general
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
@@ -872,7 +872,7 @@
         var $maintitleiframe;
         $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
         DiVAButtonjq.on("click", function() {
-            getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, ""), 'mods'); // ta bort saker som innehåller "&" och "?" som sökningen inte klarar av
+            getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, "").replace(/&amp;/g, "?"), 'mods'); // ta bort saker som innehåller "&" och "?" som sökningen inte klarar av
         })
         $(".diva2editmainer").before(DiVAButtonjq)
         $(".diva2impmainer").before(DiVAButtonjq)
@@ -1395,7 +1395,8 @@
         //bind en clickfunktion som anropar DiVA webbgränssnitt och söker på titel
         dubblettButtonjq.on("click", function() {
             var title = $("div.diva2addtextchoicebr:contains('Title'), div.diva2addtextchoicebr:contains('Titel')").parent().find('textarea').eq(0).val();
-            var newtitle = title.replace("?", "") // av någon anledning fixar inte sökningen titlar som innehåller eller i alla fall slutar med ett "?"
+            var newtitle = title.replace(/&amp;/g, "%26").replace(/&amp;/g, "%26").replace(/&amp;/g, "%26").replace(/&lt;/g, "%3C").replace(/&gt;/g, "%3E").replace(/&quot;/g, "%22").replace(/&excl;/g, "%21").replace(/&percnt;/g, "%25").replace(/&apos;/g, "%27").replace(/&ast;/g, "%2A").replace(/&quest;/g, "%3F")
+ // olika udda tecken percent-kodas
             var url = monkey_config.diva_search_url + "?dswid=-4067&language=en&searchType=RESEARCH&query=&af=%5B%5D&aq=%5B%5B%7B%22titleAll%22%3A%22" +
                 newtitle +
                 "%22%7D%5D%5D&aq2=%5B%5B%5D%5D&aqe=%5B%5D&noOfRimportForm:j_id758ows=50&sortOrder=author_sort_asc&sortOrder2=title_sort_asc&onlyFullText=false&sf=all"
@@ -1475,15 +1476,16 @@
             var thiz = this;
             var html = '<div><div class="updateheader"></div>';
             var neworg = $(thiz).next().find('input').val();
-            var neworg2 = neworg.replace(/Bracke/g, "Bräcke").replace(/Skondal/g, "Sköndal").replace(/Hogskola/g, "Högskola").replace(/Linkoping/g, "Linköping").
-            replace(/Malardalen/g, "Mälardalen").replace(/Orebro/g, "Örebro").replace(/Vasteras/g, "Västerås").replace(/Goteborg/g, "Göteborg").replace(/Norrkoping/g, "Norrköping").
-            replace(/Vaxjo/g, "Växjö").replace(/Umea/g, "Umeå").replace(/Lulea/g, "Luleå").replace(/Ostersund/g, "Östersund").replace(/Trollhattan/g, "Trollhättan").
-            replace(/Jonkoping/g, "Jönköping").replace(/Malmo/g, "Malmö").replace(/Sodertorn/g, "Södertörn").replace(/Gavle/g, "Gävle").replace(/Skovde/g, "Skövde").
-            replace(/Boras/g, "Borås").replace(/Sodertalje/g, "Södertälje").replace(/Borlange/g, "Borlänge").replace(/Harnosand/g, "Härnösand").replace(/Skelleftea/g, "Skellefteå").
-            replace(/Sjofart/g, "Sjöfart").replace(/Molnlycke/g, "Mölnlycke").replace(/Domsjo/g, "Domsjö").replace(/Varobacka/g, "Väröbacka").replace(/Sodra Innovat/g, "Södra Innovat").
-            replace(/Nykoping/g, "Nyköping").replace(/Ornskoldsvik/g, "Örnsköldsvik").replace(/Molndal/g, "Mölndal").replace(/Upplands Vasby/g, "Upplands Väsby").
-            replace(/Lowenstromska/g, "Löwenströmska").replace(/Skarholmen/g, "Skärholmen").replace(/Tjarno/g, "Tjärnö").replace(/Arrhenius Vag/g, "Arrhenius Väg").
-            replace(/Lantmateri/g, "Lantmäteri").replace(/Kraftnat/g, "Kraftnät").replace(/Stromstad/g, "Strömstad").replace(/Stralsakerhetsmyndigheten/g, "Strålsäkerhetsmyndigheten");
+            var neworg2 = neworg.replace(/Bracke/g, "Bräcke").replace(/Skondal/g, "Sköndal").replace(/Hogskola/g, "Högskola").replace(/Linkoping/g, "Linköping")
+            .replace(/Malardalen/g, "Mälardalen").replace(/Orebro/g, "Örebro").replace(/Vasteras/g, "Västerås").replace(/Goteborg/g, "Göteborg").replace(/Norrkoping/g, "Norrköping")
+            .replace(/Vaxjo/g, "Växjö").replace(/Umea/g, "Umeå").replace(/Lulea/g, "Luleå").replace(/Ostersund/g, "Östersund").replace(/Trollhattan/g, "Trollhättan")
+            .replace(/Jonkoping/g, "Jönköping").replace(/Malmo/g, "Malmö").replace(/Sodertorn/g, "Södertörn").replace(/Gavle/g, "Gävle").replace(/Skovde/g, "Skövde")
+            .replace(/Boras/g, "Borås").replace(/Sodertalje/g, "Södertälje").replace(/Borlange/g, "Borlänge").replace(/Harnosand/g, "Härnösand").replace(/Skelleftea/g, "Skellefteå")
+            .replace(/Sjofart/g, "Sjöfart").replace(/Molnlycke/g, "Mölnlycke").replace(/Domsjo/g, "Domsjö").replace(/Varobacka/g, "Väröbacka").replace(/Sodra Innovat/g, "Södra Innovat")
+            .replace(/Nykoping/g, "Nyköping").replace(/Ornskoldsvik/g, "Örnsköldsvik").replace(/Molndal/g, "Mölndal").replace(/Upplands Vasby/g, "Upplands Väsby")
+            .replace(/Lowenstromska/g, "Löwenströmska").replace(/Skarholmen/g, "Skärholmen").replace(/Tjarno/g, "Tjärnö").replace(/Arrhenius Vag/g, "Arrhenius Väg")
+            .replace(/Lantmateri/g, "Lantmäteri").replace(/Kraftnat/g, "Kraftnät").replace(/Stromstad/g, "Strömstad").replace(/Stralsakerhetsmyndigheten/g, "Strålsäkerhetsmyndigheten")
+            .replace(/\s*https:\/\/ror\.org\/[0-9a-z]{9}/g, "");
             $(thiz).next().find('input').val(neworg2);
             if (neworg != neworg2) {
                 html += '<div><p style="color:green;">Uppdaterat "Annan Organisation"</p></div>';
@@ -1917,7 +1919,7 @@
 
             $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
             // ta bort saker som innehåller & och ? och " som sökningen inte klarar av
-            getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, "").replace(/["]+/g, ""), 'mods');
+            getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, "").replace(/["]+/g, "").replace(/&amp;/g, "?"), 'mods');
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
             //
