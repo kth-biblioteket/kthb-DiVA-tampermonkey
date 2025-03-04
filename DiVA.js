@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      1.6.1-general
+// @version      2.0-general
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
@@ -401,6 +401,7 @@
                                 '<div><span class="fieldtitle">Titel: </span><span>' + json.ugusers[key].title + '</span></div>' +
                                 '<div><span class="fieldtitle">Skola/org: </span><span>' + json.ugusers[key].kthPAGroupMembership + '</span></div>' +
                                 '<div><span class="fieldtitle">KTH-affiliering: </span><span>' + json.ugusers[key].ugPrimaryAffiliation + '</span></div>' +
+                                '<div><span class="fieldtitle">ORCiD: </span><span>' + json.ugusers[key].ugOrcid + '</span></div>' +
                                 '<div><span class="fieldtitle">Email: </span><span>' + json.ugusers[key].mail + '</span></div>' +
                                 '<div><span class="fieldtitle">Username: </span><span><a href="https://www.kth.se/profile/' + json.ugusers[key].ugUsername + '" target="_new">' + json.ugusers[key].ugUsername + '</a></span></div>'
                             html += '</div>';
@@ -523,7 +524,6 @@
                     {
                         //                        if ($("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val() == "") {
                         html += '<p style="color:green;">Uppdaterat ScopusID: ' + eid + '</p>';
-                        $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                         $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').val(eid); // skriv in det i fältet för ScopusId
                         //                        }
                     }
@@ -551,9 +551,6 @@
                     } else {
                         ""; // checka inte boxen
                     }
-                    $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
-
                 }
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyupdates').html(html + $('#monkeyupdates').html());
@@ -611,11 +608,9 @@
                     } else {
                         if ($("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val() == "") {
                             html += '<p style="color:green;">Uppdaterat ISI: ' + isi + '</p>';
-                            $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').focus().val(isi); // skriv in värdet för ISI/UT i fältet för ISI
+                            $("div.diva2addtextchoicecol:contains('ISI')").parent().find('input').val(isi); // skriv in värdet för ISI/UT i fältet för ISI
                         }
                     }
-
-                    $("div.diva2addtextchoicecol:contains('ScopusID')").parent().find('input').focus(); // för att scopus-infon skall "fastna!
                 };
                 $("#monkeyresultswrapper i").css("display", "none");
                 $('#monkeyupdates').html(html + $('#monkeyupdates').html());
@@ -754,7 +749,6 @@
 
     function getCrossref(doi) {
         //          var doi = $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
-
         if (doi != "") {
             $("#monkeyresultswrapper i").css("display", "inline-block");
             $("#monkeytalk").html("Jag pratar med Crossref...");
@@ -765,6 +759,7 @@
                     var publisher_edited = publisher.replace(/Springer Science and Business Media LLC/g, "Springer Nature");
                     $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").parent().find('input').val(publisher_edited); // klistrar in förlagsinfo från Crossref
                     $("#monkeyresultswrapper i").css("display", "none");
+                    $('#monkeyupdates').html('<p style="color:green;">Uppdaterat Förlag: ' + publisher_edited + '</p>' + $('#monkeyupdates').html());
                     $('#monkeyresults').html();
                     $("#monkeytalk").html("Crossref svarade... se resultatet under \"Annat förlag\" i posten!");
                 })
@@ -1134,7 +1129,8 @@
 
             $('#wosapiButtonjq').remove();
             var wosapiButtonjq = $('<button id="wosapiButtonjq" type="button" class="buttonload"><i class="fa fa-spinner fa-spin"></i>Uppdatera från WoS</button>');
-            wosapiButtonjq.on("click", function() {
+            wosapiButtonjq.on("mousedown", async function() {
+                event.preventDefault(); // Förhindra onblur
                 getWoS($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
             })
             $("div.diva2addtextchoicecol:contains('ISI')").before(wosapiButtonjq)
@@ -1199,7 +1195,8 @@
         if (monkey_config.scopus) {
             $('#scopusButtonjq').remove();
             var scopusButtonjq = $('<button id="scopusButtonjq" type="button">Uppdatera från Scopus</button>');
-            scopusButtonjq.on("click", function() {
+            scopusButtonjq.on("mousedown", async function() {
+                event.preventDefault(); // Förhindra onblur
                 getScopus($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
             })
             $("div.diva2addtextchoicecol:contains('ScopusID')").before(scopusButtonjq)
@@ -1210,11 +1207,13 @@
         //
         ////////////////////////////////////
 
+
         if (doi != "") { // bara om det finns en DOI, annars är det meningslöst
             $('#crossrefButtonjq').remove();
             var crossrefButtonjq = $('<button id="crossrefButtonjq" type="button">Uppdatera förlag från Crossref</button>');
-            crossrefButtonjq.on("click", function() {
-                getCrossref($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+            crossrefButtonjq.on("mousedown", async function() {
+               event.preventDefault(); // Förhindra onblur
+               getCrossref($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
             })
             $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher')").before(crossrefButtonjq);
             //  $("div.diva2addtextchoicecol:contains('Annat förlag') , div.diva2addtextchoicecol:contains('Other publisher') , div.diva2addtextchoicecol:contains('Namn på utgivare') , div.diva2addtextchoicecol:contains('Name of publisher')").before(crossrefButtonjq);
@@ -1229,7 +1228,8 @@
         if (doi != "") { // bara om det finns en DOI, annars är det meningslöst
             $('#crossrefVolButtonjq').remove();
             var crossrefVolButtonjq = $('<button id="crossrefVolButtonjq" type="button">Uppdatera detaljer från Crossref</button>');
-            crossrefVolButtonjq.on("click", function() {
+            crossrefVolButtonjq.on("mousedown", async function() {
+                event.preventDefault(); // Förhindra onblur
                 getCrossrefVol($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
             })
             $("div.diva2addtextchoice2:contains('Övriga uppgifter') , div.diva2addtextchoice2:contains('Other information') ").parent().before(crossrefVolButtonjq);
@@ -1485,7 +1485,7 @@
             .replace(/Nykoping/g, "Nyköping").replace(/Ornskoldsvik/g, "Örnsköldsvik").replace(/Molndal/g, "Mölndal").replace(/Upplands Vasby/g, "Upplands Väsby")
             .replace(/Lowenstromska/g, "Löwenströmska").replace(/Skarholmen/g, "Skärholmen").replace(/Tjarno/g, "Tjärnö").replace(/Arrhenius Vag/g, "Arrhenius Väg")
             .replace(/Lantmateri/g, "Lantmäteri").replace(/Kraftnat/g, "Kraftnät").replace(/Stromstad/g, "Strömstad").replace(/Stralsakerhetsmyndigheten/g, "Strålsäkerhetsmyndigheten")
-            .replace(/\s*https:\/\/ror\.org\/[0-9a-z]{9}/g, "");
+            .replace(/\s*https:\/\/ror\.org\/[0-9a-z]{9}/g, "").replace(/\.$/, '');
             $(thiz).next().find('input').val(neworg2);
             if (neworg != neworg2) {
                 html += '<div><p style="color:green;">Uppdaterat "Annan Organisation"</p></div>';
@@ -1926,6 +1926,8 @@
             // Gå till Crossref API och hämta saker automatiskt - skall komma om knappen vid "Other publisher" faller användarna i smaken
             //
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            getCrossref($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val())
 
         }
         // End async function init()
