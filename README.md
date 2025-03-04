@@ -4,7 +4,7 @@ Problemet med att informationen inte riktigt vill stanna i fälten har möjligen
 ```
 event.preventDefault(); // Förhindra onblur
 ```
-Vad vi har ändrat för vår del kan ses här: https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/pull/16/files
+Vad vi har ändrat för vår del på KTH kan ses här: https://github.com/kth-biblioteket/kthb-DiVA-tampermonkey/pull/16/files
 
 
 ## DiVA-apan 2025-01-22 (1.6.1)
