@@ -1,4 +1,4 @@
-## DiVA-apan 2025-01-22 (2.0)
+## DiVA-apan 2025-03-04 (2.0)
 
 Problemet med att informationen inte riktigt vill stanna i fälten har möjligen fått sin lösning genom koden nedan.
 ```
