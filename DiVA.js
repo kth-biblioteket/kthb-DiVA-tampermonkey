@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name     DiVA
-// @version      2.0-general
+// @version      2.1-general
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
-// @author Thomas Lind, Anders Wändahl
+// @author Thomas Lind, Anders Wändahl, kodbidrag från Malmö Universitet
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
 // @match    https://kth.diva-portal.org/dream/import/importForm.jsf*
 // @match    https://kth.diva-portal.org/dream/publish/publishForm.jsf*
@@ -827,6 +827,69 @@
     }
 
     /**
+     * Snott från Malmö:
+     * Funktion för att anropa Crossref och hämta abstract via DOI - kopplad till knapp vid abstract.
+     *
+     * @param {string} doi
+     *mau
+     */
+function getCrossrefAbs(doi) {
+        //          var doi = $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
+        if (doi != "") {
+
+            $("#monkeyresultswrapper i").css("display", "inline-block");
+            $("#monkeytalk").html("Jag pratar med Crossref...");
+            var url = 'https://api.crossref.org/works/' + doi + '/transform/application/vnd.crossref.unixsd+xml';
+            axios.get(url)
+                .then(function(response) {
+                    var abs = $(response.data).find('jats\\:abstract').find('jats\\:p').text(); //hämtar abstract
+                    var abs2 = $(response.data).find('jats\\:abstract'); //om abstract i sektioner
+               //  Initialize an empty string to store the concatenated text
+                        var abstract = "";
+                        // Iterate through each jats:p element within the jats:abstract
+                        abs2.find('jats\\:p').each(function() {
+                        // Get the paragraph text
+                        var paragraph = $(this).text();
+                        // Concatenate the title and paragraph with formating
+                        abstract += '<p>' + paragraph + '</p>';
+                         });
+                        // Trim any extra whitespace at the end
+                       abstract = abstract.trim();
+                // Initialize an empty string to store the concatenated text
+                        var concAbs = "";
+                        // Iterate through each jats:sec element within the jats:abstract
+                        abs2.find('jats\\:sec').each(function() {
+                        // Get the title and paragraph text
+                        var title = $(this).find('jats\\:title').text();
+                        var paragraph = $(this).find('jats\\:p').text();
+                        // Concatenate the title and paragraph with formating
+                        concAbs += '<p><strong>'+ title + ':</strong> ' + paragraph + '</p>';
+                         });
+                        // Trim any extra whitespace at the end
+                       concAbs = concAbs.trim();
+
+                if (concAbs) { // && ($("div.diva2addtextchoicebr:contains('Abstract')").parent().parent().find('iframe').first().contents().find("body").html().trim()==="" || $("div.diva2addtextchoicebr:contains('Abstract')").parent().parent().find('iframe').first().contents().find("body").html().trim()==="<p><br></p>")) { //om abstract i sektioner i crossref men inget abstract i DiVA
+                    $("div.diva2addtextchoicebr:contains('Abstract')").parent().parent().find('iframe').first().contents().find("body").html(concAbs); //klistrar in abstract från crossref
+                    $('#monkeyupdates').html('<p style="color:green;">Lagt till abstract</p>' + $('#monkeyupdates').html());
+                    }
+                if (!concAbs && abstract) { // && ($("div.diva2addtextchoicebr:contains('Abstract')").parent().parent().find('iframe').first().contents().find("body").html().trim()==="" || $("div.diva2addtextchoicebr:contains('Abstract')").parent().parent().find('iframe').first().contents().find("body").html().trim()==="<p><br></p>")) { //om abstract i crossref men inte i DiVA
+                   $("div.diva2addtextchoicebr:contains('Abstract')").parent().parent().find('iframe').first().contents().find("body").html(abstract); //klistrar in abstract från crossref
+                   $('#monkeyupdates').html('<p style="color:green;">Lagt till abstract</p>' + $('#monkeyupdates').html());
+                   }
+                    $("#monkeyresultswrapper i").css("display", "none");
+                    $('#monkeyresults').html();
+                    $("#monkeytalk").html("Crossref svarade... se resultatet under Abstract i posten!");
+                })
+                .catch(function(error) {
+                    $('#monkeyresults').html('');
+                    $("#monkeyresultswrapper i").css("display", "none");
+                    $("#monkeytalk").html("Nej, jag hittade inget i Crossref");
+                })
+                .then(function() {});
+        }
+    }
+
+    /**
      *
      * Funktion för att bevaka uppdateringar i noden som författarna ligger i
      * Sker t ex efter "Koppla personpost"
@@ -1235,6 +1298,23 @@
             $("div.diva2addtextchoice2:contains('Övriga uppgifter') , div.diva2addtextchoice2:contains('Other information') ").parent().before(crossrefVolButtonjq);
         }
 
+        ////////////////////////////////////
+        // Snott från Malmö
+        // Knapp för att uppdatera abstract från Crossref
+        // *mau
+        ////////////////////////////////////
+
+
+        if (doi != "") { // bara om det finns en DOI, annars är det meningslöst
+            $('#crossrefAbsButtonjq').remove();
+            var crossrefAbsButtonjq = $('<button id="crossrefAbsButtonjq" type="button">Uppdatera abstract från Crossref</button>');
+            crossrefAbsButtonjq.on("mousedown", async function() {
+                event.preventDefault(); // Förhindra onblur
+                getCrossrefAbs($("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val());
+           })
+                $("div.diva2addtextchoicebr:contains('Abstract')").parent().before(crossrefAbsButtonjq);
+            }
+
         ///////////////////////////////////////////////////
         //
         /*  Klassificering från Swepub finns integrerad i DiVA nu = kan tas bort (även om jag tycker att den rosa knappen är snyggare)  2021-02-24 /Anders W
@@ -1476,7 +1556,8 @@
             var thiz = this;
             var html = '<div><div class="updateheader"></div>';
             var neworg = $(thiz).next().find('input').val();
-            var neworg2 = neworg.replace(/Bracke/g, "Bräcke").replace(/Skondal/g, "Sköndal").replace(/Hogskola/g, "Högskola").replace(/Linkoping/g, "Linköping")
+            var neworg2 = neworg.replace(/\s*;(?!\s*$)\s*/g, '; ').replace(/\s*,(?!\s*$)\s*/g, ', ').trim().replace(/\.$/, "").replace(/\;$/, "").replace(/\,$/, "").replace(/\.\;/g, ";")
+            .replace(/\; \;/g,";").replace(/Bracke/g, "Bräcke").replace(/Skondal/g, "Sköndal").replace(/Hogskola/g, "Högskola").replace(/Linkoping/g, "Linköping")
             .replace(/Malardalen/g, "Mälardalen").replace(/Orebro/g, "Örebro").replace(/Vasteras/g, "Västerås").replace(/Goteborg/g, "Göteborg").replace(/Norrkoping/g, "Norrköping")
             .replace(/Vaxjo/g, "Växjö").replace(/Umea/g, "Umeå").replace(/Lulea/g, "Luleå").replace(/Ostersund/g, "Östersund").replace(/Trollhattan/g, "Trollhättan")
             .replace(/Jonkoping/g, "Jönköping").replace(/Malmo/g, "Malmö").replace(/Sodertorn/g, "Södertörn").replace(/Gavle/g, "Gävle").replace(/Skovde/g, "Skövde")
@@ -1485,6 +1566,9 @@
             .replace(/Nykoping/g, "Nyköping").replace(/Ornskoldsvik/g, "Örnsköldsvik").replace(/Molndal/g, "Mölndal").replace(/Upplands Vasby/g, "Upplands Väsby")
             .replace(/Lowenstromska/g, "Löwenströmska").replace(/Skarholmen/g, "Skärholmen").replace(/Tjarno/g, "Tjärnö").replace(/Arrhenius Vag/g, "Arrhenius Väg")
             .replace(/Lantmateri/g, "Lantmäteri").replace(/Kraftnat/g, "Kraftnät").replace(/Stromstad/g, "Strömstad").replace(/Stralsakerhetsmyndigheten/g, "Strålsäkerhetsmyndigheten")
+            .replace(/Vastra Gotaland/g, "Västra Götaland").replace(/Tromso/g, "Tromsø").replace(/Sodra Alvsborg/g, "Södra Älvsborg").replace(/Varmland/g, "Värmland").replace(/Vardal/g, "Vårdal")
+            .replace(/Skane/g, "Skåne").replace(/Pitea/g, "Piteå").replace(/Ostergotland/g, "Östergötland").replace(/Kavlinge/g, "Kävlinge").replace(/Hassleholm/g, "Hässleholm")
+            .replace(/Gotaland/g, "Götaland").replace(/Gastrikland/g, "Gästrikland").replace(/Folktandvarden/g, "Folktandvården").replace(/Branemark/g, "Brånemark")
             .replace(/\s*https:\/\/ror\.org\/[0-9a-z]{9}/g, "").replace(/\.$/, '');
             $(thiz).next().find('input').val(neworg2);
             if (neworg != neworg2) {
@@ -1888,6 +1972,127 @@
         });
 
 
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Snott från Malmö
+        // Ta bort punkt i slutet av titel
+        // *mau
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        function updateIframeContent(iframe, message) {
+            let body = iframe.contents().find("body");
+            if (body.length > 0) {
+                let content = body.html().trim();
+                let cleanedContent = content.replace(/\.$/, "");
+                body.html(cleanedContent);
+
+                if (content !== cleanedContent) {
+                    let html = `<div><div class="updateheader"></div><div><p style="color:green;">Uppdaterat "${message}"</p></div></div>`;
+                    $('#monkeyupdates').html(html + $('#monkeyupdates').html());
+                }
+            }
+        }
+
+        updateIframeContent($maintitleiframe, "Titel");
+        updateIframeContent($subtitleiframe, "Undertitel");
+        updateIframeContent($bookmaintitleiframe, "Boktitel");
+        updateIframeContent($booksubtitleiframe, "Bokundertitel");
+     /**
+     * Snott från Malmö
+     *Funktion för att anropa Pubmed och hämta information via DOI
+     *  *mau
+     * @param {string} doi
+     **/
+        // Wait for the page to load
+        $(document).ready(function() {
+            event.preventDefault(); // Prevent any default actions
+            // Extract DOI from the page
+            var doi = $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
+            i = 0;
+            if (doi) {
+                // Check if the PubMedID field is empty
+                var pubmedField = $("div.diva2addtextchoicecol:contains('PubMedID')").parent().find('input');
+                if (pubmedField.val() === "") {
+                    // Construct the PubMed search URL
+                    var pubmedUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term="${doi}"[doi]`;
+                    // Fetch the PubMedID
+                    fetch(pubmedUrl)
+                        .then(function(response) {
+                        return response.text();
+                    })
+                        .then(function(data) {
+                        // Parse the XML response
+                        var parser = new DOMParser();
+                        var xmlDoc = parser.parseFromString(data, "text/xml");
+
+                        // Use XPath to find the <Id> element
+                        var xpathResult = xmlDoc.evaluate("//Id", xmlDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+                        var idElement = xpathResult.singleNodeValue;
+                        var html = '<div><div class="updateheader"></div>';
+
+                        if (idElement) {
+                            var pmid = idElement.textContent.trim();
+                            if (pmid !== "") {
+                                pubmedField.val(pmid);
+                            }
+                            html += '<div><p style="color:green;">Lagt till PMID: '+ pmid + '</p></div>';
+                            $('#monkeyupdates').html(html + $('#monkeyupdates').html());
+                        }
+                    });
+                }
+            }
+            i++;
+        });
+        //////////////////////////////////////////////////
+        // Snott från Malmö
+        // Knapp för att ersätta komma med semikolon i editorfältet
+        //  *mau
+        //////////////////////////////////////////////////
+
+        i = 0;
+        $("div.diva2addtextchoicecol:contains('Redaktör') , div.diva2addtextchoicecol:contains('Editor')").each(function() {
+            var thiz = this;
+
+            $('#editorButtonjq' + i).remove();
+            var editorButtonjq = $('<button id="editorButtonjq' + i + '" type="button">,->;</button>');
+            editorButtonjq.on("click", function() {
+                var editor = $(thiz).parent().find('input').val();
+                var alteditor = editor.replace(/ORCID Icon/g,"").replace(/ed./g,"").replace(/[(]/g,"").replace(/[)]/g,"").replace(/, and /g, "; ").replace(/, & /g, "; ").replace(/, och /g, "; ").replace(/,/g, ";").replace(/ och /g, "; ").replace(/ and /g,"; ").replace(/ & /g,"; ").replace(/ ;/g,";");
+                $(thiz).parent().find('input').val(alteditor);
+                $(thiz).parent().find('input').focus();
+                $(this).focus();
+            })
+
+            //wrapper för layout.
+            var html = $('<div id="monkeyeditor' + i + '" style="width: 100%;float: left"></div>');
+            html.append(editorButtonjq)
+            $(this).before(html)
+
+            i++;
+        });
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Snott från Malmö
+        // TA bort inledande "/" ORCID
+        // *mau
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+                var ORCID = $('#' + diva_id + '\\:authorSerie');
+        i = 0;
+        $(ORCID).find("div.diva2addtextchoicecolbr:contains('ORCiD')").each(function() {
+            var thiz = this;
+            var html = '<div><div class="updateheader"></div>';
+            var neworcid = $(thiz).next().find('input').val();
+            var neworcid2 = neworcid.replace(/\//g, "")
+            $(thiz).next().find('input').val(neworcid2);
+            if (neworcid != neworcid2) {
+                html += '<div><p style="color:green;">Uppdaterat "ORCID"</p></div>';
+                $('#monkeyupdates').html(html + $('#monkeyupdates').html());
+            } else {}
+            i++;
+        });
+
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
         //
         // Hämtar diverse automatiskt när posten öppnas - det Anders kallar headless
@@ -1918,8 +2123,10 @@
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             $maintitleiframe = $("div.diva2addtextchoicecol:contains('Huvudtitel:') , div.diva2addtextchoicecol:contains('Main title:')").parent().next().find('iframe').first();
-            // ta bort saker som innehåller & och ? och " som sökningen inte klarar av
-            getDiVA($maintitleiframe.contents().find("body").html().replace(/&nbsp;/g, " ").replace(/\?/g, "").replace(/["]+/g, "").replace(/&amp;/g, "?"), 'mods');
+            // ta bort saker som innehåller & och ? och " som sökningen inte klarar av +
+            // regex för ta att bort all html
+            var htmlRegexG = /<(?:"[^"]*"['"]*|'[^']*'['"]*|[^'">])+>/g;
+            getDiVA($maintitleiframe.contents().find("body").html().replace(htmlRegexG, "").replace(/&nbsp;/g, " ").replace(/\?/g, "").replace(/["]+/g, "").replace(/&amp;/g, "?"), 'mods');
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////
             //
