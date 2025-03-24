@@ -1,3 +1,8 @@
+## DiVA-apan 2025-03-24 (2.1)
+
+Lagt till nya funktioner från Malmö Universitet, för detaljer se repo nedan:   
+https://github.com/maubibl/DiVA-tampermonkey
+
 ## DiVA-apan 2025-03-04 (2.0)
 
 Problemet med att informationen inte riktigt vill stanna i fälten har möjligen fått sin lösning genom koden nedan.
