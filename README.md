@@ -1,3 +1,7 @@
+## DiVA-apan 2025-03-27 (2.2)
+
+Lagt till länkar till DOI, ISI, ScopusID och PubMed i vänstermarginalen
+
 ## DiVA-apan 2025-03-24 (2.1)
 
 Lagt till nya funktioner från Malmö Universitet, för detaljer se repo nedan:   
