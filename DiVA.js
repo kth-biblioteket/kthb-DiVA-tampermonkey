@@ -1320,7 +1320,8 @@ function getCrossrefAbs(doi) {
             }
 
         ///////////////////////////////////////////////////
-        //  Knapp för att kolla i Crossrefs API JSON + XML
+        //  Knappar för att kolla i Crossrefs API JSON + XML
+        //  samt även OpenAlex JSON API
         //////////////////////////////////////////////////
 
 
