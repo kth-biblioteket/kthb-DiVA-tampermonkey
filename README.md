@@ -1,6 +1,7 @@
 ## DiVA-apan 2025-04-15 (2.3)
 
-Lagt till API-länkar till Crossref (JSON+XML) samt OpenAlex (JSON) baserade på DOI. Knapparna sitter ovanför DOI-fältet.
+Lagt till API-länkar till Crossref (JSON+XML) samt OpenAlex (JSON) baserade på DOI. Knapparna sitter ovanför DOI-fältet.    
+Normalisering av namn med accenter typ "Świderski" blir "Swiderski" i "Leta KTH-anställda
 
 ## DiVA-apan 2025-03-27 (2.2)
 
