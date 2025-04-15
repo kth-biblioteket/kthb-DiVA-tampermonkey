@@ -1,3 +1,7 @@
+## DiVA-apan 2025-04-215 (2.3)
+
+Lagt till API-länkar till Crossref (JSON+XML) samt OpenAlex (JSON) baserade på DOI. Knapparna sitter ovanför DOI-fältet.
+
 ## DiVA-apan 2025-03-27 (2.2)
 
 Lagt till länkar till DOI, ISI, ScopusID och PubMed i vänstermarginalen
