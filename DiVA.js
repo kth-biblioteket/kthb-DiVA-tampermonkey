@@ -422,6 +422,15 @@
     }
 
     /**
+     * Funktion för att normalisera namn
+     * Świderski blir Swiderski
+     */
+
+    function normalizeName(str) {
+    return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+    }
+
+    /**
      * Hämta info från Leta anställda
      *
      * @param {*} fnamn
@@ -431,9 +440,13 @@
     function getLeta(fnamn, enamn) {
         $("#monkeyresultswrapper i").css("display", "inline-block");
         $("#monkeytalk").html("Jag pratar med Leta anställda...");
-        var fnamn2 = fnamn.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
-        var enamn2 = enamn.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
+        // Normalisera namn, ta bort accenter
+        var fnamnNorm = normalizeName(fnamn);
+        var enamnNorm = normalizeName(enamn);
+        var fnamn2 = fnamnNorm.replace(/(\.|\.\s[A-Z]\.|\s[A-Z]\.)*/g, ""); // fixar så att initialer + punkt t .ex "M. R." tas bort och endast den första initialen finns kvar utan punkt
+        var enamn2 = enamnNorm.replace("$$$", "") // ta bort $$$ från efternamnen för sökning
         var enamn3 = enamn2.replace(/æ/g, "ae") // ersätt eventuella æ med ae i namnen före sökning. Leta KTH-anställda spricker annars
+            console.log(enamn3);
         var url = monkey_config.letaanstallda_apiurl + "/users?fname=" +
             fnamn2 +
             "%&ename=" +
