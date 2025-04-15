@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name     DiVA
-// @version      2.2-general
+// @version      2.3-general
 // @description  En Apa för att hjälpa till med DiVA-arbetet på KTH Biblioteket
 // @author Thomas Lind, Anders Wändahl, code contributions from Malmö University
 // @match    https://kth.diva-portal.org/dream/edit/editForm.jsf*
@@ -1319,6 +1319,46 @@ function getCrossrefAbs(doi) {
                 $("div.diva2addtextchoicebr:contains('Abstract')").parent().before(crossrefAbsButtonjq);
             }
 
+        ///////////////////////////////////////////////////
+        //  Knapp för att kolla i Crossrefs API JSON + XML
+        //////////////////////////////////////////////////
+
+
+        if (doi != "") { // bara om det finns en DOI, annars är det meningslöst
+            $('#crossrefJsonApiButtonjq').remove();
+            var crossrefJsonApiButtonjq = $('<button class="link" id="crossrefJsonApiButtonjq" type="button">Crossref API JSON</button>');
+            crossrefJsonApiButtonjq.on("mousedown", async function() {
+                event.preventDefault(); // Förhindra onblur
+                var url = "https://api.crossref.org/works/" +
+                $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
+                window.open(url, '_blank');
+           })
+                $("div.diva2addtextchoicecol:contains('DOI')").parent().before(crossrefJsonApiButtonjq);
+            }
+
+        if (doi != "") { // bara om det finns en DOI, annars är det meningslöst
+            $('#crossrefXmlApiButtonjq').remove();
+            var crossrefXmlApiButtonjq = $('<button class="link" id="crossrefXmlApiButtonjq" type="button">Crossref API XML</button>');
+            crossrefXmlApiButtonjq.on("mousedown", async function() {
+                event.preventDefault(); // Förhindra onblur
+                var url = "https://doi.crossref.org/servlet/query?pid=biblioteket@kth.se&format=unixref&id=" +
+                $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
+                window.open(url, '_blank');
+           })
+                $("div.diva2addtextchoicecol:contains('DOI')").parent().before(crossrefXmlApiButtonjq);
+            }
+
+        if (doi != "") { // bara om det finns en DOI, annars är det meningslöst
+            $('#openAlexJsonApiButtonjq ').remove();
+            var openAlexJsonApiButtonjq = $('<button class="link" id="copenAlexJsonApiButtonjq " type="button">OpenAlex API JSON</button>');
+            openAlexJsonApiButtonjq .on("mousedown", async function() {
+                event.preventDefault(); // Förhindra onblur
+                var url = "https://api.openalex.org/works/https://doi.org/" +
+                $("div.diva2addtextchoicecol:contains('DOI')").parent().find('input').val();
+                window.open(url, '_blank');
+           })
+                $("div.diva2addtextchoicecol:contains('DOI')").parent().before(openAlexJsonApiButtonjq);
+            }
         ///////////////////////////////////////////////////
         //
         /*  Klassificering från Swepub finns integrerad i DiVA nu = kan tas bort (även om jag tycker att den rosa knappen är snyggare)  2021-02-24 /Anders W
