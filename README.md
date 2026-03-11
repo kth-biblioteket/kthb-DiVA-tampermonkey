@@ -2,7 +2,7 @@
 ## DiVA-apan 2026-03-11 (2.7)
 
 Lagt tillbaka det egna uppslaget av ämne mot Swepubs-API. Det går att klicka på "Kopiera ämne" för att lägga ämnet i sitt egna clipboard för vidare inklistring    
-Lagt till uppslag LiU:s LiU Subject Classifier 2025    
+Lagt till uppslag LiU:s Subject Classifier 2025    
 Lagt till uppslag på titel hos Crossref vid titelfältet för att identifiera DOI:ar som tappats bort av Scopus/WoS    
 Bumpat versionsnummer till 2.7 för att det kändes kul    
 
