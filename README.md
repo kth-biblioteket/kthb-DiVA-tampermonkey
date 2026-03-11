@@ -1,3 +1,11 @@
+
+## DiVA-apan 2026-03-11 (2.7)
+
+Lagt tillbaka det egna uppslaget av ämne mot Swepubs-API. Det går att klicka på "Kopiera ämne" för att lägga ämnet i sitt egna clipboard för vidare inklistring    
+Lagt till uppslag LiU:s LiU Subject Classifier 2025    
+Lagt till uppslag på titel hos Crossref vid titelfältet för att identifiera DOI:ar som tappats bort av Scopus/WoS    
+Bumpat versionsnummer till 2.7 för att det kändes kul    
+
 ## DiVA-apan 2025-04-15 (2.3)
 
 Lagt till API-länkar till Crossref (JSON+XML) samt OpenAlex (JSON) baserade på DOI. Knapparna sitter ovanför DOI-fältet.    
