@@ -1,3 +1,6 @@
+## DiVA-apan 2026-03-18 (2.7x)
+
+Fixat uppslag mot ISSN Portal. Säg till ifall det inte funkar till belåtenhet.
 
 ## DiVA-apan 2026-03-11 (2.7)
 
